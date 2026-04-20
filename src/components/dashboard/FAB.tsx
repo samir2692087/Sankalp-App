@@ -14,7 +14,6 @@ interface FABProps {
 export default function FAB({ onCheckIn, onUrge, onRelapse, disabledCheckIn }: FABProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // CRITICAL: Ensure backdrop is destroyed and body is restored when unmounting
   useEffect(() => {
     return () => {
       document.body.style.pointerEvents = 'auto';
@@ -24,7 +23,6 @@ export default function FAB({ onCheckIn, onUrge, onRelapse, disabledCheckIn }: F
 
   const closeMenu = () => {
     setIsOpen(false);
-    // Force immediate interaction recovery
     setTimeout(() => {
       document.body.style.pointerEvents = 'auto';
     }, 50);

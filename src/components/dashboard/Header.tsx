@@ -41,7 +41,6 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
   const isMobile = useIsMobile();
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
 
-  // Safety cleanup: Ensure page is always clickable when UI is closed
   useEffect(() => {
     if (!isThemeSheetOpen) {
       const cleanup = () => {
@@ -74,7 +73,6 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
     }
     setIsThemeSheetOpen(false);
     
-    // Immediate recovery force
     setTimeout(() => {
       document.body.style.pointerEvents = 'auto';
       document.body.style.overflow = 'auto';
@@ -216,7 +214,6 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
         </div>
       </header>
 
-      {/* Mobile Bottom Sheet for Themes */}
       <Sheet open={isThemeSheetOpen} onOpenChange={(open) => !open && closeThemeSheet()}>
         <SheetContent 
           side="bottom" 
