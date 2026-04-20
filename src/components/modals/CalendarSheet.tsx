@@ -12,9 +12,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { UserData } from "@/lib/types";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { X, StickyNote, Save, ShieldCheck, AlertCircle, Info, Trash2, Zap } from 'lucide-react';
+import { X, StickyNote, Save, ShieldCheck, AlertCircle, Trash2, Zap, LayoutGrid } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CalendarSheetProps {
   isOpen: boolean;
@@ -76,163 +77,187 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] rounded-t-[3.5rem] p-0 border-none glass-card outline-none flex flex-col animate-in slide-in-from-bottom duration-500 ease-out">
+      <SheetContent side="bottom" className="h-[90vh] max-h-[90vh] rounded-t-[4rem] p-0 border border-white/10 glass-card shadow-[0_-20px_80px_rgba(0,0,0,0.5)] outline-none flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-500 ease-out">
         <div className="sr-only">
-          <SheetTitle>Mastery Hub</SheetTitle>
-          <SheetDescription>Behavioral heatmap and discipline timeline.</SheetDescription>
+          <SheetTitle>Behavioral Hub</SheetTitle>
+          <SheetDescription>Real-time mastery tracking and reflection.</SheetDescription>
         </div>
 
-        <div className="w-12 h-1 bg-muted rounded-full mx-auto mt-3 shrink-0 opacity-40" />
+        <div className="w-16 h-1.5 bg-white/10 rounded-full mx-auto mt-4 shrink-0 opacity-40 shadow-inner" />
         
-        <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24 flex flex-col items-center no-scrollbar">
-          {!noteMode ? (
-            <div className="w-full max-w-sm flex flex-col items-center">
-              <div className="w-full flex justify-between items-center mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                    <Zap size={20} />
+        <div className="flex-1 overflow-y-auto px-8 pt-8 no-scrollbar relative">
+          <AnimatePresence mode="wait">
+            {!noteMode ? (
+              <motion.div 
+                key="calendar"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="w-full flex flex-col items-center"
+              >
+                <div className="w-full flex justify-between items-center mb-10">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-[1.2rem] bg-primary/20 flex items-center justify-center text-primary shadow-[inset_0_0_10px_rgba(124,58,237,0.3)] border border-primary/20">
+                      <LayoutGrid size={24} />
+                    </div>
+                    <div className="flex flex-col">
+                      <h2 className="font-black font-headline text-xl text-white tracking-tight">Behavioral Hub</h2>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Neural History Protocol</span>
+                    </div>
                   </div>
-                  <h2 className="font-bold font-headline text-lg text-foreground tracking-tight">Behavioral Hub</h2>
+                  <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full h-11 w-11 bg-white/5 hover:bg-white/10 active:scale-90 transition-all border border-white/5">
+                    <X size={20} className="text-white/60" />
+                  </Button>
                 </div>
-                <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full h-9 w-9 hover:bg-primary/5 active:scale-90 transition-all">
-                  <X size={18} />
-                </Button>
-              </div>
 
-              <div className="neu-flat p-5 rounded-[2.5rem] bg-card w-full border border-white/5 flex flex-col items-center shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-green-500/20 via-primary/20 to-red-500/20" />
-                
-                <Calendar 
-                  mode="multiple" 
-                  selected={checkInDates}
-                  onDayClick={handleDayClick}
-                  className="p-0 w-full"
-                  modifiers={{
-                    relapse: relapseDates,
-                    hasNote: noteDates,
-                  }}
-                  classNames={{
-                    month: "space-y-4 w-full",
-                    caption: "flex justify-center pt-1 relative items-center mb-4",
-                    caption_label: "text-sm font-black font-headline uppercase tracking-widest",
-                    head_cell: "text-muted-foreground font-black text-[9px] uppercase tracking-widest opacity-40 text-center pb-2",
-                  }}
-                  components={{
-                    Day: (dayProps: any) => {
-                      const { day, modifiers, ...props } = dayProps;
-                      if (!day?.date) return null;
-                      
-                      const date = day.date;
-                      const dateStr = format(date, "yyyy-MM-dd");
-                      const isClean = modifiers?.selected;
-                      const isRelapse = modifiers?.relapse;
-                      const hasNote = modifiers?.hasNote;
-                      const isToday = modifiers?.today;
-                      const urgeCount = urgeHeatmap[dateStr] || 0;
+                <div className="neu-flat p-8 rounded-[3rem] bg-white/[0.03] w-full max-w-sm border border-white/10 flex flex-col items-center shadow-2xl relative overflow-hidden backdrop-blur-3xl">
+                  <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                  
+                  <Calendar 
+                    mode="multiple" 
+                    selected={checkInDates}
+                    onDayClick={handleDayClick}
+                    className="p-0 w-full"
+                    modifiers={{
+                      relapse: relapseDates,
+                      hasNote: noteDates,
+                    }}
+                    classNames={{
+                      month: "space-y-6 w-full",
+                      caption: "flex justify-center pt-1 relative items-center mb-8",
+                      caption_label: "text-base font-black font-headline uppercase tracking-[0.2em] text-white",
+                      head_cell: "text-white/30 font-black text-[10px] uppercase tracking-widest text-center pb-4",
+                    }}
+                    components={{
+                      Day: (dayProps: any) => {
+                        const { day, modifiers, ...props } = dayProps;
+                        if (!day?.date) return null;
+                        
+                        const date = day.date;
+                        const dateStr = format(date, "yyyy-MM-dd");
+                        const isClean = modifiers?.selected;
+                        const isRelapse = modifiers?.relapse;
+                        const hasNote = modifiers?.hasNote;
+                        const isToday = modifiers?.today;
+                        const urgeCount = urgeHeatmap[dateStr] || 0;
 
-                      return (
-                        <td className="p-0 relative flex-1" role="presentation">
-                          <button 
-                            type="button"
-                            {...props}
-                            onPointerDown={() => handleLongPressStart(date)}
-                            onPointerUp={handleLongPressEnd}
-                            onPointerLeave={handleLongPressEnd}
-                            className={cn(
-                              "h-9 w-9 p-0 text-[11px] font-bold flex items-center justify-center rounded-full relative transition-all duration-300",
-                              "hover:scale-105 active:scale-95",
-                              isClean ? "bg-green-500 text-white shadow-md shadow-green-500/20" : 
-                              isRelapse ? "bg-red-500 text-white shadow-md shadow-red-500/20" : 
-                              "hover:bg-primary/5",
-                              urgeCount > 0 && !isClean && !isRelapse && "bg-amber-100 text-amber-700",
-                              urgeCount > 2 && !isClean && !isRelapse && "bg-amber-500 text-white",
-                              isToday && !isClean && !isRelapse && "border-2 border-primary text-primary",
-                              modifiers?.outside && "opacity-10",
-                              hasNote && "after:absolute after:bottom-1 after:w-1 after:h-1 after:bg-purple-500 after:rounded-full"
-                            )}
-                          >
-                            {date.getDate()}
-                            {urgeCount > 0 && (
-                                <div className={cn(
-                                    "absolute -top-1 -left-1 w-2.5 h-2.5 rounded-full border border-white flex items-center justify-center text-[6px]",
-                                    urgeCount > 2 ? "bg-red-500 text-white" : "bg-amber-500 text-white"
-                                )}>
-                                    {urgeCount}
-                                </div>
-                            )}
-                          </button>
-                        </td>
-                      );
-                    }
-                  }}
+                        return (
+                          <td className="p-0 relative flex-1" role="presentation">
+                            <motion.button 
+                              whileHover={{ scale: 1.15, zIndex: 10 }}
+                              whileTap={{ scale: 0.9 }}
+                              type="button"
+                              {...props}
+                              onPointerDown={() => handleLongPressStart(date)}
+                              onPointerUp={handleLongPressEnd}
+                              onPointerLeave={handleLongPressEnd}
+                              className={cn(
+                                "h-10 w-10 p-0 text-[12px] font-black flex items-center justify-center rounded-[1rem] relative transition-all duration-300",
+                                isClean ? "bg-gradient-to-br from-green-400 to-green-600 text-white shadow-[0_0_20px_rgba(34,197,94,0.4)]" : 
+                                isRelapse ? "bg-gradient-to-br from-red-500 to-red-700 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]" : 
+                                "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white",
+                                urgeCount > 0 && !isClean && !isRelapse && "bg-amber-500/20 text-amber-500 border border-amber-500/30",
+                                urgeCount > 2 && !isClean && !isRelapse && "bg-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.4)]",
+                                isToday && !isClean && !isRelapse && "border-2 border-primary text-primary",
+                                modifiers?.outside && "opacity-5",
+                                hasNote && "after:absolute after:bottom-1 after:w-1.5 after:h-1.5 after:bg-purple-400 after:rounded-full after:shadow-[0_0_5px_rgba(168,85,247,0.8)]"
+                              )}
+                            >
+                              {date.getDate()}
+                              {urgeCount > 0 && (
+                                  <div className={cn(
+                                      "absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full border border-black/40 flex items-center justify-center text-[8px] font-black",
+                                      urgeCount > 2 ? "bg-red-500 text-white" : "bg-amber-500 text-white"
+                                  )}>
+                                      {urgeCount}
+                                  </div>
+                              )}
+                            </motion.button>
+                          </td>
+                        );
+                      }
+                    }}
+                  />
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div 
+                key="note"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="w-full h-full flex flex-col"
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-[1.2rem] bg-purple-500/20 flex items-center justify-center text-purple-400 shadow-[inset_0_0_10px_rgba(168,85,247,0.3)] border border-purple-500/20">
+                      <StickyNote size={24} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black uppercase text-purple-400 tracking-[0.2em] mb-0.5">Neural Reflection</span>
+                      <span className="font-black font-headline text-xl text-white">{selectedDate ? format(selectedDate, "MMM do, yyyy") : ''}</span>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => setNoteMode(false)} className="rounded-full h-10 w-10 bg-white/5">
+                    <X size={18} />
+                  </Button>
+                </div>
+
+                <Textarea 
+                  value={currentNote}
+                  onChange={(e) => setCurrentNote(e.target.value)}
+                  placeholder="Record triggers, neural victories, or key lessons learned today..."
+                  className="flex-1 bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 resize-none mb-8 text-base focus-visible:ring-1 focus-visible:ring-purple-500/40 text-white/90 leading-relaxed shadow-inner"
                 />
-              </div>
-              
-              <div className="mt-8 grid grid-cols-3 gap-3 w-full">
-                <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-2xl bg-green-500/5 border border-green-500/10">
-                  <ShieldCheck size={12} className="text-green-500" />
-                  <span className="text-[8px] font-black uppercase text-green-600/60">Clean</span>
-                </div>
-                <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-2xl bg-red-500/5 border border-red-500/10">
-                  <AlertCircle size={12} className="text-red-500" />
-                  <span className="text-[8px] font-black uppercase text-red-600/60">Relapse</span>
-                </div>
-                <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-2xl bg-amber-500/5 border border-amber-500/10">
-                  <Zap size={12} className="text-amber-500" />
-                  <span className="text-[8px] font-black uppercase text-amber-600/60">Heatmap</span>
-                </div>
-              </div>
 
-              <div className="mt-6 flex items-center gap-3 p-3 rounded-2xl bg-muted/20 border border-white/5 w-full">
-                <Info size={12} className="text-muted-foreground shrink-0" />
-                <p className="text-[9px] text-muted-foreground/80 font-medium leading-tight">
-                  Intelligent Heatmap: Darker Amber = More Battles Resisted.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="w-full max-w-sm h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-400">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500 shadow-inner">
-                    <StickyNote size={20} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[9px] font-black uppercase text-muted-foreground leading-none mb-1 tracking-widest">Reflection</span>
-                    <span className="font-bold font-headline text-lg text-foreground">{selectedDate ? format(selectedDate, "MMM do, yyyy") : ''}</span>
-                  </div>
+                <div className="flex gap-4 mb-32">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setCurrentNote("");
+                      onSaveNote(format(selectedDate!, "yyyy-MM-dd"), "");
+                      setNoteMode(false);
+                    }} 
+                    className="h-16 rounded-[1.5rem] px-6 text-red-400 hover:bg-red-500/10 border border-white/5"
+                  >
+                    <Trash2 size={24} />
+                  </Button>
+                  <Button onClick={saveNote} className="flex-1 h-16 rounded-[1.5rem] bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black uppercase tracking-widest gap-3 shadow-[0_10px_30px_rgba(124,58,237,0.3)] hover:scale-[1.02] active:scale-95 transition-all">
+                    <Save size={20} /> Save Archive
+                  </Button>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setNoteMode(false)} className="rounded-full h-8 w-8">
-                  <X size={18} />
-                </Button>
-              </div>
-
-              <Textarea 
-                value={currentNote}
-                onChange={(e) => setCurrentNote(e.target.value)}
-                placeholder="Triggers, victories, or lessons learned today..."
-                className="flex-1 neu-inset border-none rounded-[2rem] p-6 resize-none mb-6 text-sm focus-visible:ring-1 focus-visible:ring-purple-500/20 bg-background/50 min-h-[160px] leading-relaxed"
-              />
-
-              <div className="flex gap-3">
-                <Button 
-                  variant="ghost" 
-                  onClick={() => {
-                    setCurrentNote("");
-                    onSaveNote(format(selectedDate!, "yyyy-MM-dd"), "");
-                    setNoteMode(false);
-                  }} 
-                  className="h-14 rounded-2xl px-4 text-red-500 hover:bg-red-500/10"
-                >
-                  <Trash2 size={18} />
-                </Button>
-                <Button onClick={saveNote} className="flex-1 h-14 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold gap-3 shadow-lg shadow-purple-500/20 hover:scale-[1.02] active:scale-95 transition-all">
-                  <Save size={18} /> Save Entry
-                </Button>
-              </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+
+        {/* Sticky Legend & Instructions Footer */}
+        {!noteMode && (
+          <div className="sticky bottom-0 left-0 w-full bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-xl px-8 pb-12 pt-6 border-t border-white/10 flex flex-col gap-6 z-20">
+            <div className="grid grid-cols-3 gap-4 w-full">
+              <div className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-green-500/5 border border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]">
+                <ShieldCheck size={16} className="text-green-400" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-green-400/80">Clean</span>
+              </div>
+              <div className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-red-500/5 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+                <AlertCircle size={16} className="text-red-400" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-red-400/80">Relapse</span>
+              </div>
+              <div className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-amber-500/5 border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+                <Zap size={16} className="text-amber-400" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-amber-400/80">Intensity</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 p-5 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
+              <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                <StickyNote size={14} />
+              </div>
+              <p className="text-[10px] text-white/50 font-medium leading-relaxed">
+                <span className="text-white font-black">Pro Tip:</span> Long-press any date to create a neural reflection log.
+              </p>
+            </div>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );
