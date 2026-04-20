@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -29,6 +28,10 @@ import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
 import { Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Magnetic from '@/components/interactions/Magnetic';
+import Tilt from '@/components/interactions/Tilt';
+import Parallax from '@/components/interactions/Parallax';
+import Proximity from '@/components/interactions/Proximity';
 
 const Scene3D = dynamic(() => import('@/components/background/Scene3D'), { 
   ssr: false,
@@ -150,43 +153,49 @@ export default function IronWillDashboard() {
               transition={{ ...springConfig, delay: 0.2 }}
               className="flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-8 py-8 pb-40"
             >
-              <StreakDisplay 
-                current={data.currentStreak} 
-                best={data.bestStreak} 
-                focusMode={data.focusMode} 
-                freezes={data.streakFreezes}
-                onUseFreeze={() => {
-                  if (data.streakFreezes > 0) {
-                    updateState({ ...data, streakFreezes: data.streakFreezes - 1 });
-                    toast({ title: "Freeze Activated", description: "Integrity preserved." });
-                  }
-                }}
-              />
+              <Parallax offset={15}>
+                <StreakDisplay 
+                  current={data.currentStreak} 
+                  best={data.bestStreak} 
+                  focusMode={data.focusMode} 
+                  freezes={data.streakFreezes}
+                  onUseFreeze={() => {
+                    if (data.streakFreezes > 0) {
+                      updateState({ ...data, streakFreezes: data.streakFreezes - 1 });
+                      toast({ title: "Freeze Activated", description: "Integrity preserved." });
+                    }
+                  }}
+                />
+              </Parallax>
 
-              <motion.div 
-                whileHover={{ scale: 1.02, y: -5 }}
-                transition={springConfig}
-                className="perspective-1000"
-              >
-                <Button 
-                  onClick={() => router.push('/browser')}
-                  className="h-20 rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex items-center justify-between px-8"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary/20 text-primary rounded-2xl flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-all">
-                      <Globe size={24} />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-white font-bold text-base">Neural Portal</p>
-                      <p className="text-white/20 text-[9px] uppercase font-black tracking-[0.2em]">Guardian Protected</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-[9px] font-black uppercase text-green-500/50">Active</span>
-                  </div>
-                </Button>
-              </motion.div>
+              <Proximity range={400}>
+                <Magnetic strength={0.2}>
+                  <motion.div 
+                    whileHover={{ scale: 1.02, y: -5 }}
+                    transition={springConfig}
+                    className="perspective-1000"
+                  >
+                    <Button 
+                      onClick={() => router.push('/browser')}
+                      className="h-20 rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex items-center justify-between px-8"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-primary/20 text-primary rounded-2xl flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-all">
+                          <Globe size={24} />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-white font-bold text-base">Neural Portal</p>
+                          <p className="text-white/20 text-[9px] uppercase font-black tracking-[0.2em]">Guardian Protected</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-[9px] font-black uppercase text-green-500/50">Active</span>
+                      </div>
+                    </Button>
+                  </motion.div>
+                </Magnetic>
+              </Proximity>
               
               <ActionCards 
                 onCheckIn={() => {
@@ -201,27 +210,31 @@ export default function IronWillDashboard() {
                 checkedInToday={data.checkIns.some(c => c.date === new Date().toISOString().split('T')[0])}
               />
 
-              <InsightsSummary 
-                score={data.disciplineScore} 
-                resilience={insights.resilienceLevel}
-                riskLevel={insights.riskLevel}
-                message={insights.protectionMessage}
-                onOpenInsights={(tab) => {
-                  if (tab === 'history') handleOpenModal(setShowCalendarSheet);
-                  else { setInsightsTab(tab); handleOpenModal(setShowInsightsSheet); }
-                }}
-                focusMode={data.focusMode}
-              />
+              <Tilt strength={8}>
+                <InsightsSummary 
+                  score={data.disciplineScore} 
+                  resilience={insights.resilienceLevel}
+                  riskLevel={insights.riskLevel}
+                  message={insights.protectionMessage}
+                  onOpenInsights={(tab) => {
+                    if (tab === 'history') handleOpenModal(setShowCalendarSheet);
+                    else { setInsightsTab(tab); handleOpenModal(setShowInsightsSheet); }
+                  }}
+                  focusMode={data.focusMode}
+                />
+              </Tilt>
 
               {!data.focusMode && (
-                <motion.div 
-                  whileHover={{ scale: 1.02, y: -10, rotateX: 2 }}
-                  transition={springConfig}
-                  className="glass-card p-8 rounded-[3rem] bg-card/20 border-white/5 perspective-1000"
-                >
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 opacity-60">Neural Task</h4>
-                  <p className="text-lg font-bold leading-relaxed text-foreground/90">{challenge}</p>
-                </motion.div>
+                <Parallax offset={10}>
+                  <motion.div 
+                    whileHover={{ scale: 1.02, y: -10, rotateX: 2 }}
+                    transition={springConfig}
+                    className="glass-card p-8 rounded-[3rem] bg-card/20 border-white/5 perspective-1000"
+                  >
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 opacity-60">Neural Task</h4>
+                    <p className="text-lg font-bold leading-relaxed text-foreground/90">{challenge}</p>
+                  </motion.div>
+                </Parallax>
               )}
             </motion.main>
 
@@ -247,6 +260,7 @@ export default function IronWillDashboard() {
         {showUrgeModal && <UrgeModal isOpen={showUrgeModal} onClose={() => handleCloseModal(setShowUrgeModal)} onSubmit={handleUrgeSubmit} />}
         {showInsightsSheet && <InsightsSheet isOpen={showInsightsSheet} onClose={() => handleCloseModal(setShowInsightsSheet)} data={data} defaultTab={insightsTab} />}
         {showCalendarSheet && <CalendarSheet isOpen={showCalendarSheet} onClose={() => handleCloseModal(setShowCalendarSheet)} data={data} onToggleDate={() => {}} onSaveNote={() => {}} />}
+        {showEmergencyModal && <EmergencyModal isOpen={showEmergencyModal} onClose={() => handleCloseModal(setShowEmergencyModal)} />}
         {showEmergencyModal && <EmergencyModal isOpen={showEmergencyModal} onClose={() => handleCloseModal(setShowEmergencyModal)} />}
         {showExportModal && <ExportModal isOpen={showExportModal} onClose={() => handleCloseModal(setShowExportModal)} data={data} onDataImport={() => {}} />}
       </div>
