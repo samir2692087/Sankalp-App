@@ -5,6 +5,8 @@ import { useState, useCallback, useRef } from 'react';
 import { 
   Sheet, 
   SheetContent, 
+  SheetTitle,
+  SheetDescription,
 } from "@/components/ui/sheet";
 import { Calendar } from "@/components/ui/calendar";
 import { UserData } from "@/lib/types";
@@ -63,6 +65,12 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="bottom" className="h-[70vh] rounded-t-[3.5rem] p-0 border-none glass-card outline-none overflow-hidden flex flex-col">
+        {/* Accessible Titles (Visually Hidden) */}
+        <div className="sr-only">
+          <SheetTitle>Mastery Calendar</SheetTitle>
+          <SheetDescription>Review your discipline history, toggle status, and add personal notes.</SheetDescription>
+        </div>
+
         <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mt-4 shrink-0" />
         
         <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col items-center">
