@@ -5,24 +5,31 @@
 
 const BLOCKED_KEYWORDS = [
   'porn', 'sex', 'nude', 'adult', 'xxx', 'hentai', 'escort', 'gamble', 'betting', 'casino',
-  'hookup', 'dating', 'tinder', 'bumble', 'grindr', 'erotic', 'naked', 'lust', 'violence'
+  'hookup', 'dating', 'tinder', 'bumble', 'grindr', 'erotic', 'naked', 'lust', 'violence',
+  'gore', 'nsfw', 'pussy', 'dick', 'cock'
 ];
 
 const BLOCKED_DOMAINS = [
   'pornhub.com', 'xvideos.com', 'xnxx.com', 'onlyfans.com', 'chaturbate.com',
-  'pokerstars.com', 'draftkings.com', 'roobet.com', 'stake.com', 'tinder.com'
+  'pokerstars.com', 'draftkings.com', 'roobet.com', 'stake.com', 'tinder.com',
+  'bumble.com', 'grindr.com', 'bet365.com'
+];
+
+const DISTRACTION_DOMAINS = [
+  'youtube.com', 'instagram.com', 'facebook.com', 'twitter.com', 'x.com', 
+  'reddit.com', 'tiktok.com', 'twitch.tv', 'netflix.com'
 ];
 
 const WHITELIST_DOMAINS = [
   'google.com', 'wikipedia.org', 'coursera.org', 'duolingo.com', 'github.com', 
   'stackoverflow.com', 'nextjs.org', 'reuters.com', 'bbc.com', 'ted.com', 
-  'khanacademy.org', 'medium.com'
+  'khanacademy.org', 'medium.com', 'scholar.google.com'
 ];
 
 export interface GuardianRiskAssessment {
   isBlocked: boolean;
   reason: string;
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'EXTREME';
   suggestedAction?: string;
 }
 
@@ -32,49 +39,48 @@ export interface GuardianRiskAssessment {
 export function assessContentSafety(input: string, streak: number = 0): GuardianRiskAssessment {
   const normalized = input.toLowerCase().trim();
   
-  // 1. Strict Whitelist Mode for Low Streaks (Emergency Mode)
-  const isEmergency = streak < 3;
-  if (isEmergency) {
-    const isWhitelisted = WHITELIST_DOMAINS.some(domain => normalized.includes(domain));
-    if (!isWhitelisted && normalized.includes('.')) {
-      return {
-        isBlocked: true,
-        reason: "Emergency Focus Protocol: Only educational domains allowed during recovery.",
-        riskLevel: 'HIGH',
-        suggestedAction: "Complete the 3-day stabilization period to unlock global browsing."
-      };
-    }
-  }
-
-  // 2. Keyword Check (Search Queries or URLs)
-  for (const keyword of BLOCKED_KEYWORDS) {
-    if (normalized.includes(keyword)) {
-      return {
-        isBlocked: true,
-        reason: `Discipline Breach: Explicit pattern detected ("${keyword}").`,
-        riskLevel: 'HIGH',
-        suggestedAction: "Redirecting to Neural Grounding Protocol."
-      };
-    }
-  }
-
-  // 3. Domain Check
+  // 1. Extreme Block Check (Hard Blocked Keywords/Domains)
   for (const domain of BLOCKED_DOMAINS) {
     if (normalized.includes(domain)) {
       return {
         isBlocked: true,
-        reason: `Threat Detected: Blacklisted domain (${domain}).`,
-        riskLevel: 'HIGH'
+        reason: "Neural Threat: Blacklisted Domain Intercepted.",
+        riskLevel: 'EXTREME'
       };
     }
   }
 
-  // 4. Gray Area Detection (Distractions)
-  const distractions = ['youtube.com', 'instagram.com', 'facebook.com', 'twitter.com', 'reddit.com', 'tiktok.com'];
-  if (distractions.some(d => normalized.includes(d))) {
+  for (const keyword of BLOCKED_KEYWORDS) {
+    if (normalized.includes(keyword)) {
+      return {
+        isBlocked: true,
+        reason: `Neural Breach: Explicit keyword detected ("${keyword}").`,
+        riskLevel: 'EXTREME'
+      };
+    }
+  }
+
+  // 2. Emergency Mode (Low Streaks)
+  const isEmergency = streak < 3;
+  if (isEmergency) {
+    const isWhitelisted = WHITELIST_DOMAINS.some(domain => normalized.includes(domain));
+    const isSearching = !normalized.includes('.');
+    
+    if (!isWhitelisted && !isSearching && normalized.includes('.')) {
+      return {
+        isBlocked: false,
+        reason: "Emergency Stabilization: High focus required.",
+        riskLevel: 'HIGH',
+        suggestedAction: "Stabilize for 3 days to unlock standard browsing."
+      };
+    }
+  }
+
+  // 3. Distraction Detection
+  if (DISTRACTION_DOMAINS.some(d => normalized.includes(d))) {
     return {
       isBlocked: false,
-      reason: "High Distraction Potential detected.",
+      reason: "High Distraction Potential detected. Neural pulse active.",
       riskLevel: 'MEDIUM'
     };
   }
@@ -86,7 +92,21 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
   };
 }
 
+export function formatBrowserInput(input: string): string {
+  const normalized = input.trim();
+  if (!normalized) return 'https://www.google.com';
+
+  // Check if it's a URL
+  const isUrl = normalized.includes('.') && !normalized.includes(' ');
+  
+  if (isUrl) {
+    return normalized.startsWith('http') ? normalized : `https://${normalized}`;
+  }
+
+  // Otherwise, it's a search
+  return `https://www.google.com/search?q=${encodeURIComponent(normalized)}&safe=active`;
+}
+
 export function filterSearchQuery(query: string): string {
-  // Local scrubbing: remove special characters that might be used to bypass filters
   return query.replace(/[^\w\s\.\/]/gi, '');
 }
