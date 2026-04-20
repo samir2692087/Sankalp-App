@@ -1,17 +1,16 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Plus, ShieldCheck, CheckCircle2, AlertTriangle, X } from 'lucide-react';
+import { Plus, Target, BarChart3, Trophy, Calendar, ShieldAlert, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { cn } from '@/lib/utils';
 
 interface FABProps {
-  onCheckIn: () => void;
-  onUrge: () => void;
-  onRelapse: () => void;
-  disabledCheckIn: boolean;
+  onOpenInsights: (tab: string) => void;
+  onOpenEmergency: () => void;
 }
 
-export default function FAB({ onCheckIn, onUrge, onRelapse, disabledCheckIn }: FABProps) {
+export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -19,69 +18,61 @@ export default function FAB({ onCheckIn, onUrge, onRelapse, disabledCheckIn }: F
       if (!isOpen) {
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
-        document.body.removeAttribute('data-scroll-locked');
       }
     };
     forceCleanup();
-    const timer = setTimeout(forceCleanup, 300);
-    return () => clearTimeout(timer);
   }, [isOpen]);
 
-  const closeMenu = () => {
-    setIsOpen(false);
-  };
+  const navItems = [
+    { label: 'Milestones', icon: Target, tab: 'milestones', color: 'bg-primary' },
+    { label: 'Weekly Report', icon: BarChart3, tab: 'weekly', color: 'bg-secondary' },
+    { label: 'Achievements', icon: Trophy, tab: 'achievements', color: 'bg-yellow-500' },
+    { label: 'History', icon: Calendar, tab: 'history', color: 'bg-green-500' },
+    { label: 'Emergency', icon: ShieldAlert, tab: 'emergency', color: 'bg-red-500', isEmergency: true },
+  ];
 
   return (
     <>
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-background/40 backdrop-blur-md z-[60] animate-in fade-in duration-300"
-          style={{ pointerEvents: 'auto' }}
-          onClick={closeMenu}
+          className="fixed inset-0 bg-background/60 backdrop-blur-xl z-[60] animate-in fade-in duration-300"
+          onClick={() => setIsOpen(false)}
         />
       )}
       
-      <div className="fixed bottom-10 right-10 z-[70] flex flex-col items-end gap-5">
+      <div className="fixed bottom-8 right-8 z-[70] flex flex-col items-end gap-4">
         {isOpen && (
-          <div className="flex flex-col gap-4 animate-in slide-in-from-bottom-6 fade-in duration-300">
-            <div className="flex items-center gap-4">
-              <span className="bg-card text-foreground px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl neu-flat">Mark Clean</span>
-              <Button 
-                onClick={() => { onCheckIn(); closeMenu(); }}
-                disabled={disabledCheckIn}
-                className={`w-14 h-14 rounded-2xl shadow-2xl bg-green-500 hover:bg-green-600 text-white flex items-center justify-center transition-all ${disabledCheckIn ? 'opacity-40 grayscale' : 'hover:scale-110 active:scale-95'}`}
-              >
-                <CheckCircle2 size={24} />
-              </Button>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <span className="bg-card text-foreground px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl neu-flat">Won Battle</span>
-              <Button 
-                onClick={() => { onUrge(); closeMenu(); }}
-                className="w-14 h-14 rounded-2xl shadow-2xl bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center hover:scale-110 active:scale-95"
-              >
-                <ShieldCheck size={24} />
-              </Button>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <span className="bg-card text-foreground px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl neu-flat">I Failed</span>
-              <Button 
-                onClick={() => { onRelapse(); closeMenu(); }}
-                className="w-14 h-14 rounded-2xl shadow-2xl bg-red-500 hover:bg-red-600 text-white flex items-center justify-center hover:scale-110 active:scale-95"
-              >
-                <AlertTriangle size={24} />
-              </Button>
-            </div>
+          <div className="flex flex-col gap-3 mb-2 animate-in slide-in-from-bottom-6 fade-in duration-300">
+            {navItems.map((item) => (
+              <div key={item.label} className="flex items-center gap-4 group cursor-pointer" onClick={() => {
+                if (item.isEmergency) onOpenEmergency();
+                else onOpenInsights(item.tab);
+                setIsOpen(false);
+              }}>
+                <span className="bg-card text-foreground px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl neu-flat transition-transform group-hover:scale-105">
+                  {item.label}
+                </span>
+                <Button 
+                  className={cn(
+                    "w-12 h-12 rounded-2xl shadow-2xl text-white flex items-center justify-center transition-all hover:scale-110 active:scale-95",
+                    item.color
+                  )}
+                >
+                  <item.icon size={20} />
+                </Button>
+              </div>
+            ))}
           </div>
         )}
         
         <Button 
           onClick={() => setIsOpen(!isOpen)}
-          className={`w-20 h-20 rounded-[2rem] shadow-2xl transition-all duration-500 ${isOpen ? 'bg-muted text-foreground rotate-90 scale-90' : 'bg-primary text-white hover:scale-105 active:scale-95 shadow-primary/40'}`}
+          className={cn(
+            "w-16 h-16 rounded-[2rem] shadow-2xl transition-all duration-500",
+            isOpen ? "bg-muted text-foreground rotate-90 scale-90" : "bg-primary text-white hover:scale-105 active:scale-95 shadow-primary/40"
+          )}
         >
-          {isOpen ? <X size={36} /> : <Plus size={36} />}
+          {isOpen ? <X size={28} /> : <Plus size={28} />}
         </Button>
       </div>
     </>

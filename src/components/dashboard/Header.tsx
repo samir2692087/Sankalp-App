@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -60,32 +59,8 @@ export default function Header({
         document.body.removeAttribute('data-scroll-locked');
       };
       resetUI();
-      const timer = setTimeout(resetUI, 300);
-      return () => clearTimeout(timer);
     }
   }, [isThemeSheetOpen, isSettingsOpen, isReminderOpen]);
-
-  useEffect(() => {
-    const handlePopState = () => {
-      setIsThemeSheetOpen(false);
-      setIsSettingsOpen(false);
-      setIsReminderOpen(false);
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  const openThemeSheet = () => {
-    setIsSettingsOpen(false);
-    window.history.pushState({ themeSheetOpen: true }, "");
-    setTimeout(() => setIsThemeSheetOpen(true), 100);
-  };
-
-  const openReminderModal = () => {
-    setIsSettingsOpen(false);
-    window.history.pushState({ reminderOpen: true }, "");
-    setTimeout(() => setIsReminderOpen(true), 100);
-  };
 
   const themes: { id: AppTheme, name: string, icon: any, bg: string, accent: string }[] = [
     { id: 'light', name: 'Daylight', icon: Sun, bg: 'bg-white', accent: 'bg-primary' },
@@ -95,44 +70,23 @@ export default function Header({
   ];
 
   const ThemeCards = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
+    <div className="grid grid-cols-2 gap-4">
       {themes.map((t) => (
         <button 
           key={t.id}
           onClick={() => {
             onThemeChange(t.id);
-            if (isMobile) {
-              setTimeout(() => {
-                if (window.history.state?.themeSheetOpen) window.history.back();
-                setIsThemeSheetOpen(false);
-              }, 150);
-            }
+            if (isMobile) setIsThemeSheetOpen(false);
           }}
           className={cn(
-            "theme-card group relative p-5 rounded-[2rem] flex flex-col gap-3 text-left outline-none",
-            theme === t.id ? 'active bg-primary/5' : 'bg-muted/30 hover:bg-primary/5'
+            "theme-card p-4 rounded-3xl flex flex-col gap-3 text-left border-2",
+            theme === t.id ? 'active border-primary bg-primary/5' : 'border-transparent bg-muted/30'
           )}
         >
-          <div className="flex items-center justify-between">
-            <div className={cn(
-              "w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg border border-white/10 transition-transform group-hover:scale-110",
-              t.bg
-            )}>
-              <t.icon size={22} className={t.id === 'light' ? 'text-orange-400' : 'text-white'} />
-            </div>
-            {theme === t.id && (
-              <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center animate-in zoom-in duration-300">
-                <Check size={14} className="text-primary-foreground" />
-              </div>
-            )}
+          <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg", t.bg)}>
+            <t.icon size={18} className={t.id === 'light' ? 'text-orange-400' : 'text-white'} />
           </div>
-          <div>
-            <span className="font-bold block text-base tracking-tight">{t.name}</span>
-            <div className="flex gap-1.5 mt-2">
-              <div className={cn("w-4 h-4 rounded-full border border-white/10 shadow-sm", t.bg)} />
-              <div className={cn("w-4 h-4 rounded-full shadow-sm", t.accent)} />
-            </div>
-          </div>
+          <span className="font-bold text-xs uppercase tracking-widest">{t.name}</span>
         </button>
       ))}
     </div>
@@ -140,127 +94,62 @@ export default function Header({
 
   return (
     <>
-      <header className="w-full flex items-center justify-between p-4 sm:p-6 sticky top-0 z-[50] backdrop-blur-md">
+      <header className="w-full flex items-center justify-between p-6 sticky top-0 z-[50] backdrop-blur-md shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 group cursor-pointer transition-transform hover:scale-110 active:scale-95">
-            <Shield className="text-primary-foreground" size={20} />
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 group cursor-pointer transition-transform hover:scale-110 active:scale-95">
+            <Shield className="text-primary-foreground" size={18} />
           </div>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold font-headline leading-none text-foreground">IronWill</h1>
-            <p className="text-[10px] uppercase tracking-[0.2em] font-black text-muted-foreground leading-none mt-1">Discipline Pro</p>
-          </div>
+          <h1 className="text-xl font-bold font-headline leading-none text-foreground">IronWill</h1>
         </div>
 
-        <div className="flex items-center gap-4">
-          <DropdownMenu open={isSettingsOpen} onOpenChange={setIsSettingsOpen} modal={true}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="rounded-2xl p-2 neu-button h-10 sm:h-12 flex items-center gap-2 px-4 sm:px-5 group outline-none border-none bg-card">
-                <Settings size={20} className="group-hover:rotate-90 transition-transform duration-500" />
-                <span className="hidden sm:inline font-bold uppercase text-xs tracking-widest">Settings</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuContent 
-                align="end" 
-                sideOffset={10}
-                className="glass-card rounded-[2.5rem] border-none shadow-2xl p-3 min-w-[280px] z-[9999] animate-in fade-in zoom-in-95 duration-200"
-              >
-                <DropdownMenuLabel className="font-headline p-4 text-center opacity-70">Configuration</DropdownMenuLabel>
-                <DropdownMenuSeparator className="opacity-10" />
-                
-                <DropdownMenuItem 
-                  onSelect={(e) => { e.preventDefault(); openThemeSheet(); }}
-                  className="rounded-2xl p-4 cursor-pointer flex items-center justify-between hover:bg-primary/5 focus:bg-primary/5 outline-none"
-                >
-                  <div className="flex items-center gap-3">
-                    <Palette size={20} />
-                    <span className="font-bold">Visual Themes</span>
-                  </div>
-                  <ChevronRight size={16} className="opacity-50" />
-                </DropdownMenuItem>
-
-                <DropdownMenuItem 
-                  onSelect={(e) => { e.preventDefault(); openReminderModal(); }}
-                  className="rounded-2xl p-4 cursor-pointer flex items-center gap-3 hover:bg-primary/5 focus:bg-primary/5 outline-none"
-                >
-                  <Bell size={20} className="text-primary" />
-                  <span className="font-bold">Daily Reminder</span>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem 
-                  onSelect={() => { setIsSettingsOpen(false); onShowExport(); }}
-                  className="rounded-2xl p-4 cursor-pointer flex items-center gap-3 hover:bg-primary/5 focus:bg-primary/5 outline-none"
-                >
-                  <Download size={20} className="text-secondary" />
-                  <span className="font-bold">Export Center</span>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem 
-                  onSelect={(e) => { e.preventDefault(); onToggleFocus(); }}
-                  className="rounded-2xl p-4 cursor-pointer flex items-center justify-between hover:bg-primary/5 focus:bg-primary/5 outline-none"
-                >
-                  <div className="flex items-center gap-3">
-                    <Zap size={20} className={focusMode ? 'text-primary' : ''} />
-                    <span className="font-bold">Focus Mode</span>
-                  </div>
-                  <div className={`w-10 h-5 rounded-full p-1 transition-all ${focusMode ? 'bg-primary' : 'bg-muted-foreground/30'}`}>
-                    <div className={`w-3 h-3 rounded-full bg-white transition-all ${focusMode ? 'translate-x-5' : 'translate-x-0'}`} />
-                  </div>
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator className="opacity-10" />
-                
-                <DropdownMenuItem 
-                  onSelect={() => { setIsSettingsOpen(false); onReset(); }}
-                  className="rounded-2xl p-4 cursor-pointer flex items-center gap-3 text-red-500 hover:bg-red-500/10 focus:bg-red-500/10 outline-none"
-                >
-                  <Trash2 size={20} />
-                  <span className="font-bold uppercase text-xs tracking-widest">Hard Reset</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenuPortal>
-          </DropdownMenu>
-        </div>
+        <DropdownMenu open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="rounded-xl p-2 h-10 w-10 neu-button border-none bg-card flex items-center justify-center outline-none">
+              <Settings size={20} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuContent align="end" className="glass-card rounded-[2rem] border-none shadow-2xl p-2 min-w-[240px] z-[9999]">
+              <DropdownMenuLabel className="font-headline p-3 text-center text-[10px] uppercase tracking-widest opacity-50">Settings</DropdownMenuLabel>
+              <DropdownMenuSeparator className="opacity-10" />
+              
+              <DropdownMenuItem onSelect={() => setIsThemeSheetOpen(true)} className="rounded-xl p-3 gap-3 cursor-pointer">
+                <Palette size={18} /> <span className="font-bold text-sm">Themes</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setIsReminderOpen(true)} className="rounded-xl p-3 gap-3 cursor-pointer">
+                <Bell size={18} /> <span className="font-bold text-sm">Reminders</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={onShowExport} className="rounded-xl p-3 gap-3 cursor-pointer">
+                <Download size={18} /> <span className="font-bold text-sm">Export Data</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={onToggleFocus} className="rounded-xl p-3 justify-between cursor-pointer">
+                <div className="flex items-center gap-3"><Zap size={18} /> <span className="font-bold text-sm">Focus Mode</span></div>
+                <div className={cn("w-8 h-4 rounded-full p-1 transition-all", focusMode ? 'bg-primary' : 'bg-muted')}>
+                  <div className={cn("w-2 h-2 rounded-full bg-white transition-all", focusMode ? 'translate-x-4' : 'translate-x-0')} />
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="opacity-10" />
+              <DropdownMenuItem onSelect={onReset} className="rounded-xl p-3 gap-3 cursor-pointer text-red-500 hover:bg-red-500/10">
+                <Trash2 size={18} /> <span className="font-bold text-xs uppercase tracking-widest">Wipe Data</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenuPortal>
+        </DropdownMenu>
       </header>
 
-      {isThemeSheetOpen && (
-        <Sheet open={isThemeSheetOpen} onOpenChange={(v) => {
-          if (!v && window.history.state?.themeSheetOpen) window.history.back();
-          setIsThemeSheetOpen(v);
-        }}>
-          <SheetContent 
-            side={isMobile ? "bottom" : "right"} 
-            className={cn(
-              "theme-sheet glass-card border-none z-[10000] p-8 pb-12 outline-none",
-              isMobile ? "rounded-t-[3.5rem]" : "rounded-l-[3.5rem] max-w-md"
-            )}
-          >
-            <div className="theme-sheet-handle" />
-            <div className="flex items-center justify-between mb-8">
-              <Button variant="ghost" onClick={() => { if (window.history.state?.themeSheetOpen) window.history.back(); setIsThemeSheetOpen(false); }} className="p-0 h-auto hover:bg-transparent">
-                <ArrowLeft size={24} />
-              </Button>
-              <SheetTitle className="text-2xl font-bold font-headline text-center flex-1">Visual Identity</SheetTitle>
-              <SheetClose asChild>
-                <Button variant="ghost" className="opacity-70 hover:opacity-100 p-0 h-auto">
-                  <X className="h-6 w-6" />
-                </Button>
-              </SheetClose>
-            </div>
-            <SheetDescription className="text-center font-medium mb-6">Customize your environment for better discipline.</SheetDescription>
-            <ThemeCards />
-          </SheetContent>
-        </Sheet>
-      )}
+      <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
+        <SheetContent side="bottom" className="rounded-t-[3.5rem] glass-card border-none p-8 pb-12 outline-none">
+          <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-6" />
+          <SheetHeader className="mb-8">
+            <SheetTitle className="text-2xl font-bold font-headline text-center">Visual Identity</SheetTitle>
+            <SheetDescription className="text-center font-medium">Choose your focus environment.</SheetDescription>
+          </SheetHeader>
+          <ThemeCards />
+        </SheetContent>
+      </Sheet>
 
       {isReminderOpen && (
-        <ReminderModal 
-          isOpen={isReminderOpen}
-          onClose={() => { if (window.history.state?.reminderOpen) window.history.back(); setIsReminderOpen(false); }}
-          enabled={data.notificationsEnabled}
-          time={data.reminderTime}
-          onUpdate={onUpdateReminder}
-        />
+        <ReminderModal isOpen={isReminderOpen} onClose={() => setIsReminderOpen(false)} enabled={data.notificationsEnabled} time={data.reminderTime} onUpdate={onUpdateReminder} />
       )}
     </>
   );

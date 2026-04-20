@@ -1,22 +1,22 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
 import Header from '@/components/dashboard/Header';
 import StreakDisplay from '@/components/dashboard/StreakDisplay';
 import ActionCards from '@/components/dashboard/ActionCards';
-import Analytics from '@/components/dashboard/Analytics';
+import InsightsSummary from '@/components/dashboard/InsightsSummary';
 import RelapseModal from '@/components/modals/RelapseModal';
 import UrgeModal from '@/components/modals/UrgeModal';
 import ExportModal from '@/components/modals/ExportModal';
+import InsightsSheet from '@/components/modals/InsightsSheet';
+import EmergencyModal from '@/components/modals/EmergencyModal';
 import FAB from '@/components/dashboard/FAB';
 import { UserData, INITIAL_DATA, UrgeIntensity, AppTheme } from '@/lib/types';
 import { getStoredData, saveData, clearData } from '@/lib/storage';
 import { 
   calculateStreak, 
   calculateDisciplineScore, 
-  getBehavioralInsights, 
-  getDailyChallenge 
+  getBehavioralInsights 
 } from '@/lib/discipline-engine';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
@@ -27,46 +27,43 @@ export default function IronWillDashboard() {
   const [showRelapseModal, setShowRelapseModal] = useState(false);
   const [showUrgeModal, setShowUrgeModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showInsightsSheet, setShowInsightsSheet] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const [insightsTab, setInsightsTab] = useState('milestones');
   const [mounted, setMounted] = useState(false);
 
   // Interaction Cleanup Engine
   useEffect(() => {
-    const isAnyModalOpen = showRelapseModal || showUrgeModal || showExportModal;
+    const isAnyModalOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal;
     
     if (!isAnyModalOpen) {
       const forceCleanup = () => {
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
-        document.body.style.userSelect = 'auto';
         document.documentElement.style.pointerEvents = 'auto';
         document.documentElement.style.overflow = 'auto';
         document.body.removeAttribute('data-scroll-locked');
         document.documentElement.removeAttribute('data-scroll-locked');
-        
-        const portals = document.querySelectorAll('[data-radix-portal]');
-        portals.forEach(portal => {
-          if (portal.children.length === 0) portal.remove();
-        });
       };
 
       forceCleanup();
       const interval = setInterval(forceCleanup, 100);
       const timer = setTimeout(() => clearInterval(interval), 1000);
-      
       return () => {
         clearInterval(interval);
         clearTimeout(timer);
       };
     }
-  }, [showRelapseModal, showUrgeModal, showExportModal]);
+  }, [showRelapseModal, showUrgeModal, showExportModal, showInsightsSheet, showEmergencyModal]);
 
   useEffect(() => {
     const handlePopState = () => {
       setShowRelapseModal(false);
       setShowUrgeModal(false);
       setShowExportModal(false);
+      setShowInsightsSheet(false);
+      setShowEmergencyModal(false);
     };
-
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
@@ -83,32 +80,6 @@ export default function IronWillDashboard() {
     setter(false);
   }, []);
 
-  // Notification Engine
-  useEffect(() => {
-    if (!mounted || !data.notificationsEnabled) return;
-
-    const checkNotification = () => {
-      const now = new Date();
-      const today = now.toISOString().split('T')[0];
-      const currentTimeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
-      if (currentTimeStr === data.reminderTime && data.lastNotificationDate !== today) {
-        if (Notification.permission === 'granted') {
-          new Notification("IronWill Daily Protocol", {
-            body: "Time for your daily discipline check-in. Stay strong!",
-          });
-          
-          const newData = { ...data, lastNotificationDate: today };
-          setData(newData);
-          saveData(newData);
-        }
-      }
-    };
-
-    const interval = setInterval(checkNotification, 60000); // Check every minute
-    return () => clearInterval(interval);
-  }, [mounted, data.notificationsEnabled, data.reminderTime, data.lastNotificationDate]);
-
   useEffect(() => {
     setMounted(true);
     const stored = getStoredData();
@@ -123,7 +94,6 @@ export default function IronWillDashboard() {
       newData.disciplineScore = calculateDisciplineScore(newData);
       setData(newData);
     };
-    
     syncData();
   }, []);
 
@@ -150,19 +120,10 @@ export default function IronWillDashboard() {
       toast({ variant: "destructive", title: "Already Logged", description: "Your discipline is noted for today!" });
       return;
     }
-
     const newData = { ...data };
     newData.checkIns.push({ date: today, timestamp: Date.now() });
     updateState(newData);
-
-    const messages = [
-      { min: 0, msg: "Strong start 💪 +10 Points" },
-      { min: 7, msg: "Momentum building 🚀 +20 Points" },
-      { min: 30, msg: "Discipline unlocked 🧠 Master status!" }
-    ];
-    
-    const feedback = [...messages].reverse().find(m => data.currentStreak >= m.min);
-    toast({ title: "+1 Day Added 🔥", description: feedback?.msg || "+10 Points Added" });
+    toast({ title: "+1 Day Added 🔥", description: "Keep the fire burning!" });
   };
 
   const handleUrgeResisted = (intensity: UrgeIntensity) => {
@@ -183,104 +144,84 @@ export default function IronWillDashboard() {
     toast({ variant: "destructive", title: "Relapse Logged", description: "Resilience is built through restart." });
   };
 
-  const handleUpdateReminder = (enabled: boolean, time: string) => {
-    const newData = { ...data, notificationsEnabled: enabled, reminderTime: time };
-    updateState(newData);
-    toast({ title: "Protocol Updated", description: enabled ? `Reminder set for ${time}` : "Reminders disabled" });
-  };
-
   const handleReset = () => {
-    if (confirm("Factory Reset: Wipe all progress and settings?")) {
+    if (confirm("Factory Reset: Wipe all progress?")) {
       clearData();
       setData(INITIAL_DATA);
       document.body.setAttribute('data-theme', 'light');
-      toast({ title: "System Reset", description: "All data cleared. Starting fresh." });
+      toast({ title: "System Reset" });
     }
-  };
-
-  const handleImport = () => {
-    const stored = getStoredData();
-    updateState(stored);
   };
 
   if (!mounted) return null;
 
-  const { mostCommonTrigger, highRiskWindow } = getBehavioralInsights(data);
-  const challenge = getDailyChallenge();
+  const insights = getBehavioralInsights(data);
   const checkedInToday = data.checkIns.some(c => c.date === new Date().toISOString().split('T')[0]);
 
   return (
-    <div className="min-h-screen bg-background relative transition-colors duration-500 overflow-x-hidden">
+    <div className="h-screen bg-background relative overflow-hidden flex flex-col">
       <Header 
         focusMode={data.focusMode} 
         theme={data.theme || 'light'}
         data={data}
         onThemeChange={handleThemeChange}
         onReset={handleReset}
-        onToggleFocus={() => {
-          const mode = !data.focusMode;
-          updateState({ ...data, focusMode: mode });
-          toast({ title: mode ? "Focus Mode ON" : "Focus Mode OFF", description: mode ? "Sensitivity filters active." : "Normal view restored." });
-        }}
+        onToggleFocus={() => updateState({ ...data, focusMode: !data.focusMode })}
         onShowExport={() => handleOpenModal(setShowExportModal)}
-        onUpdateReminder={handleUpdateReminder}
+        onUpdateReminder={(enabled, time) => updateState({ ...data, notificationsEnabled: enabled, reminderTime: time })}
       />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-4 flex flex-col items-center gap-12">
-        <div className="w-full space-y-12 transition-all duration-700">
-          <StreakDisplay current={data.currentStreak} best={data.bestStreak} focusMode={data.focusMode} />
-
-          <ActionCards 
-            onCheckIn={handleCheckIn} 
-            onUrge={() => handleOpenModal(setShowUrgeModal)} 
-            onRelapse={() => handleOpenModal(setShowRelapseModal)} 
-            checkedInToday={checkedInToday}
-          />
-          
-          <Analytics 
-            score={data.disciplineScore} 
-            trigger={mostCommonTrigger} 
-            window={highRiskWindow}
-            challenge={challenge}
-            data={data}
-            focusMode={data.focusMode}
-          />
-        </div>
-
-        {showRelapseModal && (
-          <RelapseModal 
-            isOpen={showRelapseModal} 
-            onClose={() => handleCloseModal(setShowRelapseModal)} 
-            onSubmit={handleRelapse} 
-          />
-        )}
-
-        {showUrgeModal && (
-          <UrgeModal 
-            isOpen={showUrgeModal} 
-            onClose={() => handleCloseModal(setShowUrgeModal)} 
-            onSubmit={handleUrgeResisted} 
-          />
-        )}
-
-        {showExportModal && (
-          <ExportModal 
-            isOpen={showExportModal}
-            onClose={() => handleCloseModal(setShowExportModal)}
-            data={data}
-            onDataImport={handleImport}
-          />
-        )}
-
-        <FAB 
+      <main className="flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-8 justify-center pb-24">
+        <StreakDisplay current={data.currentStreak} best={data.bestStreak} focusMode={data.focusMode} />
+        
+        <ActionCards 
           onCheckIn={handleCheckIn} 
           onUrge={() => handleOpenModal(setShowUrgeModal)} 
           onRelapse={() => handleOpenModal(setShowRelapseModal)} 
-          disabledCheckIn={checkedInToday}
+          checkedInToday={checkedInToday}
         />
 
-        <Toaster />
+        <InsightsSummary 
+          score={data.disciplineScore} 
+          resilience={insights.resilienceLevel}
+          onOpenInsights={(tab) => {
+            setInsightsTab(tab);
+            handleOpenModal(setShowInsightsSheet);
+          }}
+          focusMode={data.focusMode}
+        />
       </main>
+
+      <FAB 
+        onOpenInsights={(tab) => {
+          setInsightsTab(tab);
+          handleOpenModal(setShowInsightsSheet);
+        }}
+        onOpenEmergency={() => handleOpenModal(setShowEmergencyModal)}
+      />
+
+      {showRelapseModal && (
+        <RelapseModal isOpen={showRelapseModal} onClose={() => handleCloseModal(setShowRelapseModal)} onSubmit={handleRelapse} />
+      )}
+      {showUrgeModal && (
+        <UrgeModal isOpen={showUrgeModal} onClose={() => handleCloseModal(setShowUrgeModal)} onSubmit={handleUrgeResisted} />
+      )}
+      {showExportModal && (
+        <ExportModal isOpen={showExportModal} onClose={() => handleCloseModal(setShowExportModal)} data={data} onDataImport={() => setMounted(false)} />
+      )}
+      {showInsightsSheet && (
+        <InsightsSheet 
+          isOpen={showInsightsSheet} 
+          onClose={() => handleCloseModal(setShowInsightsSheet)} 
+          data={data} 
+          defaultTab={insightsTab}
+        />
+      )}
+      {showEmergencyModal && (
+        <EmergencyModal isOpen={showEmergencyModal} onClose={() => handleCloseModal(setShowEmergencyModal)} />
+      )}
+
+      <Toaster />
     </div>
   );
 }
