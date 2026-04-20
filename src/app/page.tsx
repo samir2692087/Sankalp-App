@@ -28,18 +28,21 @@ export default function IronWillDashboard() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Safety cleanup: Ensure page is always clickable when no modals are active
+  // CRITICAL: Cleanup body state whenever ANY modal closes
   useEffect(() => {
     if (!showRelapseModal && !showUrgeModal && !showExportModal) {
-      const timer = setTimeout(() => {
+      const cleanup = () => {
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
-      }, 300); // Allow time for exit animations
+        document.documentElement.style.pointerEvents = 'auto';
+        document.documentElement.style.overflow = 'auto';
+      };
+      
+      const timer = setTimeout(cleanup, 300);
       return () => clearTimeout(timer);
     }
   }, [showRelapseModal, showUrgeModal, showExportModal]);
 
-  // Sync state with browser history for back button support
   useEffect(() => {
     const handlePopState = () => {
       setShowRelapseModal(false);

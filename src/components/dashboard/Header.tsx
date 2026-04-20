@@ -41,18 +41,20 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
   const isMobile = useIsMobile();
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
 
-  // Safety cleanup for body pointer events
+  // Safety cleanup: Ensure page is always clickable when UI is closed
   useEffect(() => {
     if (!isThemeSheetOpen) {
-      const timer = setTimeout(() => {
+      const cleanup = () => {
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
-      }, 300);
+        document.documentElement.style.pointerEvents = 'auto';
+      };
+      
+      const timer = setTimeout(cleanup, 300);
       return () => clearTimeout(timer);
     }
   }, [isThemeSheetOpen]);
 
-  // Popstate handling for navigation
   useEffect(() => {
     const handlePopState = () => {
       setIsThemeSheetOpen(false);
@@ -71,8 +73,12 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
       window.history.back();
     }
     setIsThemeSheetOpen(false);
-    // Explicit cleanup
-    document.body.style.pointerEvents = 'auto';
+    
+    // Immediate recovery force
+    setTimeout(() => {
+      document.body.style.pointerEvents = 'auto';
+      document.body.style.overflow = 'auto';
+    }, 100);
   };
 
   const themes: { id: AppTheme, name: string, icon: any, bg: string, accent: string }[] = [
