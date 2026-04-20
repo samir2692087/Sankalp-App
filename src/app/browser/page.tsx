@@ -61,16 +61,16 @@ export default function DisciplineBrowserPage() {
   useEffect(() => {
     const stored = getStoredData();
     setStreak(stored.currentStreak || 0);
-    // Explicitly set the initial state to the homepage
+    // Force reset to homepage on mount to ensure no blank screen
     setUrl(DEFAULT_HOMEPAGE);
     setInputUrl(DEFAULT_HOMEPAGE);
   }, []);
 
   const navigateTo = useCallback((target: string, addToHistory = true) => {
-    // 1. Mandatory Fallback: Never load empty or relative routes
+    // 1. Mandatory Fallback & Empty Check
     const scrubbedInput = (target || '').trim();
     if (!scrubbedInput || scrubbedInput === '/browser') {
-      console.log("Loading: Falling back to homepage due to invalid input.");
+      console.log("Loading Fallback: DEFAULT_HOMEPAGE");
       setUrl(DEFAULT_HOMEPAGE);
       setInputUrl(DEFAULT_HOMEPAGE);
       return;
@@ -78,19 +78,27 @@ export default function DisciplineBrowserPage() {
     
     setIsLoading(true);
     
-    // 2. Intelligent Routing
-    const filtered = filterSearchQuery(scrubbedInput);
-    const finalUrl = formatBrowserInput(filtered);
+    // 2. Intelligent Routing: Search vs URL
+    // Basic heuristic: if it has a dot and no spaces, or starts with http, it's a URL
+    const isProbablyUrl = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(scrubbedInput) && !scrubbedInput.includes(' ');
     
-    // 3. Debug Logging
-    console.log("Loading:", finalUrl);
+    let finalUrl = '';
+    if (isProbablyUrl) {
+      finalUrl = scrubbedInput.startsWith('http') ? scrubbedInput : `https://${scrubbedInput}`;
+    } else {
+      finalUrl = `https://www.google.com/search?q=${encodeURIComponent(scrubbedInput)}&safe=active`;
+    }
+    
+    // 3. Absolute URL Enforcement (Debug Log)
+    console.log("Loading URL:", finalUrl);
 
     // 4. Content Assessment
     const assessment = assessContentSafety(finalUrl, streak);
 
-    // 5. Update UI Stability
+    // 5. Update UI Stability - Soft protection (max 6px blur)
     setSafetyStatus(assessment.status);
     setGuardianScore(100 - assessment.riskScore);
+    // Use subtle blur for protective guidance
     setIsBlurActive(assessment.isBlurRequired || assessment.status === 'BLOCKED');
     setBlockReason(assessment.reason);
 
@@ -109,8 +117,8 @@ export default function DisciplineBrowserPage() {
       setHistoryIndex(newHistory.length - 1);
     }
 
-    // Simulation of scanning environment
-    setTimeout(() => setIsLoading(false), 1000);
+    // Network environment scanning simulation
+    setTimeout(() => setIsLoading(false), 800);
   }, [streak, history, historyIndex]);
 
   const handleBack = () => {
@@ -138,6 +146,13 @@ export default function DisciplineBrowserPage() {
       navigateTo(inputUrl);
     }
   };
+
+  // Fail-safe: Ensure URL is never invalid
+  useEffect(() => {
+    if (!url || url === '/browser') {
+      setUrl(DEFAULT_HOMEPAGE);
+    }
+  }, [url]);
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#07070a] overflow-hidden text-white selection:bg-primary/30">
@@ -260,7 +275,7 @@ export default function DisciplineBrowserPage() {
            </AnimatePresence>
         </div>
 
-        {/* Browser Iframe */}
+        {/* Browser Viewport */}
         {url && (
           <iframe 
             src={url} 
@@ -273,17 +288,17 @@ export default function DisciplineBrowserPage() {
           />
         )}
 
-        {/* Floating Safety Pill - Non-Blocking */}
+        {/* Floating Safety Pill - Non-Blocking HUD */}
         <AnimatePresence>
           {safetyStatus !== 'SAFE' && (
             <motion.div 
               initial={{ y: -50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
+              animate={{ y: 24, opacity: 1 }}
               exit={{ y: -50, opacity: 0 }}
-              className="absolute top-6 left-1/2 -translate-x-1/2 z-[70]"
+              className="absolute top-0 left-1/2 -translate-x-1/2 z-[70] pointer-events-none"
             >
                <div className={cn(
-                 "px-6 py-2.5 rounded-full flex items-center gap-3 backdrop-blur-3xl border shadow-2xl transition-all",
+                 "px-6 py-2.5 rounded-full flex items-center gap-3 backdrop-blur-3xl border shadow-2xl transition-all pointer-events-auto",
                  safetyStatus === 'BLOCKED' ? "bg-red-950/90 border-red-500/40" : "bg-amber-950/90 border-amber-500/40"
                )}>
                  <div className={cn(
@@ -292,7 +307,7 @@ export default function DisciplineBrowserPage() {
                  )}>
                    <ShieldAlert size={12} className={cn(safetyStatus === 'BLOCKED' && "animate-pulse")} />
                  </div>
-                 <div className="flex flex-col">
+                 <div className="flex flex-col pr-2">
                     <span className="text-[10px] font-black uppercase tracking-tight leading-none text-white">Focus Stability Compromised</span>
                     <span className="text-[8px] font-bold text-white/50 leading-none mt-1">{blockReason}</span>
                  </div>
