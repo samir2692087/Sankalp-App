@@ -15,7 +15,7 @@ import InsightsSheet from '@/components/modals/InsightsSheet';
 import EmergencyModal from '@/components/modals/EmergencyModal';
 import CalendarSheet from '@/components/modals/CalendarSheet';
 import FAB from '@/components/dashboard/FAB';
-import { UserData, INITIAL_DATA, UrgeIntensity, AppTheme } from '@/lib/types';
+import { UserData, INITIAL_DATA, AppTheme } from '@/lib/types';
 import { getStoredData, saveData, clearData } from '@/lib/storage';
 import { 
   calculateStreak, 
@@ -23,17 +23,15 @@ import {
   getBehavioralInsights,
   getDailyChallenge
 } from '@/lib/discipline-engine';
-import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
-// Dynamically import the 3D scene with SSR disabled to avoid React Three Fiber conflicts with Next.js SSR
+// Dynamically import the 3D scene with SSR disabled
 const Scene3D = dynamic(() => import('@/components/background/Scene3D'), { 
   ssr: false,
   loading: () => <div className="fixed inset-0 -z-10 bg-[#050505]" /> 
 });
 
 export default function IronWillDashboard() {
-  const { toast } = useToast();
   const [data, setData] = useState<UserData>(INITIAL_DATA);
   const [showRelapseModal, setShowRelapseModal] = useState(false);
   const [showUrgeModal, setShowUrgeModal] = useState(false);
@@ -45,6 +43,7 @@ export default function IronWillDashboard() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Reset interaction blocking
     const forceReset = () => {
       const activeOverlays = document.querySelectorAll('[role="dialog"], [data-state="open"], .fixed.inset-0');
       if (activeOverlays.length === 0) {
@@ -104,7 +103,7 @@ export default function IronWillDashboard() {
 
   return (
     <div className="min-h-screen bg-transparent relative flex flex-col selection:bg-primary/30">
-      <Scene3D />
+      <Scene3D streak={data.currentStreak} theme={data.theme || 'dark'} />
       
       <Header 
         focusMode={data.focusMode} 
