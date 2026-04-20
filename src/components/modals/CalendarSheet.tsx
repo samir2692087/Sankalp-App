@@ -12,7 +12,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { UserData } from "@/lib/types";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { X, StickyNote, Save, Calendar as CalendarIcon, ShieldCheck, AlertCircle, Info, Trash2, Zap } from 'lucide-react';
+import { X, StickyNote, Save, ShieldCheck, AlertCircle, Info, Trash2, Zap } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from '@/lib/utils';
 
@@ -34,7 +34,6 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
   const relapseDates = useMemo(() => (data?.relapses || []).map(r => new Date(r.timestamp)), [data?.relapses]);
   const noteDates = useMemo(() => (data?.notes || []).map(n => new Date(n.date)), [data?.notes]);
   
-  // Heatmap intensity for urges
   const urgeHeatmap = useMemo(() => {
     const map: Record<string, number> = {};
     (data?.urges || []).forEach(u => {
@@ -179,7 +178,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                   <span className="text-[8px] font-black uppercase text-red-600/60">Relapse</span>
                 </div>
                 <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-2xl bg-amber-500/5 border border-amber-500/10">
-                  < zap size={12} className="text-amber-500" />
+                  <Zap size={12} className="text-amber-500" />
                   <span className="text-[8px] font-black uppercase text-amber-600/60">Heatmap</span>
                 </div>
               </div>
