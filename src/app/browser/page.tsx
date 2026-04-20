@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, 
@@ -11,10 +11,7 @@ import {
   Lock, 
   Sparkles,
   Shield,
-  RefreshCw,
   AlertTriangle,
-  ChevronLeft,
-  ChevronRight,
   Home,
   BookOpen,
   GraduationCap,
@@ -22,13 +19,15 @@ import {
   SearchCode,
   FileText,
   ArrowLeft,
-  Globe
+  Globe,
+  Zap,
+  ExternalLink,
+  ChevronRight
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { cn } from '@/lib/utils';
-import { assessContentSafety, filterSearchQuery, formatBrowserInput } from '@/lib/guardian-engine';
+import { assessContentSafety } from '@/lib/guardian-engine';
 import { useRouter } from 'next/navigation';
 import { getStoredData } from '@/lib/storage';
 
@@ -40,123 +39,75 @@ const QUICK_ACCESS = [
   { name: 'Docs', icon: SearchCode, url: 'https://nextjs.org/docs' }
 ];
 
-const DEFAULT_HOMEPAGE = 'https://www.google.com';
-
 export default function DisciplineBrowserPage() {
   const router = useRouter();
   const [streak, setStreak] = useState(0);
-  const [url, setUrl] = useState(DEFAULT_HOMEPAGE);
   const [inputUrl, setInputUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [safetyStatus, setSafetyStatus] = useState<'SAFE' | 'WARN' | 'BLOCKED'>('SAFE');
-  const [guardianScore, setGuardianScore] = useState(100);
-  const [blockReason, setBlockReason] = useState('');
-  const [shake, setShake] = useState(false);
-  const [isBlurActive, setIsBlurActive] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   
-  const [history, setHistory] = useState<string[]>([DEFAULT_HOMEPAGE]);
-  const [historyIndex, setHistoryIndex] = useState(0);
+  // Launch state
+  const [pendingUrl, setPendingUrl] = useState<string | null>(null);
+  const [riskAssessment, setRiskAssessment] = useState<any>(null);
+  const [showWarning, setShowWarning] = useState(false);
 
-  // Auto-load homepage on mount
   useEffect(() => {
     const stored = getStoredData();
     setStreak(stored.currentStreak || 0);
-    // Force reset to homepage on mount to ensure no blank screen
-    setUrl(DEFAULT_HOMEPAGE);
-    setInputUrl(DEFAULT_HOMEPAGE);
   }, []);
 
-  const navigateTo = useCallback((target: string, addToHistory = true) => {
-    // 1. Mandatory Fallback & Empty Check
+  const processLaunch = useCallback((target: string) => {
     const scrubbedInput = (target || '').trim();
-    if (!scrubbedInput || scrubbedInput === '/browser') {
-      console.log("Loading Fallback: DEFAULT_HOMEPAGE");
-      setUrl(DEFAULT_HOMEPAGE);
-      setInputUrl(DEFAULT_HOMEPAGE);
-      return;
-    }
+    if (!scrubbedInput) return;
+
+    setIsAnalyzing(true);
     
-    setIsLoading(true);
-    
-    // 2. Intelligent Routing: Search vs URL
-    // Basic heuristic: if it has a dot and no spaces, or starts with http, it's a URL
+    // Intelligent Routing
     const isProbablyUrl = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(scrubbedInput) && !scrubbedInput.includes(' ');
-    
     let finalUrl = '';
     if (isProbablyUrl) {
       finalUrl = scrubbedInput.startsWith('http') ? scrubbedInput : `https://${scrubbedInput}`;
     } else {
       finalUrl = `https://www.google.com/search?q=${encodeURIComponent(scrubbedInput)}&safe=active`;
     }
-    
-    // 3. Absolute URL Enforcement (Debug Log)
-    console.log("Loading URL:", finalUrl);
 
-    // 4. Content Assessment
+    // Pre-flight content assessment
     const assessment = assessContentSafety(finalUrl, streak);
-
-    // 5. Update UI Stability - Soft protection (max 6px blur)
-    setSafetyStatus(assessment.status);
-    setGuardianScore(100 - assessment.riskScore);
-    // Use subtle blur for protective guidance
-    setIsBlurActive(assessment.isBlurRequired || assessment.status === 'BLOCKED');
-    setBlockReason(assessment.reason);
-
-    if (assessment.status === 'BLOCKED') {
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-    }
-
-    setUrl(finalUrl);
-    setInputUrl(finalUrl);
     
-    if (addToHistory) {
-      const newHistory = history.slice(0, historyIndex + 1);
-      newHistory.push(finalUrl);
-      setHistory(newHistory);
-      setHistoryIndex(newHistory.length - 1);
-    }
+    setTimeout(() => {
+      setIsAnalyzing(false);
+      if (assessment.status === 'SAFE') {
+        window.open(finalUrl, '_blank');
+        setInputUrl('');
+      } else {
+        setPendingUrl(finalUrl);
+        setRiskAssessment(assessment);
+        setShowWarning(true);
+      }
+    }, 800);
+  }, [streak]);
 
-    // Network environment scanning simulation
-    setTimeout(() => setIsLoading(false), 800);
-  }, [streak, history, historyIndex]);
-
-  const handleBack = () => {
-    if (historyIndex > 0) {
-      const prevUrl = history[historyIndex - 1];
-      setHistoryIndex(historyIndex - 1);
-      navigateTo(prevUrl, false);
-    }
-  };
-
-  const handleForward = () => {
-    if (historyIndex < history.length - 1) {
-      const nextUrl = history[historyIndex + 1];
-      setHistoryIndex(historyIndex + 1);
-      navigateTo(nextUrl, false);
+  const confirmLaunch = () => {
+    if (pendingUrl) {
+      window.open(pendingUrl, '_blank');
+      resetLaunch();
     }
   };
 
-  const handleReload = () => navigateTo(url, false);
-  const handleHome = () => navigateTo(DEFAULT_HOMEPAGE);
+  const resetLaunch = () => {
+    setPendingUrl(null);
+    setRiskAssessment(null);
+    setShowWarning(false);
+    setInputUrl('');
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputUrl.trim()) {
-      navigateTo(inputUrl);
-    }
+    processLaunch(inputUrl);
   };
-
-  // Fail-safe: Ensure URL is never invalid
-  useEffect(() => {
-    if (!url || url === '/browser') {
-      setUrl(DEFAULT_HOMEPAGE);
-    }
-  }, [url]);
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#07070a] overflow-hidden text-white selection:bg-primary/30">
-      {/* Browser HUD Header */}
+      {/* Search Header */}
       <div className="bg-[#0b0b0f]/95 backdrop-blur-3xl border-b border-white/5 p-4 flex flex-col gap-3 shrink-0 z-50">
         <div className="flex items-center gap-4">
           <Button 
@@ -168,204 +119,187 @@ export default function DisciplineBrowserPage() {
             <ArrowLeft size={18} />
           </Button>
 
-          {/* Nav Controls */}
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={handleBack} disabled={historyIndex === 0} className="rounded-xl hover:bg-white/5 disabled:opacity-10">
-              <ChevronLeft size={18} />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleForward} disabled={historyIndex === history.length - 1} className="rounded-xl hover:bg-white/5 disabled:opacity-10">
-              <ChevronRight size={18} />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleReload} className="rounded-xl hover:bg-white/5">
-              <RefreshCw size={14} className={cn("text-white/40", isLoading && "animate-spin")} />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleHome} className="rounded-xl hover:bg-white/5">
-              <Home size={16} className="text-white/40" />
-            </Button>
-          </div>
-
-          {/* Search/URL Hub */}
           <form onSubmit={handleSubmit} className="flex-1">
-            <motion.div 
-              animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
-              className="relative group"
-            >
+            <div className="relative group">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors">
-                {safetyStatus === 'BLOCKED' ? <ShieldAlert size={14} className="text-red-500" /> : <Globe size={14} />}
+                <Search size={16} />
               </div>
               <Input 
                 value={inputUrl}
                 onChange={(e) => setInputUrl(e.target.value)}
-                placeholder="Search knowledge or enter neural URL..."
-                className={cn(
-                  "w-full h-11 bg-white/[0.03] border-white/5 rounded-2xl pl-11 pr-10 text-[11px] font-medium transition-all focus-visible:ring-primary/40 focus-visible:bg-white/[0.06] focus-visible:border-primary/20",
-                  safetyStatus === 'BLOCKED' && "border-red-500/50 text-red-500"
-                )}
+                placeholder="Enter URL or search knowledge..."
+                className="w-full h-12 bg-white/[0.03] border-white/5 rounded-2xl pl-11 pr-10 text-sm font-medium transition-all focus-visible:ring-primary/40 focus-visible:bg-white/[0.06] focus-visible:border-primary/20"
               />
-              {inputUrl && (
-                <button 
-                  type="button"
-                  onClick={() => setInputUrl('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/10 hover:text-white transition-colors"
-                >
-                  <X size={12} />
-                </button>
+              {isAnalyzing && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <Zap size={14} className="text-primary animate-pulse" />
+                </div>
               )}
-            </motion.div>
+            </div>
           </form>
 
-          {/* Stability Hub */}
-          <div className="flex items-center gap-4 pr-1">
-             <div className="hidden sm:flex flex-col items-end">
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/20 mb-1">Neural Stability</span>
-                <div className="w-20 h-1 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div 
-                    animate={{ width: `${guardianScore}%` }}
-                    className={cn(
-                      "h-full transition-all duration-1000",
-                      guardianScore > 70 ? "bg-green-500" : 
-                      guardianScore > 30 ? "bg-amber-500" : "bg-red-500"
-                    )}
-                  />
+          <div className="flex items-center gap-3">
+             <div className="hidden sm:flex flex-col items-end mr-2">
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/20 mb-1">Neural Shield</span>
+                <div className="w-16 h-1 bg-green-500/20 rounded-full overflow-hidden">
+                  <div className="w-full h-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
                 </div>
              </div>
-             <div className={cn(
-              "w-10 h-10 rounded-xl flex items-center justify-center border border-white/5",
-              safetyStatus === 'SAFE' ? "bg-green-500/10 text-green-500" : 
-              safetyStatus === 'WARN' ? "bg-amber-500/10 text-amber-500" : "bg-red-500/10 text-red-500"
-            )}>
-              {safetyStatus === 'SAFE' ? <ShieldCheck size={18} /> : 
-               safetyStatus === 'WARN' ? <Shield size={18} /> : <ShieldAlert size={18} />}
-            </div>
+             <div className="w-10 h-10 rounded-xl flex items-center justify-center border border-white/5 bg-green-500/10 text-green-500">
+                <ShieldCheck size={18} />
+             </div>
           </div>
         </div>
-
-        {/* Quick Access Matrix */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
-          <span className="text-[8px] font-black uppercase text-white/10 tracking-widest mr-2 shrink-0">Neural Links</span>
-          {QUICK_ACCESS.map((item) => (
-            <motion.button
-              key={item.name}
-              type="button"
-              whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.06)' }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigateTo(item.url)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/5 text-[9px] font-bold text-white/30 hover:text-white transition-all shrink-0"
-            >
-              <item.icon size={11} className="text-primary/50" />
-              {item.name}
-            </motion.button>
-          ))}
-        </div>
       </div>
 
-      {/* Main Viewport */}
-      <div className="flex-1 relative bg-white overflow-hidden">
-        {/* Top Scan Bar */}
-        <div className="absolute top-0 left-0 w-full h-[2px] bg-transparent z-[60] overflow-hidden">
-           <AnimatePresence>
-             {isLoading && (
-               <motion.div 
-                 initial={{ x: '-100%' }}
-                 animate={{ x: '100%' }}
-                 transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                 className="w-1/4 h-full bg-primary shadow-[0_0_8px_hsl(var(--primary))]"
-               />
-             )}
-           </AnimatePresence>
-        </div>
+      {/* Main Dashboard View */}
+      <div className="flex-1 relative overflow-y-auto no-scrollbar p-6 sm:p-12 flex flex-col items-center">
+        {/* Animated Grid Background */}
+        <div className="absolute inset-0 -z-10 opacity-20 pointer-events-none" 
+             style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
-        {/* Browser Viewport */}
-        {url && (
-          <iframe 
-            src={url} 
-            className={cn(
-              "w-full h-full border-none transition-all duration-700 bg-white",
-              isBlurActive && "blur-[6px] grayscale-[0.3]"
-            )}
-            title="Discipline Viewport"
-            onLoad={() => setIsLoading(false)}
-          />
-        )}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-2xl w-full flex flex-col items-center gap-12 pt-12"
+        >
+          <div className="text-center space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary mb-4">
+              <Sparkles size={12} /> Neural Launchpad Active
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-bold font-headline leading-tight">
+              Browse with <span className="text-primary">Intent.</span>
+            </h2>
+            <p className="text-white/40 text-sm sm:text-base font-medium max-w-md mx-auto">
+              Every search is analyzed for focus integrity. SafeSearch is forced by default.
+            </p>
+          </div>
 
-        {/* Floating Safety Pill - Non-Blocking HUD */}
-        <AnimatePresence>
-          {safetyStatus !== 'SAFE' && (
+          {/* Quick Access Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+            {QUICK_ACCESS.map((item, idx) => (
+              <motion.button
+                key={item.name}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                onClick={() => processLaunch(item.url)}
+                className="group glass-card p-6 rounded-[2rem] flex items-center gap-4 border border-white/5 hover:border-primary/30 transition-all text-left"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-white/[0.03] flex items-center justify-center text-white/40 group-hover:bg-primary/20 group-hover:text-primary transition-all">
+                  <item.icon size={20} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-white/80 group-hover:text-white">{item.name}</h4>
+                  <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mt-1">Safe Zone</p>
+                </div>
+                <ExternalLink size={14} className="ml-auto text-white/10 group-hover:text-white/40" />
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Status HUD Card */}
+          <div className="w-full glass-card p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.02] flex flex-col sm:flex-row items-center gap-8">
+            <div className="w-24 h-24 rounded-full border-4 border-primary/20 flex items-center justify-center relative">
+               <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin-slow" />
+               <Zap size={32} className="text-primary drop-shadow-[0_0_10px_rgba(124,58,237,0.5)]" />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <h3 className="text-xl font-bold mb-2">Neural Synchronization High</h3>
+              <p className="text-sm text-white/40 font-medium leading-relaxed">
+                You are currently browsing under Level {Math.floor(streak / 7)} protection. Distraction patterns are monitored in real-time.
+              </p>
+            </div>
+            <div className="w-full sm:w-auto">
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between text-[10px] font-black uppercase text-white/20 tracking-tighter">
+                  <span>Integrity</span>
+                  <span>98%</span>
+                </div>
+                <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                   <div className="w-[98%] h-full bg-primary" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Protocol Warning Modal */}
+      <AnimatePresence>
+        {showWarning && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md"
+          >
             <motion.div 
-              initial={{ y: -50, opacity: 0 }}
-              animate={{ y: 24, opacity: 1 }}
-              exit={{ y: -50, opacity: 0 }}
-              className="absolute top-0 left-1/2 -translate-x-1/2 z-[70] pointer-events-none"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="max-w-md w-full glass-card p-8 rounded-[3rem] border border-red-500/20 bg-[#0b0b0f] shadow-[0_0_100px_rgba(239,68,68,0.1)]"
             >
-               <div className={cn(
-                 "px-6 py-2.5 rounded-full flex items-center gap-3 backdrop-blur-3xl border shadow-2xl transition-all pointer-events-auto",
-                 safetyStatus === 'BLOCKED' ? "bg-red-950/90 border-red-500/40" : "bg-amber-950/90 border-amber-500/40"
-               )}>
-                 <div className={cn(
-                   "w-6 h-6 rounded-full flex items-center justify-center",
-                   safetyStatus === 'BLOCKED' ? "bg-red-500 text-white" : "bg-amber-500 text-white"
-                 )}>
-                   <ShieldAlert size={12} className={cn(safetyStatus === 'BLOCKED' && "animate-pulse")} />
-                 </div>
-                 <div className="flex flex-col pr-2">
-                    <span className="text-[10px] font-black uppercase tracking-tight leading-none text-white">Focus Stability Compromised</span>
-                    <span className="text-[8px] font-bold text-white/50 leading-none mt-1">{blockReason}</span>
-                 </div>
-                 <div className="h-4 w-px bg-white/10 mx-1" />
-                 <Button 
-                   size="sm" 
-                   variant="ghost" 
-                   onClick={() => navigateTo(DEFAULT_HOMEPAGE)}
-                   className="h-7 px-3 rounded-lg text-[9px] font-black uppercase text-primary hover:bg-white/5"
-                 >
-                   Stabilize
-                 </Button>
-               </div>
+              <div className="w-16 h-16 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mb-6 mx-auto">
+                <ShieldAlert size={32} className="animate-pulse" />
+              </div>
+              
+              <div className="text-center space-y-4 mb-8">
+                <h3 className="text-2xl font-bold text-red-500">Protocol Alert</h3>
+                <p className="text-white/60 text-sm leading-relaxed">
+                  The destination you are attempting to reach has been flagged for <span className="text-white font-bold">{riskAssessment?.reason}</span>.
+                </p>
+                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center gap-3 text-left">
+                  <AlertTriangle size={18} className="text-amber-500 shrink-0" />
+                  <p className="text-[10px] font-medium text-white/40 italic">
+                    "Discipline is choosing between what you want now and what you want most."
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <Button 
+                  onClick={() => processLaunch('https://www.wikipedia.org')}
+                  className="h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold"
+                >
+                  Redirect to Knowledge Hub
+                </Button>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button 
+                    variant="ghost" 
+                    onClick={resetLaunch}
+                    className="h-12 rounded-2xl bg-white/5 hover:bg-white/10 text-white/60"
+                  >
+                    Abort Launch
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={confirmLaunch}
+                    className="h-12 rounded-2xl text-red-500 hover:bg-red-500/10"
+                  >
+                    Proceed Anyway
+                  </Button>
+                </div>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* Subtle Bottom Shield indicator */}
-        <div className="absolute bottom-6 left-6 pointer-events-none z-50">
-           <div className="flex items-center gap-2 opacity-20">
-             <Lock size={12} className="text-green-500" />
-             <span className="text-[9px] font-black uppercase tracking-[0.2em]">Neural Shield Active</span>
-           </div>
-        </div>
-      </div>
-
-      {/* Footer Status Bar */}
-      <div className="bg-[#0b0b0f] border-t border-white/5 px-6 py-3 flex items-center justify-between shrink-0">
+      {/* Analytics Footer */}
+      <div className="bg-[#0b0b0f] border-t border-white/5 px-8 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-6">
            <div className="flex items-center gap-2 text-[9px] font-bold text-white/20 uppercase tracking-widest">
-             <div className="w-1.5 h-1.5 rounded-full bg-green-500/50" /> Protocol Secure
+             <div className="w-1.5 h-1.5 rounded-full bg-green-500" /> Neural Link Secure
            </div>
            <div className="flex items-center gap-2 text-[9px] font-bold text-white/20 uppercase tracking-widest">
-             <Activity size={12} className="text-primary/50" /> Synchronization High
+             <Globe size={12} className="text-primary/50" /> VPN Tunnel Active
            </div>
         </div>
         <div className="text-[9px] font-black uppercase text-white/10 tracking-widest">
-          IronWill Neural Engine v3.0
+          Guardian Engine v3.5 Stable
         </div>
       </div>
     </div>
-  );
-}
-
-function Activity({ className, size }: { className?: string, size?: number }) {
-  return (
-    <svg 
-      width={size || 24} 
-      height={size || 24} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-    </svg>
   );
 }
