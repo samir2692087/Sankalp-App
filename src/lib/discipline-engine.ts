@@ -1,18 +1,20 @@
 
-import { UserData, RelapseLog, UrgeLog } from './types';
+import { UserData, RelapseLog, UrgeLog, CheckInLog } from './types';
 
 export function calculateStreak(lastRelapseTimestamp: number | null): number {
-  if (lastRelapseTimestamp === null) return 0;
+  if (!lastRelapseTimestamp) return 0;
   const diff = Date.now() - lastRelapseTimestamp;
-  return Math.floor(diff / (1000 * 60 * 60 * 24));
+  return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
 }
 
 export function calculateDisciplineScore(data: UserData): number {
+  if (!data) return 0;
   const urges = data.urges || [];
   const relapses = data.relapses || [];
   const checkIns = data.checkIns || [];
   
-  const streakFactor = Math.min((data.currentStreak || 0) * 2, 50);
+  const currentStreak = data.currentStreak || 0;
+  const streakFactor = Math.min(currentStreak * 2, 50);
   const urgeFactor = Math.min(urges.length * 3, 40);
   const checkInFactor = Math.min(checkIns.length * 0.5, 20);
   const relapsePenalty = Math.min(relapses.length * 15, 90);
@@ -22,17 +24,17 @@ export function calculateDisciplineScore(data: UserData): number {
 }
 
 export function getBehavioralInsights(data: UserData) {
-  const relapses = data.relapses || [];
-  const urges = data.urges || [];
+  const relapses = data?.relapses || [];
+  const urges = data?.urges || [];
   
-  const reasons = relapses.map(r => r.reason);
+  const reasons = relapses.map(r => r?.reason || "Unknown").filter(Boolean);
   const mostCommonTrigger = reasons.length > 0 
     ? reasons.reduce((a, b, i, arr) => 
         (arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b)
       ) 
     : "Consistent data required";
 
-  const times = relapses.map(r => r.timeOfDay);
+  const times = relapses.map(r => r?.timeOfDay || "N/A").filter(t => t !== "N/A");
   const highRiskWindow = times.length > 0
     ? times.reduce((a, b, i, arr) => 
         (arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b)
@@ -43,7 +45,7 @@ export function getBehavioralInsights(data: UserData) {
   const winRate = totalBattles > 0 ? Math.round((urges.length / totalBattles) * 100) : 100;
 
   // Streak Protection: Risk Detection
-  const recentUrges = urges.filter(u => Date.now() - u.timestamp < 1000 * 60 * 60 * 48).length;
+  const recentUrges = urges.filter(u => u?.timestamp && (Date.now() - u.timestamp < 1000 * 60 * 60 * 48)).length;
   const riskLevel = recentUrges >= 3 ? 'CRITICAL' : recentUrges >= 1 ? 'ELEVATED' : 'STABLE';
 
   return { 
@@ -59,21 +61,39 @@ export function getBehavioralInsights(data: UserData) {
 }
 
 export function getWeeklyData(data: UserData) {
-  const urges = data.urges || [];
-  const relapses = data.relapses || [];
-  const checkIns = data.checkIns || [];
+  const urges = data?.urges || [];
+  const relapses = data?.relapses || [];
+  const checkIns = data?.checkIns || [];
   
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
-    return d.toISOString().split('T')[0];
+    try {
+      return d.toISOString().split('T')[0];
+    } catch (e) {
+      return new Date().toISOString().split('T')[0];
+    }
   });
 
   return last7Days.map(date => ({
-    name: date.split('-').slice(1).join('/'),
-    urges: urges.filter(u => new Date(u.timestamp).toISOString().split('T')[0] === date).length,
-    relapses: relapses.filter(r => new Date(r.timestamp).toISOString().split('T')[0] === date).length,
-    checkins: checkIns.filter(c => c.date === date).length
+    name: date.split('-').slice(1).join('/') || date,
+    urges: urges.filter(u => {
+      if (!u?.timestamp) return false;
+      try {
+        return new Date(u.timestamp).toISOString().split('T')[0] === date;
+      } catch (e) {
+        return false;
+      }
+    }).length,
+    relapses: relapses.filter(r => {
+      if (!r?.timestamp) return false;
+      try {
+        return new Date(r.timestamp).toISOString().split('T')[0] === date;
+      } catch (e) {
+        return false;
+      }
+    }).length,
+    checkins: checkIns.filter(c => c?.date === date).length
   }));
 }
 
@@ -96,7 +116,7 @@ export function getDailyChallenge(streak: number) {
   ];
   const midStreak = [
     "Meditate for 10 minutes.",
-    "Take a 2-minute cold shower shower.",
+    "Take a 2-minute cold shower.",
     "No social media for 2 hours.",
     "Read 10 pages of self-improvement."
   ];
@@ -109,5 +129,5 @@ export function getDailyChallenge(streak: number) {
 
   const pool = (streak || 0) >= 90 ? highStreak : (streak || 0) >= 30 ? midStreak : lowStreak;
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-  return pool[dayOfYear % pool.length];
+  return pool[Math.max(0, dayOfYear % pool.length)];
 }

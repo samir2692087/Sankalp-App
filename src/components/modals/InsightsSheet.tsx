@@ -33,15 +33,22 @@ interface InsightsSheetProps {
 }
 
 export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'milestones' }: InsightsSheetProps) {
-  const weeklyData = getWeeklyData(data);
-  const achievements = getAchievements(data?.currentStreak || 0, data?.disciplineScore || 0);
+  const weeklyData = useMemo(() => getWeeklyData(data), [data]);
+  const achievements = useMemo(() => getAchievements(data?.currentStreak || 0, data?.disciplineScore || 0), [data?.currentStreak, data?.disciplineScore]);
 
   const timelineData = useMemo(() => {
+    if (!Array.isArray(weeklyData)) return [];
     return weeklyData.map(d => ({
-      name: d.name,
-      score: Math.max(0, 100 - (d.relapses * 20) + (d.checkins * 5))
+      name: d.name || 'N/A',
+      score: Math.max(0, 100 - ((d.relapses || 0) * 20) + ((d.checkins || 0) * 5))
     }));
   }, [weeklyData]);
+
+  const winRate = useMemo(() => {
+    const total = (data?.urges?.length || 0) + (data?.relapses?.length || 0);
+    if (total === 0) return 100;
+    return Math.round(((data?.urges?.length || 0) / total) * 100);
+  }, [data]);
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -100,30 +107,32 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
             <TabsContent value="weekly" className="mt-0 outline-none space-y-6">
               <div className="bg-slate-900 p-8 rounded-[2.5rem] h-64 shadow-2xl">
                 <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-6">Resilience Trajectory</h4>
-                <ResponsiveContainer width="100%" height="80%">
-                  <LineChart data={timelineData}>
-                    <XAxis dataKey="name" hide />
-                    <YAxis hide domain={[0, 100]} />
-                    <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '1rem', color: '#fff', fontSize: '10px' }} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="score" 
-                      stroke="#fff" 
-                      strokeWidth={3} 
-                      dot={{ r: 4, fill: '#fff' }} 
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                <div className="h-40 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={timelineData}>
+                      <XAxis dataKey="name" hide />
+                      <YAxis hide domain={[0, 100]} />
+                      <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '1rem', color: '#fff', fontSize: '10px' }} />
+                      <Line 
+                        type="monotone" 
+                        dataKey="score" 
+                        stroke="#fff" 
+                        strokeWidth={3} 
+                        dot={{ r: 4, fill: '#fff' }} 
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white border border-slate-200 p-6 rounded-[2rem] text-center shadow-sm">
                   <p className="text-[9px] font-black uppercase text-slate-400 mb-1">Total Conflicts</p>
-                  <p className="text-2xl font-bold text-slate-900">{(data?.urges || []).length + (data?.relapses || []).length}</p>
+                  <p className="text-2xl font-bold text-slate-900">{(data?.urges?.length || 0) + (data?.relapses?.length || 0)}</p>
                 </div>
                 <div className="bg-white border border-slate-200 p-6 rounded-[2rem] text-center shadow-sm">
                   <p className="text-[9px] font-black uppercase text-slate-400 mb-1">Victory Rate</p>
-                  <p className="text-2xl font-bold text-slate-900">{Math.round(((data?.urges || []).length / ((data?.urges || []).length + (data?.relapses || []).length || 1)) * 100)}%</p>
+                  <p className="text-2xl font-bold text-slate-900">{winRate}%</p>
                 </div>
               </div>
             </TabsContent>
