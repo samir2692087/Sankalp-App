@@ -20,6 +20,14 @@ export interface CheckInLog {
   timestamp: number;
 }
 
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+}
+
 export interface UserData {
   bestStreak: number;
   currentStreak: number;
@@ -32,7 +40,7 @@ export interface UserData {
   theme: AppTheme;
   notificationsEnabled: boolean;
   reminderTime: string; // HH:mm format
-  lastNotificationDate: string | null; // YYYY-MM-DD to prevent duplicate alerts
+  lastNotificationDate: string | null;
 }
 
 export const INITIAL_DATA: UserData = {

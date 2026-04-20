@@ -96,7 +96,6 @@ export default function IronWillDashboard() {
         if (Notification.permission === 'granted') {
           new Notification("IronWill Daily Protocol", {
             body: "Time for your daily discipline check-in. Stay strong!",
-            icon: "/shield-icon.png", // Assuming existence or fallback
           });
           
           const newData = { ...data, lastNotificationDate: today };
@@ -199,6 +198,11 @@ export default function IronWillDashboard() {
     }
   };
 
+  const handleImport = () => {
+    const stored = getStoredData();
+    updateState(stored);
+  };
+
   if (!mounted) return null;
 
   const { mostCommonTrigger, highRiskWindow } = getBehavioralInsights(data);
@@ -213,31 +217,34 @@ export default function IronWillDashboard() {
         data={data}
         onThemeChange={handleThemeChange}
         onReset={handleReset}
-        onToggleFocus={() => updateState({ ...data, focusMode: !data.focusMode })}
+        onToggleFocus={() => {
+          const mode = !data.focusMode;
+          updateState({ ...data, focusMode: mode });
+          toast({ title: mode ? "Focus Mode ON" : "Focus Mode OFF", description: mode ? "Sensitivity filters active." : "Normal view restored." });
+        }}
         onShowExport={() => handleOpenModal(setShowExportModal)}
         onUpdateReminder={handleUpdateReminder}
       />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-4 flex flex-col items-center gap-12">
         <div className="w-full space-y-12 transition-all duration-700">
-          <StreakDisplay current={data.currentStreak} best={data.bestStreak} />
+          <StreakDisplay current={data.currentStreak} best={data.bestStreak} focusMode={data.focusMode} />
 
-          {!data.focusMode && (
-            <>
-              <ActionCards 
-                onCheckIn={handleCheckIn} 
-                onUrge={() => handleOpenModal(setShowUrgeModal)} 
-                onRelapse={() => handleOpenModal(setShowRelapseModal)} 
-                checkedInToday={checkedInToday}
-              />
-              <Analytics 
-                score={data.disciplineScore} 
-                trigger={mostCommonTrigger} 
-                window={highRiskWindow}
-                challenge={challenge}
-              />
-            </>
-          )}
+          <ActionCards 
+            onCheckIn={handleCheckIn} 
+            onUrge={() => handleOpenModal(setShowUrgeModal)} 
+            onRelapse={() => handleOpenModal(setShowRelapseModal)} 
+            checkedInToday={checkedInToday}
+          />
+          
+          <Analytics 
+            score={data.disciplineScore} 
+            trigger={mostCommonTrigger} 
+            window={highRiskWindow}
+            challenge={challenge}
+            data={data}
+            focusMode={data.focusMode}
+          />
         </div>
 
         {showRelapseModal && (
@@ -261,6 +268,7 @@ export default function IronWillDashboard() {
             isOpen={showExportModal}
             onClose={() => handleCloseModal(setShowExportModal)}
             data={data}
+            onDataImport={handleImport}
           />
         )}
 

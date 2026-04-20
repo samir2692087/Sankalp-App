@@ -23,3 +23,17 @@ export const clearData = () => {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(STORAGE_KEY);
 };
+
+export const importData = (jsonStr: string): boolean => {
+  try {
+    const data = JSON.parse(jsonStr);
+    // Basic validation
+    if (typeof data.currentStreak === 'number' && Array.isArray(data.urges)) {
+      saveData(data);
+      return true;
+    }
+    return false;
+  } catch (e) {
+    return false;
+  }
+};

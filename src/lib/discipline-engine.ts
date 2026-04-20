@@ -1,19 +1,16 @@
 
-import { UserData, CheckInLog } from './types';
+import { UserData, RelapseLog, UrgeLog } from './types';
 
 export function calculateStreak(lastRelapseTimestamp: number | null): number {
-  if (lastRelapseTimestamp === null) {
-    // If never relapsed, streak is days since first record or just 0
-    return 0;
-  }
+  if (lastRelapseTimestamp === null) return 0;
   const diff = Date.now() - lastRelapseTimestamp;
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
 export function calculateDisciplineScore(data: UserData): number {
-  const streakFactor = Math.min(data.currentStreak * 2, 50); // Up to 50 points for 25 days streak
-  const urgeFactor = Math.min(data.urges.length * 2, 30); // Up to 30 points for resisting urges
-  const relapsePenalty = Math.min(data.relapses.length * 10, 80); // Up to 80 points penalty
+  const streakFactor = Math.min(data.currentStreak * 2, 50);
+  const urgeFactor = Math.min(data.urges.length * 2, 30);
+  const relapsePenalty = Math.min(data.relapses.length * 10, 80);
   
   const rawScore = 50 + streakFactor + urgeFactor - relapsePenalty;
   return Math.max(0, Math.min(100, Math.round(rawScore)));
@@ -25,16 +22,49 @@ export function getBehavioralInsights(data: UserData) {
     ? reasons.reduce((a, b, i, arr) => 
         (arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b)
       ) 
-    : "No data yet";
+    : "Consistent data required";
 
   const times = data.relapses.map(r => r.timeOfDay);
   const highRiskWindow = times.length > 0
     ? times.reduce((a, b, i, arr) => 
         (arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b)
       )
-    : "No data yet";
+    : "Morning Protocol Active";
 
-  return { mostCommonTrigger, highRiskWindow };
+  const totalBattles = data.urges.length + data.relapses.length;
+  const winRate = totalBattles > 0 ? Math.round((data.urges.length / totalBattles) * 100) : 100;
+
+  return { 
+    mostCommonTrigger, 
+    highRiskWindow,
+    winRate,
+    resilienceLevel: winRate > 80 ? 'Fortress' : winRate > 50 ? 'Steel' : 'Vulnerable'
+  };
+}
+
+export function getWeeklyData(data: UserData) {
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return d.toISOString().split('T')[0];
+  });
+
+  return last7Days.map(date => ({
+    name: date.split('-').slice(1).join('/'),
+    urges: data.urges.filter(u => new Date(u.timestamp).toISOString().split('T')[0] === date).length,
+    relapses: data.relapses.filter(r => new Date(r.timestamp).toISOString().split('T')[0] === date).length,
+    checkins: data.checkIns.filter(c => c.date === date).length
+  }));
+}
+
+export function getAchievements(streak: number, score: number) {
+  return [
+    { id: '1', name: 'Initiate', desc: 'First 24 hours clean', unlocked: streak >= 1 },
+    { id: '2', name: 'Warrior', desc: '7 Day Streak reached', unlocked: streak >= 7 },
+    { id: '3', name: 'Steel Mind', desc: '30 Day Mastery', unlocked: streak >= 30 },
+    { id: '4', name: 'Iron Will', desc: '90 Day Ascension', unlocked: streak >= 90 },
+    { id: '5', name: 'Elite Status', desc: 'Score over 80', unlocked: score >= 80 },
+  ];
 }
 
 export function getDailyChallenge() {
