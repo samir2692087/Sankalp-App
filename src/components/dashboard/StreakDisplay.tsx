@@ -2,8 +2,9 @@
 "use client";
 
 import { Flame, Trophy, Snowflake } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import React, { useRef } from 'react';
 
 interface StreakDisplayProps {
   current: number;
@@ -16,29 +17,53 @@ interface StreakDisplayProps {
 const physicsConfig = { type: "spring", stiffness: 120, damping: 14, mass: 1 };
 
 export default function StreakDisplay({ current, best, focusMode, freezes, onUseFreeze }: StreakDisplayProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [10, -10]), { stiffness: 120, damping: 14 });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-10, 10]), { stiffness: 120, damping: 14 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 0.9, z: -100 }}
-      animate={{ 
-        opacity: 1, 
-        scale: 1, 
-        z: 0,
-        y: [0, -10, 0] 
-      }}
-      transition={{
-        ...physicsConfig,
-        y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
-      }}
-      whileHover={{ 
-        rotateX: 4, 
-        rotateY: -4, 
-        scale: 1.02,
-        boxShadow: "0 20px 40px rgba(0,0,0,0.6)" 
-      }}
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      style={{ rotateX, rotateY }}
       className="w-full perspective-1000 cursor-pointer"
     >
-      <div className="glass-card p-10 rounded-[3rem] flex flex-col items-center justify-center group relative overflow-hidden">
+      <motion.div 
+        whileHover={{ scale: 1.02, boxShadow: "0 20px 60px rgba(0,0,0,0.8)" }}
+        className="glass-card p-10 rounded-[3rem] flex flex-col items-center justify-center group relative overflow-hidden"
+      >
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 pointer-events-none opacity-50" />
+        
+        {/* Dynamic Light Reflection Layer */}
+        <motion.div 
+          style={{ 
+            background: useTransform(
+              [mouseX, mouseY], 
+              ([x, y]: any) => `radial-gradient(circle at ${50 + x * 100}% ${50 + y * 100}%, rgba(255,255,255,0.08) 0%, transparent 60%)`
+            )
+          }}
+          className="absolute inset-0 pointer-events-none"
+        />
 
         <div className="relative w-64 h-64 flex items-center justify-center mb-6">
           <svg className="absolute inset-0 w-full h-full -rotate-90">
@@ -133,7 +158,7 @@ export default function StreakDisplay({ current, best, focusMode, freezes, onUse
              </div>
           </motion.button>
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useRef, useMemo, useEffect, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Float, Points, PointMaterial, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 import { AppTheme } from '@/lib/types';
@@ -29,24 +29,26 @@ function EnergyCore({ streak, theme, riskLevel, isBlurred }: SceneProps) {
     }
   }, [theme, riskLevel]);
 
-  // Physics-based inertia and damping simulation
-  const targetIntensity = isBlurred ? 0.5 : Math.min(1.5 + streak * 0.15, 4);
-  const targetSpeed = isBlurred ? 0.1 : Math.min(1.2 + streak * 0.1, 4.5);
-  
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
+    const { mouse } = state;
+
     if (meshRef.current) {
       // Rotation with inertia
       meshRef.current.rotation.y += (0.005 + (streak * 0.0001)) * (isBlurred ? 0.2 : 1);
       meshRef.current.rotation.z += (0.002 + (streak * 0.00005)) * (isBlurred ? 0.1 : 1);
       
+      // Magnetic reaction to mouse
+      meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, mouse.x * 0.5, 0.05);
+      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, mouse.y * 0.5, 0.05);
+
       // Breathing physics
       const breathing = 1 + Math.sin(t * (isBlurred ? 0.5 : 1.5 + streak * 0.02)) * 0.05;
       meshRef.current.scale.lerp(new THREE.Vector3(breathing, breathing, breathing), 0.1);
     }
     
     if (lightRef.current) {
-      // Light intensity pulsing with spring-like damping
+      const targetIntensity = isBlurred ? 0.5 : Math.min(1.5 + streak * 0.15, 4);
       lightRef.current.intensity = THREE.MathUtils.lerp(
         lightRef.current.intensity,
         targetIntensity + Math.sin(t * 2) * 0.2,
@@ -63,7 +65,7 @@ function EnergyCore({ streak, theme, riskLevel, isBlurred }: SceneProps) {
           <sphereGeometry args={[1.6, 64, 64]} />
           <MeshDistortMaterial
             color={themeColor}
-            speed={targetSpeed}
+            speed={isBlurred ? 0.1 : Math.min(1.2 + streak * 0.1, 4.5)}
             distort={isBlurred ? 0.05 : 0.4 + (streak * 0.01)}
             radius={1}
             emissive={themeColor}
@@ -75,11 +77,6 @@ function EnergyCore({ streak, theme, riskLevel, isBlurred }: SceneProps) {
           />
         </mesh>
       </Float>
-      {/* Halo Layer */}
-      <mesh position={[0, 0, -3.1]}>
-        <sphereGeometry args={[1.8, 32, 32]} />
-        <meshBasicMaterial color={themeColor} transparent opacity={isBlurred ? 0.05 : 0.08} />
-      </mesh>
     </group>
   );
 }
@@ -110,16 +107,17 @@ function NeuralParticles({ streak, theme, riskLevel, isBlurred }: SceneProps) {
 
   useFrame((state) => {
     if (!pointsRef.current) return;
+    const { mouse } = state;
     const t = state.clock.getElapsedTime();
-    const driftSpeed = isBlurred ? 0.005 : 0.03 + (streak * 0.001);
     
-    pointsRef.current.rotation.y += driftSpeed * 0.1;
+    // Magnetic drift
+    pointsRef.current.rotation.y += 0.001;
+    pointsRef.current.position.x = THREE.MathUtils.lerp(pointsRef.current.position.x, mouse.x * 0.2, 0.02);
+    pointsRef.current.position.y = THREE.MathUtils.lerp(pointsRef.current.position.y, mouse.y * 0.2, 0.02);
     
     const positionsAttr = pointsRef.current.geometry.attributes.position.array as Float32Array;
     for (let i = 0; i < count; i++) {
-      // Brownian-like jitter motion
       positionsAttr[i * 3 + 1] += Math.sin(t * 0.5 + i) * 0.001;
-      positionsAttr[i * 3] += Math.cos(t * 0.3 + i) * 0.0005;
     }
     pointsRef.current.geometry.attributes.position.needsUpdate = true;
   });
@@ -140,10 +138,7 @@ function NeuralParticles({ streak, theme, riskLevel, isBlurred }: SceneProps) {
 }
 
 function Scene({ streak, theme, riskLevel, isBlurred }: SceneProps) {
-  const { camera } = (window as any).THREE_STATE || { camera: { position: { z: 5 } } };
-  
   useFrame((state) => {
-    // Camera Dolly Physics: Depth reactive to app state
     const targetZ = isBlurred ? 7 : 5;
     state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetZ, 0.05);
     state.camera.lookAt(0, 0, -3);

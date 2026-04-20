@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { 
   Settings, 
   Trash2, 
@@ -13,7 +13,6 @@ import {
   Shield, 
   Zap, 
   Bell, 
-  ArrowLeft, 
   Database
 } from 'lucide-react';
 import {
@@ -36,6 +35,7 @@ import { AppTheme, UserData } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import ReminderModal from '@/components/modals/ReminderModal';
 import { motion } from 'framer-motion';
+import Magnetic from './Magnetic';
 
 interface HeaderProps {
   focusMode: boolean;
@@ -76,29 +76,33 @@ export default function Header({
       <header className="w-full flex items-center justify-between p-8 sticky top-0 z-[50] shrink-0">
         <div className="absolute inset-0 bg-[#0B0F14]/60 backdrop-blur-2xl border-b border-white/5 pointer-events-none -z-10" />
         
-        <motion.div 
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          transition={physicsConfig}
-          className="flex items-center gap-4 group cursor-pointer"
-        >
-          <div className="w-13 h-13 bg-primary rounded-2xl flex items-center justify-center primary-glow transition-all group-hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]">
-            <Shield className="text-white" size={26} />
-          </div>
-          <div className="flex flex-col">
-            <h1 className="text-white font-black text-2xl leading-none tracking-tighter">IronWill</h1>
-            <span className="text-white/30 font-black uppercase tracking-[0.3em] text-[8px]">Neural Interface v2.5</span>
-          </div>
-        </motion.div>
+        <Magnetic strength={0.2}>
+          <motion.div 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={physicsConfig}
+            className="flex items-center gap-4 group cursor-pointer"
+          >
+            <div className="w-13 h-13 bg-primary rounded-2xl flex items-center justify-center primary-glow transition-all group-hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]">
+              <Shield className="text-white" size={26} />
+            </div>
+            <div className="flex flex-col">
+              <h1 className="text-white font-black text-2xl leading-none tracking-tighter">IronWill</h1>
+              <span className="text-white/30 font-black uppercase tracking-[0.3em] text-[8px]">Neural Interface v2.5</span>
+            </div>
+          </motion.div>
+        </Magnetic>
 
         <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-          <DialogTrigger asChild>
-            <motion.div whileHover={{ scale: 1.1, rotate: 15 }} whileTap={{ scale: 0.9, rotate: -15 }} transition={physicsConfig}>
-              <Button variant="ghost" className="rounded-2xl w-14 h-14 glass-card flex items-center justify-center p-0 border-white/10">
-                <Settings size={24} className="text-white/80" />
-              </Button>
-            </motion.div>
-          </DialogTrigger>
+          <Magnetic strength={0.4}>
+            <DialogTrigger asChild>
+              <motion.div whileHover={{ scale: 1.1, rotate: 15 }} whileTap={{ scale: 0.9, rotate: -15 }} transition={physicsConfig}>
+                <Button variant="ghost" className="rounded-2xl w-14 h-14 glass-card flex items-center justify-center p-0 border-white/10">
+                  <Settings size={24} className="text-white/80" />
+                </Button>
+              </motion.div>
+            </DialogTrigger>
+          </Magnetic>
           <DialogContent className="max-w-[440px] glass-card border-white/10 p-0 outline-none overflow-hidden rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.8)]">
             <div className="bg-white/[0.02] p-10 text-center border-b border-white/5">
               <DialogTitle className="text-2xl font-black text-white tracking-tight">System Core</DialogTitle>
