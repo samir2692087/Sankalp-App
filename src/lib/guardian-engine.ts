@@ -45,7 +45,7 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
   if (isBlacklisted) {
     return {
       status: 'BLOCKED',
-      reason: "Neural Protocol Violation: High-risk environment detected. Stabilization active.",
+      reason: "High-risk environment detected. Neural stability protocols active.",
       riskScore: 100,
       isBlurRequired: true
     };
@@ -56,7 +56,7 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
   if (explicitMatch) {
     return {
       status: 'BLOCKED',
-      reason: `Neural Breach: Explicit intent detected ("${explicitMatch}"). Fog stabilizers active.`,
+      reason: `Explicit intent detected ("${explicitMatch}"). Fog stabilizers active.`,
       riskScore: 100,
       isBlurRequired: true
     };
@@ -67,9 +67,9 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
   if (isDistraction) {
     return {
       status: 'WARN',
-      reason: "High Distraction Risk: This environment is known for infinite dopamine loops.",
+      reason: "High distraction risk detected. Stay intentional.",
       riskScore: 60,
-      isBlurRequired: streak < 3 // More aggressive stabilization for early streaks
+      isBlurRequired: streak < 3 // Gentle fog for early streaks
     };
   }
 
@@ -78,7 +78,7 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
   if (isKnowledge) {
     return {
       status: 'SAFE',
-      reason: 'Neural Environment Stable: Verified Knowledge Zone.',
+      reason: 'Neural Environment Stable.',
       riskScore: 0,
       isBlurRequired: false
     };
@@ -88,7 +88,7 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
   return {
     status: 'SAFE',
     reason: 'Stability Maintained.',
-    riskScore: 20,
+    riskScore: 10,
     isBlurRequired: false
   };
 }
@@ -100,7 +100,7 @@ export function formatBrowserInput(input: string): string {
   const normalized = input.trim();
   if (!normalized) return 'https://www.google.com';
 
-  // Absolute URL detection
+  // Absolute URL detection (basic heuristic)
   const isUrl = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(normalized);
   
   if (isUrl && !normalized.includes(' ')) {
