@@ -1,7 +1,9 @@
+
 "use client";
 
 import React, { useRef, useState, useCallback } from 'react';
 import { motion, useSpring, useMotionValue } from 'framer-motion';
+import { useInteraction } from '@/context/InteractionContext';
 
 interface MagneticProps {
   children: React.ReactNode;
@@ -17,6 +19,7 @@ export default function Magnetic({ children, strength = 0.4, className, activeSc
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const scale = useMotionValue(1);
+  const { triggerPulse } = useInteraction();
 
   const springX = useSpring(x, springConfig);
   const springY = useSpring(y, springConfig);
@@ -34,7 +37,10 @@ export default function Magnetic({ children, strength = 0.4, className, activeSc
     x.set(distanceX * strength);
     y.set(distanceY * strength);
     scale.set(activeScale);
-  }, [strength, activeScale, x, y, scale]);
+    
+    // Trigger subtle proximity pulse
+    triggerPulse(0.005);
+  }, [strength, activeScale, x, y, scale, triggerPulse]);
 
   const handleMouseLeave = useCallback(() => {
     x.set(0);

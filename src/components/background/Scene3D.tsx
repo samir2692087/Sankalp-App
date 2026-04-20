@@ -2,10 +2,11 @@
 "use client";
 
 import React, { useRef, useMemo, useEffect, useState } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Points, PointMaterial, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 import { AppTheme } from '@/lib/types';
+import { useInteraction } from '@/context/InteractionContext';
 
 interface SceneProps {
   streak: number;
@@ -17,9 +18,10 @@ interface SceneProps {
 function EnergyCore({ streak, theme, riskLevel, isBlurred }: SceneProps) {
   const meshRef = useRef<THREE.Mesh>(null!);
   const lightRef = useRef<THREE.PointLight>(null!);
+  const { intensity, mode } = useInteraction();
   
   const themeColor = useMemo(() => {
-    if (riskLevel === 'CRITICAL') return '#ff1e1e';
+    if (riskLevel === 'CRITICAL' || mode === 'risk') return '#ff1e1e';
     if (riskLevel === 'ELEVATED') return '#ff9900';
     switch (theme) {
       case 'purple': return '#d946ef';
@@ -27,31 +29,33 @@ function EnergyCore({ streak, theme, riskLevel, isBlurred }: SceneProps) {
       case 'light': return '#3b82f6';
       default: return '#8b5cf6';
     }
-  }, [theme, riskLevel]);
+  }, [theme, riskLevel, mode]);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     const { mouse } = state;
 
     if (meshRef.current) {
-      // Rotation with inertia
-      meshRef.current.rotation.y += (0.005 + (streak * 0.0001)) * (isBlurred ? 0.2 : 1);
-      meshRef.current.rotation.z += (0.002 + (streak * 0.00005)) * (isBlurred ? 0.1 : 1);
+      // Rotation influenced by streak and interaction intensity
+      const speedFactor = (1 + intensity * 5);
+      meshRef.current.rotation.y += (0.005 + (streak * 0.0001)) * speedFactor * (isBlurred ? 0.2 : 1);
+      meshRef.current.rotation.z += (0.002 + (streak * 0.00005)) * speedFactor * (isBlurred ? 0.1 : 1);
       
       // Magnetic reaction to mouse
-      meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, mouse.x * 0.5, 0.05);
-      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, mouse.y * 0.5, 0.05);
+      meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, mouse.x * (0.5 + intensity), 0.05);
+      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, mouse.y * (0.5 + intensity), 0.05);
 
-      // Breathing physics
+      // Breathing physics with interaction distortion
       const breathing = 1 + Math.sin(t * (isBlurred ? 0.5 : 1.5 + streak * 0.02)) * 0.05;
-      meshRef.current.scale.lerp(new THREE.Vector3(breathing, breathing, breathing), 0.1);
+      const pulseScale = breathing + intensity * 0.2;
+      meshRef.current.scale.lerp(new THREE.Vector3(pulseScale, pulseScale, pulseScale), 0.1);
     }
     
     if (lightRef.current) {
-      const targetIntensity = isBlurred ? 0.5 : Math.min(1.5 + streak * 0.15, 4);
+      const baseIntensity = isBlurred ? 0.5 : Math.min(1.5 + streak * 0.15, 4);
       lightRef.current.intensity = THREE.MathUtils.lerp(
         lightRef.current.intensity,
-        targetIntensity + Math.sin(t * 2) * 0.2,
+        (baseIntensity + intensity * 6) + Math.sin(t * 2) * 0.2,
         0.05
       );
     }
@@ -65,11 +69,11 @@ function EnergyCore({ streak, theme, riskLevel, isBlurred }: SceneProps) {
           <sphereGeometry args={[1.6, 64, 64]} />
           <MeshDistortMaterial
             color={themeColor}
-            speed={isBlurred ? 0.1 : Math.min(1.2 + streak * 0.1, 4.5)}
-            distort={isBlurred ? 0.05 : 0.4 + (streak * 0.01)}
+            speed={isBlurred ? 0.1 : Math.min(1.2 + streak * 0.1, 4.5) * (1 + intensity)}
+            distort={isBlurred ? 0.05 : (0.4 + (streak * 0.01)) + intensity * 0.3}
             radius={1}
             emissive={themeColor}
-            emissiveIntensity={isBlurred ? 0.1 : 0.4}
+            emissiveIntensity={isBlurred ? 0.1 : 0.4 + intensity}
             transparent
             opacity={0.8}
             metalness={0.9}
@@ -83,6 +87,7 @@ function EnergyCore({ streak, theme, riskLevel, isBlurred }: SceneProps) {
 
 function NeuralParticles({ streak, theme, riskLevel, isBlurred }: SceneProps) {
   const pointsRef = useRef<THREE.Points>(null!);
+  const { intensity } = useInteraction();
   const count = Math.min(400 + streak * 15, 1200);
   
   const positions = useMemo(() => {
@@ -108,18 +113,11 @@ function NeuralParticles({ streak, theme, riskLevel, isBlurred }: SceneProps) {
   useFrame((state) => {
     if (!pointsRef.current) return;
     const { mouse } = state;
-    const t = state.clock.getElapsedTime();
     
-    // Magnetic drift
-    pointsRef.current.rotation.y += 0.001;
-    pointsRef.current.position.x = THREE.MathUtils.lerp(pointsRef.current.position.x, mouse.x * 0.2, 0.02);
-    pointsRef.current.position.y = THREE.MathUtils.lerp(pointsRef.current.position.y, mouse.y * 0.2, 0.02);
-    
-    const positionsAttr = pointsRef.current.geometry.attributes.position.array as Float32Array;
-    for (let i = 0; i < count; i++) {
-      positionsAttr[i * 3 + 1] += Math.sin(t * 0.5 + i) * 0.001;
-    }
-    pointsRef.current.geometry.attributes.position.needsUpdate = true;
+    // Magnetic drift influenced by intensity
+    pointsRef.current.rotation.y += 0.001 * (1 + intensity * 10);
+    pointsRef.current.position.x = THREE.MathUtils.lerp(pointsRef.current.position.x, mouse.x * (0.2 + intensity), 0.02);
+    pointsRef.current.position.y = THREE.MathUtils.lerp(pointsRef.current.position.y, mouse.y * (0.2 + intensity), 0.02);
   });
 
   return (
@@ -127,33 +125,34 @@ function NeuralParticles({ streak, theme, riskLevel, isBlurred }: SceneProps) {
       <PointMaterial
         transparent
         color={color}
-        size={isBlurred ? 0.15 : 0.08 + streak * 0.0005}
+        size={isBlurred ? 0.15 : (0.08 + streak * 0.0005) + intensity * 0.05}
         sizeAttenuation={true}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
-        opacity={isBlurred ? 0.15 : 0.4}
+        opacity={isBlurred ? 0.15 : 0.4 + intensity * 0.4}
       />
     </Points>
   );
 }
 
-function Scene({ streak, theme, riskLevel, isBlurred }: SceneProps) {
+function Scene(props: SceneProps) {
+  const { intensity } = useInteraction();
   useFrame((state) => {
-    const targetZ = isBlurred ? 7 : 5;
+    const targetZ = props.isBlurred ? 7 : 5 - (intensity * 0.5);
     state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetZ, 0.05);
     state.camera.lookAt(0, 0, -3);
   });
 
   return (
     <>
-      <ambientLight intensity={0.2} />
-      <EnergyCore streak={streak} theme={theme} riskLevel={riskLevel} isBlurred={isBlurred} />
-      <NeuralParticles streak={streak} theme={theme} riskLevel={riskLevel} isBlurred={isBlurred} />
+      <ambientLight intensity={0.2 + intensity * 0.3} />
+      <EnergyCore {...props} />
+      <NeuralParticles {...props} />
     </>
   );
 }
 
-export default function Scene3D({ streak, theme, riskLevel, isBlurred }: SceneProps) {
+export default function Scene3D(props: SceneProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -169,7 +168,7 @@ export default function Scene3D({ streak, theme, riskLevel, isBlurred }: ScenePr
         gl={{ antialias: true, alpha: true }}
         style={{ pointerEvents: 'none' }}
       >
-        <Scene streak={streak} theme={theme} riskLevel={riskLevel} isBlurred={isBlurred} />
+        <Scene {...props} />
       </Canvas>
     </div>
   );

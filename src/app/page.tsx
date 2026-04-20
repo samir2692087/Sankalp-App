@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -32,6 +33,8 @@ import Magnetic from '@/components/interactions/Magnetic';
 import Tilt from '@/components/interactions/Tilt';
 import Parallax from '@/components/interactions/Parallax';
 import Proximity from '@/components/interactions/Proximity';
+import { useInteraction } from '@/context/InteractionContext';
+import { feedback } from '@/lib/feedback-engine';
 
 const Scene3D = dynamic(() => import('@/components/background/Scene3D'), { 
   ssr: false,
@@ -43,6 +46,7 @@ const springConfig = { type: "spring", stiffness: 100, damping: 20 };
 export default function IronWillDashboard() {
   const router = useRouter();
   const { toast } = useToast();
+  const { triggerPulse, setMode, mode } = useInteraction();
   const [data, setData] = useState<UserData>(INITIAL_DATA);
   const [showRelapseModal, setShowRelapseModal] = useState(false);
   const [showUrgeModal, setShowUrgeModal] = useState(false);
@@ -81,33 +85,51 @@ export default function IronWillDashboard() {
   };
 
   const handleOpenModal = useCallback((setter: (v: boolean) => void) => {
+    triggerPulse(0.3);
+    feedback.tap();
     window.history.pushState({ modalOpen: true }, "");
     setter(true);
-  }, []);
+  }, [triggerPulse]);
 
   const handleCloseModal = useCallback((setter: (v: boolean) => void) => {
+    triggerPulse(0.2);
+    feedback.tap();
     if (window.history.state?.modalOpen) window.history.back();
     setter(false);
-  }, []);
+  }, [triggerPulse]);
 
   const handleRelapseSubmit = (reason: string, time: string) => {
+    feedback.warning();
+    triggerPulse(0.8);
+    setMode('risk');
     const newRelapse = { id: Date.now().toString(), timestamp: Date.now(), reason, timeOfDay: time };
     const newData = { ...data, lastRelapseTimestamp: Date.now(), relapses: [newRelapse, ...data.relapses], streakFreezes: Math.max(0, data.streakFreezes - 1) };
     updateState(newData);
     handleCloseModal(setShowRelapseModal);
     toast({ title: "Neural Protocol Reset", description: "Day One. Stay focused." });
+    setTimeout(() => setMode('calm'), 5000);
   };
 
   const handleUrgeSubmit = (intensity: UrgeIntensity) => {
+    feedback.success();
+    triggerPulse(0.6);
+    setMode('active');
     const newUrge = { id: Date.now().toString(), timestamp: Date.now(), intensity };
     const newData = { ...data, urges: [newUrge, ...data.urges] };
     updateState(newData);
     handleCloseModal(setShowUrgeModal);
     toast({ title: "Victory Confirmed", description: "You are mastering your mind." });
+    setTimeout(() => setMode('calm'), 3000);
   };
 
   const insights = useMemo(() => getBehavioralInsights(data), [data]);
   const challenge = useMemo(() => getDailyChallenge(data.currentStreak), [data.currentStreak]);
+
+  useEffect(() => {
+    if (insights.riskLevel === 'CRITICAL') setMode('risk');
+    else if (data.focusMode) setMode('focus');
+    else setMode('calm');
+  }, [insights.riskLevel, data.focusMode, setMode]);
 
   if (!mounted) return null;
 
@@ -140,11 +162,23 @@ export default function IronWillDashboard() {
               focusMode={data.focusMode} 
               theme={data.theme || 'dark'}
               data={data}
-              onThemeChange={(t) => updateState({ ...data, theme: t })}
-              onReset={() => { if(confirm("Wipe all neural mastery data?")) { clearData(); setData(INITIAL_DATA); } }}
-              onToggleFocus={() => updateState({ ...data, focusMode: !data.focusMode })}
+              onThemeChange={(t) => {
+                feedback.tap();
+                updateState({ ...data, theme: t });
+              }}
+              onReset={() => { 
+                feedback.warning();
+                if(confirm("Wipe all neural mastery data?")) { clearData(); setData(INITIAL_DATA); } 
+              }}
+              onToggleFocus={() => {
+                feedback.tap();
+                updateState({ ...data, focusMode: !data.focusMode });
+              }}
               onShowExport={() => handleOpenModal(setShowExportModal)}
-              onUpdateReminder={(e, t) => updateState({ ...data, notificationsEnabled: e, reminderTime: t })}
+              onUpdateReminder={(e, t) => {
+                feedback.tap();
+                updateState({ ...data, notificationsEnabled: e, reminderTime: t });
+              }}
             />
 
             <motion.main 
@@ -161,6 +195,8 @@ export default function IronWillDashboard() {
                   freezes={data.streakFreezes}
                   onUseFreeze={() => {
                     if (data.streakFreezes > 0) {
+                      feedback.success();
+                      triggerPulse(0.5);
                       updateState({ ...data, streakFreezes: data.streakFreezes - 1 });
                       toast({ title: "Freeze Activated", description: "Integrity preserved." });
                     }
@@ -176,7 +212,10 @@ export default function IronWillDashboard() {
                     className="perspective-1000"
                   >
                     <Button 
-                      onClick={() => router.push('/browser')}
+                      onClick={() => {
+                        feedback.tap();
+                        router.push('/browser');
+                      }}
                       className="h-20 rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex items-center justify-between px-8"
                     >
                       <div className="flex items-center gap-4">
@@ -201,6 +240,8 @@ export default function IronWillDashboard() {
                 onCheckIn={() => {
                   const today = new Date().toISOString().split('T')[0];
                   if (!data.checkIns.some(c => c.date === today)) {
+                    feedback.success();
+                    triggerPulse(0.4);
                     updateState({ ...data, checkIns: [{ date: today, timestamp: Date.now() }, ...data.checkIns] });
                     toast({ title: "Protocol Marked Clean", description: "Consistency is power." });
                   }
@@ -217,6 +258,7 @@ export default function IronWillDashboard() {
                   riskLevel={insights.riskLevel}
                   message={insights.protectionMessage}
                   onOpenInsights={(tab) => {
+                    feedback.tap();
                     if (tab === 'history') handleOpenModal(setShowCalendarSheet);
                     else { setInsightsTab(tab); handleOpenModal(setShowInsightsSheet); }
                   }}
@@ -243,6 +285,7 @@ export default function IronWillDashboard() {
                 <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}>
                   <FAB 
                     onOpenInsights={(tab) => {
+                      feedback.tap();
                       if (tab === 'history') handleOpenModal(setShowCalendarSheet);
                       else { setInsightsTab(tab); handleOpenModal(setShowInsightsSheet); }
                     }}
@@ -260,7 +303,6 @@ export default function IronWillDashboard() {
         {showUrgeModal && <UrgeModal isOpen={showUrgeModal} onClose={() => handleCloseModal(setShowUrgeModal)} onSubmit={handleUrgeSubmit} />}
         {showInsightsSheet && <InsightsSheet isOpen={showInsightsSheet} onClose={() => handleCloseModal(setShowInsightsSheet)} data={data} defaultTab={insightsTab} />}
         {showCalendarSheet && <CalendarSheet isOpen={showCalendarSheet} onClose={() => handleCloseModal(setShowCalendarSheet)} data={data} onToggleDate={() => {}} onSaveNote={() => {}} />}
-        {showEmergencyModal && <EmergencyModal isOpen={showEmergencyModal} onClose={() => handleCloseModal(setShowEmergencyModal)} />}
         {showEmergencyModal && <EmergencyModal isOpen={showEmergencyModal} onClose={() => handleCloseModal(setShowEmergencyModal)} />}
         {showExportModal && <ExportModal isOpen={showExportModal} onClose={() => handleCloseModal(setShowExportModal)} data={data} onDataImport={() => {}} />}
       </div>
