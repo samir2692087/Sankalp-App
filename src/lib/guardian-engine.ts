@@ -16,7 +16,7 @@ const BLOCKED_DOMAINS = [
 ];
 
 const DISTRACTION_DOMAINS = [
-  'youtube.com', 'instagram.com', 'facebook.com', 'twitter.com', 'x.com', 
+  'instagram.com', 'facebook.com', 'twitter.com', 'x.com', 
   'reddit.com', 'tiktok.com', 'twitch.tv', 'netflix.com'
 ];
 
@@ -60,23 +60,22 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
     }
   }
 
-  // 2. Emergency Mode (Low Streaks)
-  const isEmergency = streak < 3;
-  if (isEmergency) {
+  // 2. High Risk (Strong Warning/Blur)
+  if (streak < 3) {
     const isWhitelisted = WHITELIST_DOMAINS.some(domain => normalized.includes(domain));
     const isSearching = !normalized.includes('.');
     
-    if (!isWhitelisted && !isSearching && normalized.includes('.')) {
+    if (!isWhitelisted && !isSearching && normalized.includes('.') && !normalized.includes('google.com')) {
       return {
         isBlocked: false,
-        reason: "Emergency Stabilization: High focus required.",
+        reason: "Emergency Stabilization: High focus required for low streaks.",
         riskLevel: 'HIGH',
-        suggestedAction: "Stabilize for 3 days to unlock standard browsing."
+        suggestedAction: "Stabilize for 3 days to unlock standard freedom."
       };
     }
   }
 
-  // 3. Distraction Detection
+  // 3. Distraction Detection (Medium Risk/Soft Blur)
   if (DISTRACTION_DOMAINS.some(d => normalized.includes(d))) {
     return {
       isBlocked: false,
@@ -92,18 +91,22 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
   };
 }
 
+/**
+ * Formats user input into a valid URL or search query.
+ */
 export function formatBrowserInput(input: string): string {
   const normalized = input.trim();
   if (!normalized) return 'https://www.google.com';
 
-  // Check if it's a URL
+  // Check if it's a URL (contains a dot and no spaces)
   const isUrl = normalized.includes('.') && !normalized.includes(' ');
   
   if (isUrl) {
+    // Add protocol if missing
     return normalized.startsWith('http') ? normalized : `https://${normalized}`;
   }
 
-  // Otherwise, it's a search
+  // Otherwise, treat as a search query
   return `https://www.google.com/search?q=${encodeURIComponent(normalized)}&safe=active`;
 }
 
