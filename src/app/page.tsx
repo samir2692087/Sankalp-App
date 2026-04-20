@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/dashboard/Header';
 import StreakDisplay from '@/components/dashboard/StreakDisplay';
 import ActionCards from '@/components/dashboard/ActionCards';
@@ -14,7 +15,6 @@ import ExportModal from '@/components/modals/ExportModal';
 import InsightsSheet from '@/components/modals/InsightsSheet';
 import EmergencyModal from '@/components/modals/EmergencyModal';
 import CalendarSheet from '@/components/modals/CalendarSheet';
-import BrowserModal from '@/components/browser/BrowserModal';
 import FAB from '@/components/dashboard/FAB';
 import { UserData, INITIAL_DATA, AppTheme, UrgeIntensity } from '@/lib/types';
 import { getStoredData, saveData, clearData } from '@/lib/storage';
@@ -36,6 +36,7 @@ const Scene3D = dynamic(() => import('@/components/background/Scene3D'), {
 });
 
 export default function IronWillDashboard() {
+  const router = useRouter();
   const { toast } = useToast();
   const [data, setData] = useState<UserData>(INITIAL_DATA);
   const [showRelapseModal, setShowRelapseModal] = useState(false);
@@ -44,7 +45,6 @@ export default function IronWillDashboard() {
   const [showInsightsSheet, setShowInsightsSheet] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [showCalendarSheet, setShowCalendarSheet] = useState(false);
-  const [showBrowserModal, setShowBrowserModal] = useState(false);
   const [insightsTab, setInsightsTab] = useState('milestones');
   const [mounted, setMounted] = useState(false);
 
@@ -147,7 +147,7 @@ export default function IronWillDashboard() {
 
   if (!mounted) return null;
 
-  const isAnySheetOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal || showCalendarSheet || showBrowserModal;
+  const isAnySheetOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal || showCalendarSheet;
 
   return (
     <div className="min-h-screen bg-transparent relative flex flex-col selection:bg-primary/30 overflow-x-hidden no-scrollbar">
@@ -193,7 +193,7 @@ export default function IronWillDashboard() {
 
         <div className="grid grid-cols-1 gap-4 w-full">
            <Button 
-            onClick={() => handleOpenModal(setShowBrowserModal)}
+            onClick={() => router.push('/browser')}
             className="h-16 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/10 transition-all group flex items-center justify-between px-8"
            >
              <div className="flex items-center gap-4">
@@ -202,7 +202,7 @@ export default function IronWillDashboard() {
                </div>
                <div className="text-left">
                  <p className="text-white font-bold text-sm">Discipline Browser</p>
-                 <p className="text-white/40 text-[9px] uppercase font-black tracking-widest">AI Protected Session</p>
+                 <p className="text-white/40 text-[9px] uppercase font-black tracking-widest">AI Protected Portal</p>
                </div>
              </div>
              <div className="flex items-center gap-2">
@@ -270,7 +270,7 @@ export default function IronWillDashboard() {
       {showCalendarSheet && <CalendarSheet isOpen={showCalendarSheet} onClose={() => handleCloseModal(setShowCalendarSheet)} data={data} onToggleDate={() => {}} onSaveNote={() => {}} />}
       {showEmergencyModal && <EmergencyModal isOpen={showEmergencyModal} onClose={() => handleCloseModal(setShowEmergencyModal)} />}
       {showExportModal && <ExportModal isOpen={showExportModal} onClose={() => handleCloseModal(setShowExportModal)} data={data} onDataImport={() => {}} />}
-      {showBrowserModal && <BrowserModal isOpen={showBrowserModal} onClose={() => handleCloseModal(setShowBrowserModal)} streak={data.currentStreak} />}
     </div>
   );
 }
+

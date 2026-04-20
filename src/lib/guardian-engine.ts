@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview High-performance Local Guardian Engine.
  * Provides real-time filtering and risk detection without external API dependencies.
@@ -34,7 +35,7 @@ export interface GuardianRiskAssessment {
 
 /**
  * Assesses content safety entirely locally based on keywords and domains.
- * This version allows full browsing but applies non-intrusive "Neural Stabilizers" (blurs).
+ * Applies "Soft Protection" architecture - non-blocking but stabilizes focus.
  */
 export function assessContentSafety(input: string, streak: number = 0): GuardianRiskAssessment {
   const normalized = input.toLowerCase().trim();
@@ -44,18 +45,18 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
   if (isBlacklisted) {
     return {
       status: 'BLOCKED',
-      reason: "Neural Protocol Violation: Blacklisted environment detected. Soft-fog stabilizers active.",
+      reason: "Neural Protocol Violation: High-risk environment detected. Stabilization active.",
       riskScore: 100,
       isBlurRequired: true
     };
   }
 
-  // 2. Search Keyword Detection (Pre-execution check)
+  // 2. Search Keyword Detection
   const explicitMatch = EXPLICIT_KEYWORDS.find(keyword => normalized.includes(keyword));
   if (explicitMatch) {
     return {
       status: 'BLOCKED',
-      reason: `Neural Breach: Explicit content intent detected ("${explicitMatch}"). Fog stabilizers active.`,
+      reason: `Neural Breach: Explicit intent detected ("${explicitMatch}"). Fog stabilizers active.`,
       riskScore: 100,
       isBlurRequired: true
     };
@@ -66,9 +67,9 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
   if (isDistraction) {
     return {
       status: 'WARN',
-      reason: "High Distraction Potential: Neural stabilizers active to preserve focus.",
+      reason: "High Distraction Risk: This environment is known for infinite dopamine loops.",
       riskScore: 60,
-      isBlurRequired: streak < 7 // Apply subtle blur to distractions if streak is low
+      isBlurRequired: streak < 3 // More aggressive stabilization for early streaks
     };
   }
 
@@ -77,40 +78,40 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
   if (isKnowledge) {
     return {
       status: 'SAFE',
-      reason: 'Neural Environment Stable: Knowledge zone verified.',
+      reason: 'Neural Environment Stable: Verified Knowledge Zone.',
       riskScore: 0,
       isBlurRequired: false
     };
   }
 
-  // 5. Default "Gray" Browsing
+  // 5. Default Browsing
   return {
     status: 'SAFE',
-    reason: 'Neural Stability Maintained.',
+    reason: 'Stability Maintained.',
     riskScore: 20,
     isBlurRequired: false
   };
 }
 
 /**
- * Formats user input into a valid URL or search query.
+ * Formats user input into a valid URL or search query with SafeSearch.
  */
 export function formatBrowserInput(input: string): string {
   const normalized = input.trim();
   if (!normalized) return 'https://www.google.com';
 
-  // Heuristic for URL detection
+  // Absolute URL detection
   const isUrl = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(normalized);
   
   if (isUrl && !normalized.includes(' ')) {
     return normalized.startsWith('http') ? normalized : `https://${normalized}`;
   }
 
-  // Treat as search query with SafeSearch active
+  // Search query with SafeSearch active
   return `https://www.google.com/search?q=${encodeURIComponent(normalized)}&safe=active`;
 }
 
 export function filterSearchQuery(query: string): string {
-  // Removes common malicious or bypass patterns
+  // Removes common bypass patterns while preserving real search utility
   return query.replace(/[^\w\s\.\/\?\&\=\-]/gi, '');
 }
