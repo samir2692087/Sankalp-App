@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -13,7 +14,6 @@ interface FABProps {
 export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Interaction Cleanup logic specifically for FAB's manual backdrop
   const cleanupInteractions = useCallback(() => {
     document.body.style.pointerEvents = 'auto';
     document.body.style.overflow = 'auto';
@@ -31,7 +31,7 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
     { label: 'Milestones', icon: Target, tab: 'milestones', color: 'bg-primary' },
     { label: 'Weekly Report', icon: BarChart3, tab: 'weekly', color: 'bg-secondary' },
     { label: 'Achievements', icon: Trophy, tab: 'achievements', color: 'bg-yellow-500' },
-    { label: 'History', icon: Calendar, tab: 'history', color: 'bg-green-500' },
+    { label: 'Calendar', icon: Calendar, tab: 'history', color: 'bg-green-500' },
     { label: 'Emergency', icon: ShieldAlert, tab: 'emergency', color: 'bg-red-500', isEmergency: true },
   ];
 

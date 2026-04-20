@@ -20,6 +20,11 @@ export interface CheckInLog {
   timestamp: number;
 }
 
+export interface DayNote {
+  date: string;
+  content: string;
+}
+
 export interface Badge {
   id: string;
   name: string;
@@ -35,6 +40,7 @@ export interface UserData {
   urges: UrgeLog[];
   relapses: RelapseLog[];
   checkIns: CheckInLog[];
+  notes: DayNote[];
   disciplineScore: number;
   focusMode: boolean;
   theme: AppTheme;
@@ -50,6 +56,7 @@ export const INITIAL_DATA: UserData = {
   urges: [],
   relapses: [],
   checkIns: [],
+  notes: [],
   disciplineScore: 0,
   focusMode: false,
   theme: 'light',
