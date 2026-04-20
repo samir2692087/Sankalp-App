@@ -1,0 +1,11 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-discipline",
+      "description": "Abstract 3D representation of discipline and strength",
+      "imageUrl": "https://picsum.photos/seed/ironwill/1200/400",
+      "imageHint": "abstract purple"
+    }
+  ]
+}

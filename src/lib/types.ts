@@ -1,0 +1,42 @@
+
+export type UrgeIntensity = 'Low' | 'Medium' | 'High';
+
+export interface UrgeLog {
+  id: string;
+  timestamp: number;
+  intensity: UrgeIntensity;
+}
+
+export interface RelapseLog {
+  id: string;
+  timestamp: number;
+  reason: string;
+  timeOfDay: string;
+}
+
+export interface CheckInLog {
+  date: string; // YYYY-MM-DD
+  timestamp: number;
+}
+
+export interface UserData {
+  bestStreak: number;
+  currentStreak: number;
+  lastRelapseTimestamp: number | null;
+  urges: UrgeLog[];
+  relapses: RelapseLog[];
+  checkIns: CheckInLog[];
+  disciplineScore: number;
+  focusMode: boolean;
+}
+
+export const INITIAL_DATA: UserData = {
+  bestStreak: 0,
+  currentStreak: 0,
+  lastRelapseTimestamp: null,
+  urges: [],
+  relapses: [],
+  checkIns: [],
+  disciplineScore: 0,
+  focusMode: false,
+};
