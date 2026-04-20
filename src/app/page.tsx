@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Header from '@/components/dashboard/Header';
 import StreakDisplay from '@/components/dashboard/StreakDisplay';
 import ActionCards from '@/components/dashboard/ActionCards';
@@ -28,18 +28,33 @@ export default function IronWillDashboard() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // CRITICAL: Cleanup body state whenever ANY modal closes
+  // CRITICAL INTERACTION CLEANUP ENGINE
+  // This ensures that even if Radix/ShadCN components fail to clean up their 
+  // focus traps or pointer-event locks, the page remains interactive.
   useEffect(() => {
-    if (!showRelapseModal && !showUrgeModal && !showExportModal) {
+    const isAnyModalOpen = showRelapseModal || showUrgeModal || showExportModal;
+    
+    if (!isAnyModalOpen) {
       const cleanup = () => {
+        // Reset styles on body and html
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
         document.documentElement.style.pointerEvents = 'auto';
         document.documentElement.style.overflow = 'auto';
+        
+        // Remove Radix-specific lock attributes if they persist
+        document.body.removeAttribute('data-scroll-locked');
+        document.documentElement.removeAttribute('data-scroll-locked');
       };
-      
-      const timer = setTimeout(cleanup, 300);
-      return () => clearTimeout(timer);
+
+      // Execute immediately and then after a short delay to catch late-cleanup issues
+      cleanup();
+      const timer = setTimeout(cleanup, 100);
+      const timer2 = setTimeout(cleanup, 500);
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(timer2);
+      };
     }
   }, [showRelapseModal, showUrgeModal, showExportModal]);
 
@@ -156,7 +171,7 @@ export default function IronWillDashboard() {
   const checkedInToday = data.checkIns.some(c => c.date === new Date().toISOString().split('T')[0]);
 
   return (
-    <div className="min-h-screen bg-background relative transition-colors duration-500">
+    <div className="min-h-screen bg-background relative transition-colors duration-500 overflow-x-hidden">
       <Header 
         focusMode={data.focusMode} 
         theme={data.theme || 'light'}
@@ -167,7 +182,7 @@ export default function IronWillDashboard() {
         onShowExport={() => handleOpenModal(setShowExportModal)}
       />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-4 flex flex-col items-center gap-12 overflow-x-hidden">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-4 flex flex-col items-center gap-12">
         <div className="w-full space-y-12 transition-all duration-700">
           <StreakDisplay current={data.currentStreak} best={data.bestStreak} />
 
@@ -189,23 +204,29 @@ export default function IronWillDashboard() {
           )}
         </div>
 
-        <RelapseModal 
-          isOpen={showRelapseModal} 
-          onClose={() => handleCloseModal(setShowRelapseModal)} 
-          onSubmit={handleRelapse} 
-        />
+        {showRelapseModal && (
+          <RelapseModal 
+            isOpen={showRelapseModal} 
+            onClose={() => handleCloseModal(setShowRelapseModal)} 
+            onSubmit={handleRelapse} 
+          />
+        )}
 
-        <UrgeModal 
-          isOpen={showUrgeModal} 
-          onClose={() => handleCloseModal(setShowUrgeModal)} 
-          onSubmit={handleUrgeResisted} 
-        />
+        {showUrgeModal && (
+          <UrgeModal 
+            isOpen={showUrgeModal} 
+            onClose={() => handleCloseModal(setShowUrgeModal)} 
+            onSubmit={handleUrgeResisted} 
+          />
+        )}
 
-        <ExportModal 
-          isOpen={showExportModal}
-          onClose={() => handleCloseModal(setShowExportModal)}
-          data={data}
-        />
+        {showExportModal && (
+          <ExportModal 
+            isOpen={showExportModal}
+            onClose={() => handleCloseModal(setShowExportModal)}
+            data={data}
+          />
+        )}
 
         <FAB 
           onCheckIn={handleCheckIn} 

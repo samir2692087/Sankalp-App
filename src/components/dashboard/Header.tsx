@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Settings, Download, Trash2, Palette, Sun, Moon, Sparkles, Terminal, Shield, Zap, ChevronRight, Check, ArrowLeft, X } from 'lucide-react';
 import {
   DropdownMenu,
@@ -41,14 +41,17 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
   const isMobile = useIsMobile();
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
 
+  // Robust interaction cleanup for the theme sheet
   useEffect(() => {
     if (!isThemeSheetOpen) {
       const cleanup = () => {
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
         document.documentElement.style.pointerEvents = 'auto';
+        document.documentElement.style.overflow = 'auto';
       };
       
+      cleanup();
       const timer = setTimeout(cleanup, 300);
       return () => clearTimeout(timer);
     }
@@ -72,11 +75,6 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
       window.history.back();
     }
     setIsThemeSheetOpen(false);
-    
-    setTimeout(() => {
-      document.body.style.pointerEvents = 'auto';
-      document.body.style.overflow = 'auto';
-    }, 100);
   };
 
   const themes: { id: AppTheme, name: string, icon: any, bg: string, accent: string }[] = [
@@ -158,34 +156,16 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
                 <DropdownMenuLabel className="font-headline p-4 text-center opacity-70">Configuration</DropdownMenuLabel>
                 <DropdownMenuSeparator className="opacity-10" />
                 
-                {isMobile ? (
-                  <DropdownMenuItem 
-                    onSelect={openThemeSheet}
-                    className="rounded-2xl p-4 cursor-pointer flex items-center justify-between hover:bg-primary/5 focus:bg-primary/5 outline-none"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Palette size={20} />
-                      <span className="font-bold">Visual Themes</span>
-                    </div>
-                    <ChevronRight size={16} className="opacity-50" />
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger className="rounded-2xl p-4 cursor-pointer flex items-center gap-3 hover:bg-primary/5 transition-colors focus:bg-primary/5 outline-none">
-                      <Palette size={20} />
-                      <span className="font-bold">Visual Themes</span>
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuPortal>
-                      <DropdownMenuSubContent 
-                        sideOffset={15}
-                        className="glass-card rounded-[2.5rem] border-none shadow-2xl p-5 min-w-[360px] z-[10000]"
-                      >
-                        <DropdownMenuLabel className="text-center text-xs font-black uppercase tracking-widest opacity-50 mb-4">Select Theme</DropdownMenuLabel>
-                        <ThemeCards />
-                      </DropdownMenuSubContent>
-                    </DropdownMenuPortal>
-                  </DropdownMenuSub>
-                )}
+                <DropdownMenuItem 
+                  onSelect={openThemeSheet}
+                  className="rounded-2xl p-4 cursor-pointer flex items-center justify-between hover:bg-primary/5 focus:bg-primary/5 outline-none"
+                >
+                  <div className="flex items-center gap-3">
+                    <Palette size={20} />
+                    <span className="font-bold">Visual Themes</span>
+                  </div>
+                  <ChevronRight size={16} className="opacity-50" />
+                </DropdownMenuItem>
 
                 <DropdownMenuItem onClick={onShowExport} className="rounded-2xl p-4 cursor-pointer flex items-center gap-3 hover:bg-primary/5 focus:bg-primary/5 outline-none">
                   <Download size={20} className="text-secondary" />
@@ -214,10 +194,13 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
         </div>
       </header>
 
-      <Sheet open={isThemeSheetOpen} onOpenChange={(open) => !open && closeThemeSheet()}>
+      <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
         <SheetContent 
-          side="bottom" 
-          className="theme-sheet glass-card border-none rounded-t-[3.5rem] p-8 pb-12 z-[10000]"
+          side={isMobile ? "bottom" : "right"} 
+          className={cn(
+            "theme-sheet glass-card border-none z-[10000] p-8 pb-12",
+            isMobile ? "rounded-t-[3.5rem]" : "rounded-l-[3.5rem] max-w-md"
+          )}
         >
           <div className="theme-sheet-handle" />
           <div className="flex items-center justify-between mb-8">
@@ -225,8 +208,10 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
               <ArrowLeft size={24} />
             </Button>
             <SheetTitle className="text-2xl font-bold font-headline text-center flex-1">Visual Identity</SheetTitle>
-            <SheetClose className="opacity-70 ring-offset-background transition-opacity hover:opacity-100">
-              <X className="h-6 w-6" />
+            <SheetClose asChild>
+              <Button variant="ghost" className="opacity-70 hover:opacity-100 p-0 h-auto">
+                <X className="h-6 w-6" />
+              </Button>
             </SheetClose>
           </div>
           <SheetDescription className="text-center font-medium mb-6">Customize your environment for better discipline.</SheetDescription>

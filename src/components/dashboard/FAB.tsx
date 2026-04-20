@@ -15,17 +15,20 @@ export default function FAB({ onCheckIn, onUrge, onRelapse, disabledCheckIn }: F
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    return () => {
-      document.body.style.pointerEvents = 'auto';
-      document.body.style.overflow = 'auto';
-    };
-  }, []);
+    if (!isOpen) {
+      const cleanup = () => {
+        document.body.style.pointerEvents = 'auto';
+        document.body.style.overflow = 'auto';
+        document.documentElement.style.pointerEvents = 'auto';
+      };
+      cleanup();
+      const timer = setTimeout(cleanup, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   const closeMenu = () => {
     setIsOpen(false);
-    setTimeout(() => {
-      document.body.style.pointerEvents = 'auto';
-    }, 50);
   };
 
   return (
@@ -33,7 +36,7 @@ export default function FAB({ onCheckIn, onUrge, onRelapse, disabledCheckIn }: F
       {isOpen && (
         <div 
           className="fixed inset-0 bg-background/40 backdrop-blur-md z-[60] animate-in fade-in duration-300"
-          style={{ pointerEvents: 'auto', display: 'block' }}
+          style={{ pointerEvents: 'auto' }}
           onClick={closeMenu}
         />
       )}
