@@ -1,10 +1,9 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Globe, 
   ShieldCheck, 
   ShieldAlert, 
   X, 
@@ -22,7 +21,6 @@ import {
   Youtube,
   SearchCode,
   FileText,
-  Zap,
   ArrowLeft
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -30,7 +28,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from '@/lib/utils';
 import { assessContentSafety, filterSearchQuery, formatBrowserInput } from '@/lib/guardian-engine';
-import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { getStoredData } from '@/lib/storage';
 
@@ -42,11 +39,12 @@ const QUICK_ACCESS = [
   { name: 'Docs', icon: SearchCode, url: 'https://nextjs.org/docs' }
 ];
 
+const DEFAULT_HOMEPAGE = 'https://www.google.com';
+
 export default function DisciplineBrowserPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [streak, setStreak] = useState(0);
-  const [url, setUrl] = useState('https://www.google.com');
+  const [url, setUrl] = useState(DEFAULT_HOMEPAGE);
   const [inputUrl, setInputUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [safetyStatus, setSafetyStatus] = useState<'SAFE' | 'WARN' | 'BLOCKED'>('SAFE');
@@ -55,7 +53,7 @@ export default function DisciplineBrowserPage() {
   const [shake, setShake] = useState(false);
   const [isBlurActive, setIsBlurActive] = useState(false);
   
-  const [history, setHistory] = useState<string[]>(['https://www.google.com']);
+  const [history, setHistory] = useState<string[]>([DEFAULT_HOMEPAGE]);
   const [historyIndex, setHistoryIndex] = useState(0);
 
   useEffect(() => {
@@ -64,12 +62,24 @@ export default function DisciplineBrowserPage() {
   }, []);
 
   const navigateTo = useCallback((target: string, addToHistory = true) => {
-    if (!target) return;
+    // 1. Mandatory Fallback: Never load empty state
+    const normalizedTarget = (target || '').trim();
+    if (!normalizedTarget) {
+      console.log('Empty input detected. Falling back to homepage.');
+      setUrl(DEFAULT_HOMEPAGE);
+      setInputUrl(DEFAULT_HOMEPAGE);
+      return;
+    }
     
     setIsLoading(true);
-    const scrubbed = filterSearchQuery(target);
+    
+    // 2. Search vs URL Handling
+    const scrubbed = filterSearchQuery(normalizedTarget);
     const finalUrl = formatBrowserInput(scrubbed);
     
+    // 3. Debug Rule: Log final URL before loading
+    console.log('Neural Navigation Target:', finalUrl);
+
     // Guardian Content Assessment
     const assessment = assessContentSafety(finalUrl, streak);
 
@@ -94,8 +104,8 @@ export default function DisciplineBrowserPage() {
       setHistoryIndex(newHistory.length - 1);
     }
 
-    // Simulate Network environment scanning
-    setTimeout(() => setIsLoading(false), 800);
+    // Simulation of environment scan
+    setTimeout(() => setIsLoading(false), 1200);
   }, [streak, history, historyIndex]);
 
   const handleBack = () => {
@@ -115,7 +125,7 @@ export default function DisciplineBrowserPage() {
   };
 
   const handleReload = () => navigateTo(url, false);
-  const handleHome = () => navigateTo('https://www.google.com');
+  const handleHome = () => navigateTo(DEFAULT_HOMEPAGE);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -257,8 +267,9 @@ export default function DisciplineBrowserPage() {
         </div>
 
         <div className="flex-1 relative">
+          {/* Ensure iframe always has a valid src to prevent blank screens */}
           <iframe 
-            src={url} 
+            src={url || DEFAULT_HOMEPAGE} 
             className={cn(
               "w-full h-full border-none transition-all duration-1000 bg-white",
               isBlurActive && "blur-[15px] grayscale-[0.5]"
