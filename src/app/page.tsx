@@ -28,7 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 // Dynamically import the 3D scene with SSR disabled
 const Scene3D = dynamic(() => import('@/components/background/Scene3D'), { 
   ssr: false,
-  loading: () => <div className="fixed inset-0 -z-10 bg-[#050505]" /> 
+  loading: () => <div className="fixed inset-0 -z-10 bg-background" /> 
 });
 
 export default function IronWillDashboard() {
@@ -44,7 +44,7 @@ export default function IronWillDashboard() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Reset interaction blocking logic
+    // Reset interaction blocking logic for sheets/modals
     const forceReset = () => {
       if (typeof document === 'undefined') return;
       const activeOverlays = Array.from(document.querySelectorAll('[role="dialog"], [data-state="open"]'))
@@ -119,7 +119,7 @@ export default function IronWillDashboard() {
     };
     updateState(newData);
     handleCloseModal(setShowRelapseModal);
-    toast({ title: "Protocol Reset", description: "Stay focused. Every day is day one." });
+    toast({ title: "Neural Protocol Reset", description: "Day One. Stay focused." });
   };
 
   const handleUrgeSubmit = (intensity: UrgeIntensity) => {
@@ -134,7 +134,7 @@ export default function IronWillDashboard() {
     };
     updateState(newData);
     handleCloseModal(setShowUrgeModal);
-    toast({ title: "Victory Recorded", description: "You are stronger than your impulses." });
+    toast({ title: "Victory Confirmed", description: "You are mastering your mind." });
   };
 
   const insights = useMemo(() => getBehavioralInsights(data), [data]);
@@ -145,28 +145,32 @@ export default function IronWillDashboard() {
   const isAnySheetOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal || showCalendarSheet;
 
   return (
-    <div className="min-h-screen bg-transparent relative flex flex-col selection:bg-primary/30 overflow-x-hidden">
-      <Scene3D streak={data.currentStreak} theme={data.theme || 'dark'} />
+    <div className="min-h-screen bg-transparent relative flex flex-col selection:bg-primary/30 overflow-x-hidden no-scrollbar">
+      <Scene3D 
+        streak={data.currentStreak} 
+        theme={data.theme || 'dark'} 
+        riskLevel={insights.riskLevel}
+      />
       
-      {/* Background Dimmer for Readability */}
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] -z-[5] pointer-events-none" />
+      {/* Immersive Dimmer */}
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-[1px] -z-[5] pointer-events-none" />
 
       <Header 
         focusMode={data.focusMode} 
         theme={data.theme || 'dark'}
         data={data}
         onThemeChange={(t) => updateState({ ...data, theme: t })}
-        onReset={() => { if(confirm("Wipe all mastery data?")) { clearData(); setData(INITIAL_DATA); } }}
+        onReset={() => { if(confirm("Wipe all neural mastery data?")) { clearData(); setData(INITIAL_DATA); } }}
         onToggleFocus={() => updateState({ ...data, focusMode: !data.focusMode })}
         onShowExport={() => handleOpenModal(setShowExportModal)}
         onUpdateReminder={(e, t) => updateState({ ...data, notificationsEnabled: e, reminderTime: t })}
       />
 
       <motion.main 
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-6 py-8 pb-32"
+        className="flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-8 py-8 pb-40"
       >
         <StreakDisplay 
           current={data.currentStreak} 
@@ -176,7 +180,7 @@ export default function IronWillDashboard() {
           onUseFreeze={() => {
             if (data.streakFreezes > 0) {
               updateState({ ...data, streakFreezes: data.streakFreezes - 1 });
-              toast({ title: "Freeze Used", description: "Integrity preserved." });
+              toast({ title: "Freeze Activated", description: "Integrity preserved." });
             }
           }}
         />
@@ -186,7 +190,7 @@ export default function IronWillDashboard() {
             const today = new Date().toISOString().split('T')[0];
             if (!data.checkIns.some(c => c.date === today)) {
               updateState({ ...data, checkIns: [{ date: today, timestamp: Date.now() }, ...data.checkIns] });
-              toast({ title: "Daily Protocol Marked", description: "Discipline is freedom." });
+              toast({ title: "Protocol Marked Clean", description: "Consistency is power." });
             }
           }} 
           onUrge={() => handleOpenModal(setShowUrgeModal)} 
@@ -208,11 +212,11 @@ export default function IronWillDashboard() {
 
         {!data.focusMode && (
           <motion.div 
-            whileHover={{ scale: 1.01 }}
-            className="glass-card p-6 rounded-[2.5rem] bg-card/40"
+            whileHover={{ scale: 1.02, y: -4 }}
+            className="glass-card p-8 rounded-[3rem] bg-card/20 border-white/5"
           >
-            <h4 className="text-[9px] font-black uppercase tracking-widest text-primary mb-2 opacity-80">Daily Mission</h4>
-            <p className="text-sm font-bold leading-snug text-foreground">{challenge}</p>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-3 opacity-80">Daily Mission</h4>
+            <p className="text-base font-bold leading-relaxed text-foreground/90">{challenge}</p>
           </motion.div>
         )}
       </motion.main>

@@ -23,7 +23,7 @@
     --border: 247 14% 85%;
     --input: 247 14% 85%;
     --ring: 262 58% 38%;
-    --radius: 2rem;
+    --radius: 2.5rem;
     --glow: hsla(262, 58%, 38%, 0.3);
   }
 
@@ -60,7 +60,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-background/40 backdrop-blur-2xl border border-white/10 shadow-2xl;
+    @apply bg-card/10 backdrop-blur-3xl border border-white/10 shadow-2xl;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -78,6 +78,10 @@
 
   .neu-flat {
     @apply glass-card;
+  }
+
+  .safe-padding-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 120px);
   }
 }
 

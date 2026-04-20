@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface ActionCardsProps {
   onCheckIn: () => void;
@@ -11,40 +12,46 @@ interface ActionCardsProps {
 
 export default function ActionCards({ onCheckIn, onUrge, onRelapse, checkedInToday }: ActionCardsProps) {
   return (
-    <div className="grid grid-cols-3 gap-3 w-full animate-fade-in-up [animation-delay:100ms]">
-      <button 
+    <div className="grid grid-cols-3 gap-4 w-full">
+      <motion.button 
+        whileHover={{ scale: 1.05, y: -5 }}
+        whileTap={{ scale: 0.95 }}
         type="button"
         onClick={onCheckIn}
         disabled={checkedInToday}
-        className={`neu-button group p-4 rounded-[1.5rem] flex flex-col items-center text-center gap-1.5 transition-all ${checkedInToday ? 'opacity-60 grayscale' : 'hover:scale-105'}`}
+        className={`glass-card group p-5 rounded-[2.5rem] flex flex-col items-center text-center gap-2 transition-all ${checkedInToday ? 'opacity-40 grayscale pointer-events-none' : 'hover:bg-primary/5 border-white/5'}`}
       >
-        <div className="p-2.5 rounded-xl bg-green-100 text-green-600 group-hover:scale-110 transition-transform">
-          <CheckCircle2 size={24} />
+        <div className="p-3 rounded-2xl bg-green-500/10 text-green-500 group-hover:bg-green-500/20 transition-all">
+          <CheckCircle2 size={26} />
         </div>
-        <span className="font-bold text-[10px] uppercase tracking-tighter">Mark Clean</span>
-      </button>
+        <span className="font-bold text-[10px] uppercase tracking-tighter text-foreground/80">Mark Clean</span>
+      </motion.button>
 
-      <button 
+      <motion.button 
+        whileHover={{ scale: 1.05, y: -5 }}
+        whileTap={{ scale: 0.95 }}
         type="button"
         onClick={onUrge}
-        className="neu-button group p-4 rounded-[1.5rem] flex flex-col items-center text-center gap-1.5 hover:scale-105 transition-all"
+        className="glass-card group p-5 rounded-[2.5rem] flex flex-col items-center text-center gap-2 hover:bg-primary/5 border-white/5"
       >
-        <div className="p-2.5 rounded-xl bg-blue-100 text-blue-600 group-hover:scale-110 transition-transform">
-          <ShieldCheck size={24} />
+        <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-500 group-hover:bg-blue-500/20 transition-all">
+          <ShieldCheck size={26} />
         </div>
-        <span className="font-bold text-[10px] uppercase tracking-tighter">Resisted</span>
-      </button>
+        <span className="font-bold text-[10px] uppercase tracking-tighter text-foreground/80">Resisted</span>
+      </motion.button>
 
-      <button 
+      <motion.button 
+        whileHover={{ scale: 1.05, y: -5 }}
+        whileTap={{ scale: 0.95 }}
         type="button"
         onClick={onRelapse}
-        className="neu-button group p-4 rounded-[1.5rem] flex flex-col items-center text-center gap-1.5 hover:scale-105 transition-all"
+        className="glass-card group p-5 rounded-[2.5rem] flex flex-col items-center text-center gap-2 hover:bg-destructive/10 border-white/5"
       >
-        <div className="p-2.5 rounded-xl bg-red-100 text-red-600 group-hover:scale-110 transition-transform">
-          <AlertTriangle size={24} />
+        <div className="p-3 rounded-2xl bg-red-500/10 text-red-500 group-hover:bg-red-500/20 transition-all">
+          <AlertTriangle size={26} />
         </div>
-        <span className="font-bold text-[10px] uppercase tracking-tighter">Relapsed</span>
-      </button>
+        <span className="font-bold text-[10px] uppercase tracking-tighter text-foreground/80">Relapsed</span>
+      </motion.button>
     </div>
   );
 }
