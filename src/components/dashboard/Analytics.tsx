@@ -2,6 +2,7 @@
 
 import { TrendingUp, Clock, Zap, Target, Star } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from 'react';
 
 interface AnalyticsProps {
