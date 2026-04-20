@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -28,6 +27,17 @@ export default function IronWillDashboard() {
   const [showUrgeModal, setShowUrgeModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  // Safety cleanup: Ensure page is always clickable when no modals are active
+  useEffect(() => {
+    if (!showRelapseModal && !showUrgeModal && !showExportModal) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = 'auto';
+        document.body.style.overflow = 'auto';
+      }, 300); // Allow time for exit animations
+      return () => clearTimeout(timer);
+    }
+  }, [showRelapseModal, showUrgeModal, showExportModal]);
 
   // Sync state with browser history for back button support
   useEffect(() => {

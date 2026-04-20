@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -42,6 +41,17 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
   const isMobile = useIsMobile();
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
 
+  // Safety cleanup for body pointer events
+  useEffect(() => {
+    if (!isThemeSheetOpen) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = 'auto';
+        document.body.style.overflow = 'auto';
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isThemeSheetOpen]);
+
   // Popstate handling for navigation
   useEffect(() => {
     const handlePopState = () => {
@@ -61,6 +71,8 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
       window.history.back();
     }
     setIsThemeSheetOpen(false);
+    // Explicit cleanup
+    document.body.style.pointerEvents = 'auto';
   };
 
   const themes: { id: AppTheme, name: string, icon: any, bg: string, accent: string }[] = [
@@ -126,7 +138,7 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
         </div>
 
         <div className="flex items-center gap-4">
-          <DropdownMenu>
+          <DropdownMenu modal={true}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="rounded-2xl p-2 neu-button h-10 sm:h-12 flex items-center gap-2 px-4 sm:px-5 group outline-none border-none">
                 <Settings size={20} className="group-hover:rotate-90 transition-transform duration-500" />
