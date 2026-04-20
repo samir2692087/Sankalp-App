@@ -14,6 +14,7 @@ import { Slider } from "@/components/ui/slider";
 import { UrgeIntensity } from '@/lib/types';
 import { ShieldAlert, ShieldCheck, Shield, ArrowLeft, Zap, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface UrgeModalProps {
   isOpen: boolean;
