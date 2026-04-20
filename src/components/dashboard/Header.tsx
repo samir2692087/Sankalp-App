@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Settings, Download, Trash2, Palette, Sun, Moon, Sparkles, Terminal, Shield, Zap, ChevronRight, Check, ArrowLeft, X, Bell } from 'lucide-react';
+import { Settings, Download, Trash2, Palette, Sun, Moon, Sparkles, Terminal, Shield, Zap, Bell, ArrowLeft, Check } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +17,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
-  SheetClose,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { AppTheme, UserData } from '@/lib/types';
@@ -51,14 +50,17 @@ export default function Header({
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  // Interaction Recovery logic for Header specific triggers
   useEffect(() => {
     if (!isThemeSheetOpen && !isSettingsOpen && !isReminderOpen) {
-      const resetUI = () => {
+      const cleanup = () => {
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
         document.body.removeAttribute('data-scroll-locked');
       };
-      resetUI();
+      cleanup();
+      const t = setTimeout(cleanup, 300);
+      return () => clearTimeout(t);
     }
   }, [isThemeSheetOpen, isSettingsOpen, isReminderOpen]);
 
@@ -79,10 +81,15 @@ export default function Header({
             if (isMobile) setIsThemeSheetOpen(false);
           }}
           className={cn(
-            "theme-card p-4 rounded-3xl flex flex-col gap-3 text-left border-2",
+            "theme-card p-4 rounded-3xl flex flex-col gap-3 text-left border-2 relative overflow-hidden",
             theme === t.id ? 'active border-primary bg-primary/5' : 'border-transparent bg-muted/30'
           )}
         >
+          {theme === t.id && (
+            <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
+              <Check size={12} className="text-white" />
+            </div>
+          )}
           <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg", t.bg)}>
             <t.icon size={18} className={t.id === 'light' ? 'text-orange-400' : 'text-white'} />
           </div>
@@ -139,8 +146,15 @@ export default function Header({
 
       <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-[3.5rem] glass-card border-none p-8 pb-12 outline-none">
-          <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-6" />
-          <SheetHeader className="mb-8">
+          <div className="theme-sheet-handle" />
+          <SheetHeader className="mb-8 relative">
+            <Button 
+              variant="ghost" 
+              onClick={() => setIsThemeSheetOpen(false)} 
+              className="absolute left-0 top-0 p-0 h-auto hover:bg-transparent"
+            >
+              <ArrowLeft size={24} />
+            </Button>
             <SheetTitle className="text-2xl font-bold font-headline text-center">Visual Identity</SheetTitle>
             <SheetDescription className="text-center font-medium">Choose your focus environment.</SheetDescription>
           </SheetHeader>

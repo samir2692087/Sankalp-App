@@ -13,14 +13,12 @@ interface FABProps {
 export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Interaction Cleanup logic specifically for FAB's manual backdrop
   useEffect(() => {
-    const forceCleanup = () => {
-      if (!isOpen) {
-        document.body.style.pointerEvents = 'auto';
-        document.body.style.overflow = 'auto';
-      }
-    };
-    forceCleanup();
+    if (!isOpen) {
+      document.body.style.pointerEvents = 'auto';
+      document.body.style.overflow = 'auto';
+    }
   }, [isOpen]);
 
   const navItems = [

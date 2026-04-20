@@ -32,29 +32,37 @@ export default function IronWillDashboard() {
   const [insightsTab, setInsightsTab] = useState('milestones');
   const [mounted, setMounted] = useState(false);
 
-  // Interaction Cleanup Engine - Prevents invisible blocking layers
+  // GLOBAL INTERACTION CLEANUP ENGINE
+  // This ensures that no invisible layers or scroll-locks remain after closing any UI component
   useEffect(() => {
-    const isAnyModalOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal;
+    const isAnyPageModalOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal;
     
-    if (!isAnyModalOpen) {
-      const forceCleanup = () => {
-        document.body.style.pointerEvents = 'auto';
-        document.body.style.overflow = 'auto';
-        document.documentElement.style.pointerEvents = 'auto';
-        document.documentElement.style.overflow = 'auto';
-        document.body.removeAttribute('data-scroll-locked');
-        document.documentElement.removeAttribute('data-scroll-locked');
-      };
+    // We also monitor for Radix/ShadCN internal attributes that block interactions
+    const forceCleanup = () => {
+      // Only cleanup if we are sure no major modal managed by this page is active
+      if (!isAnyPageModalOpen) {
+        const targets = [document.body, document.documentElement];
+        targets.forEach(el => {
+          el.style.pointerEvents = 'auto';
+          el.style.overflow = 'auto';
+          el.removeAttribute('data-scroll-locked');
+          el.style.removeProperty('pointer-events');
+          el.style.removeProperty('overflow');
+        });
+      }
+    };
 
-      forceCleanup();
-      // Periodically check for 1 second to catch any lingering locks from transition animations
-      const interval = setInterval(forceCleanup, 100);
-      const timer = setTimeout(() => clearInterval(interval), 1000);
-      return () => {
-        clearInterval(interval);
-        clearTimeout(timer);
-      };
-    }
+    // Immediate cleanup
+    forceCleanup();
+
+    // Fallback cleanup with intervals to catch late-firing animation transitions
+    const interval = setInterval(forceCleanup, 300);
+    const timeout = setTimeout(() => clearInterval(interval), 2000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, [showRelapseModal, showUrgeModal, showExportModal, showInsightsSheet, showEmergencyModal]);
 
   useEffect(() => {
