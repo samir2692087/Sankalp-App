@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -118,7 +119,7 @@ export default function IronWillDashboard() {
   const checkedInToday = data.checkIns.some(c => c.date === new Date().toISOString().split('T')[0]);
 
   return (
-    <main className="max-w-4xl mx-auto px-4 pb-32 pt-4 flex flex-col items-center gap-12 min-h-screen">
+    <div className="min-h-screen bg-background relative transition-colors duration-500">
       <Header 
         focusMode={data.focusMode} 
         theme={data.theme || 'light'}
@@ -129,53 +130,55 @@ export default function IronWillDashboard() {
         onShowExport={() => setShowExportModal(true)}
       />
 
-      <div className="w-full space-y-12 transition-all duration-700">
-        <StreakDisplay current={data.currentStreak} best={data.bestStreak} />
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-4 flex flex-col items-center gap-12 overflow-x-hidden">
+        <div className="w-full space-y-12 transition-all duration-700">
+          <StreakDisplay current={data.currentStreak} best={data.bestStreak} />
 
-        {!data.focusMode && (
-          <>
-            <ActionCards 
-              onCheckIn={handleCheckIn} 
-              onUrge={() => setShowUrgeModal(true)} 
-              onRelapse={() => setShowRelapseModal(true)} 
-              checkedInToday={checkedInToday}
-            />
-            <Analytics 
-              score={data.disciplineScore} 
-              trigger={mostCommonTrigger} 
-              window={highRiskWindow}
-              challenge={challenge}
-            />
-          </>
-        )}
-      </div>
+          {!data.focusMode && (
+            <>
+              <ActionCards 
+                onCheckIn={handleCheckIn} 
+                onUrge={() => setShowUrgeModal(true)} 
+                onRelapse={() => setShowRelapseModal(true)} 
+                checkedInToday={checkedInToday}
+              />
+              <Analytics 
+                score={data.disciplineScore} 
+                trigger={mostCommonTrigger} 
+                window={highRiskWindow}
+                challenge={challenge}
+              />
+            </>
+          )}
+        </div>
 
-      <RelapseModal 
-        isOpen={showRelapseModal} 
-        onClose={() => setShowRelapseModal(false)} 
-        onSubmit={handleRelapse} 
-      />
+        <RelapseModal 
+          isOpen={showRelapseModal} 
+          onClose={() => setShowRelapseModal(false)} 
+          onSubmit={handleRelapse} 
+        />
 
-      <UrgeModal 
-        isOpen={showUrgeModal} 
-        onClose={() => setShowUrgeModal(false)} 
-        onSubmit={handleUrgeResisted} 
-      />
+        <UrgeModal 
+          isOpen={showUrgeModal} 
+          onClose={() => setShowUrgeModal(false)} 
+          onSubmit={handleUrgeResisted} 
+        />
 
-      <ExportModal 
-        isOpen={showExportModal}
-        onClose={() => setShowExportModal(false)}
-        data={data}
-      />
+        <ExportModal 
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          data={data}
+        />
 
-      <FAB 
-        onCheckIn={handleCheckIn} 
-        onUrge={() => setShowUrgeModal(true)} 
-        onRelapse={() => setShowRelapseModal(true)} 
-        disabledCheckIn={checkedInToday}
-      />
+        <FAB 
+          onCheckIn={handleCheckIn} 
+          onUrge={() => setShowUrgeModal(true)} 
+          onRelapse={() => setShowRelapseModal(true)} 
+          disabledCheckIn={checkedInToday}
+        />
 
-      <Toaster />
-    </main>
+        <Toaster />
+      </main>
+    </div>
   );
 }
