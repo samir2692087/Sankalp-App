@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useRef, useMemo, useEffect, useState } from 'react';
@@ -28,37 +29,45 @@ function EnergyCore({ streak, theme, riskLevel, isBlurred }: SceneProps) {
     }
   }, [theme, riskLevel]);
 
-  // Streak affects core behavior: more energetic as it grows
-  const baseIntensity = isBlurred ? 5 : Math.min(1.5 + streak * 0.15, 4);
-  const baseSpeed = isBlurred ? 0.3 : Math.min(1.2 + streak * 0.1, 4.5);
-  const distortion = Math.min(0.3 + streak * 0.02, 0.7);
-
+  // Physics-based inertia and damping simulation
+  const targetIntensity = isBlurred ? 0.5 : Math.min(1.5 + streak * 0.15, 4);
+  const targetSpeed = isBlurred ? 0.1 : Math.min(1.2 + streak * 0.1, 4.5);
+  
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     if (meshRef.current) {
-      meshRef.current.rotation.y = t * (isBlurred ? 0.05 : 0.3 + streak * 0.01);
-      meshRef.current.rotation.z = t * (isBlurred ? 0.02 : 0.15 + streak * 0.005);
-      const breathing = 1 + Math.sin(t * (isBlurred ? 0.8 : 2 + streak * 0.05)) * 0.08;
-      meshRef.current.scale.set(breathing, breathing, breathing);
+      // Rotation with inertia
+      meshRef.current.rotation.y += (0.005 + (streak * 0.0001)) * (isBlurred ? 0.2 : 1);
+      meshRef.current.rotation.z += (0.002 + (streak * 0.00005)) * (isBlurred ? 0.1 : 1);
+      
+      // Breathing physics
+      const breathing = 1 + Math.sin(t * (isBlurred ? 0.5 : 1.5 + streak * 0.02)) * 0.05;
+      meshRef.current.scale.lerp(new THREE.Vector3(breathing, breathing, breathing), 0.1);
     }
+    
     if (lightRef.current) {
-      lightRef.current.intensity = baseIntensity + Math.sin(t * (3 + streak * 0.1)) * 0.5;
+      // Light intensity pulsing with spring-like damping
+      lightRef.current.intensity = THREE.MathUtils.lerp(
+        lightRef.current.intensity,
+        targetIntensity + Math.sin(t * 2) * 0.2,
+        0.05
+      );
     }
   });
 
   return (
     <group>
-      <pointLight ref={lightRef} position={[0, 0, 2]} color={themeColor} intensity={baseIntensity} />
-      <Float speed={isBlurred ? 1 : 3} rotationIntensity={0.8} floatIntensity={0.8}>
+      <pointLight ref={lightRef} position={[0, 0, 2]} color={themeColor} intensity={0} />
+      <Float speed={isBlurred ? 0.5 : 2} rotationIntensity={0.5} floatIntensity={0.5}>
         <mesh ref={meshRef} position={[0, 0, -3]}>
           <sphereGeometry args={[1.6, 64, 64]} />
           <MeshDistortMaterial
             color={themeColor}
-            speed={baseSpeed}
-            distort={isBlurred ? 0.1 : distortion}
+            speed={targetSpeed}
+            distort={isBlurred ? 0.05 : 0.4 + (streak * 0.01)}
             radius={1}
             emissive={themeColor}
-            emissiveIntensity={baseIntensity * 0.6}
+            emissiveIntensity={isBlurred ? 0.1 : 0.4}
             transparent
             opacity={0.8}
             metalness={0.9}
@@ -66,10 +75,10 @@ function EnergyCore({ streak, theme, riskLevel, isBlurred }: SceneProps) {
           />
         </mesh>
       </Float>
-      {/* Outer Glow Halo */}
+      {/* Halo Layer */}
       <mesh position={[0, 0, -3.1]}>
         <sphereGeometry args={[1.8, 32, 32]} />
-        <meshBasicMaterial color={themeColor} transparent opacity={isBlurred ? 0.15 : 0.1} />
+        <meshBasicMaterial color={themeColor} transparent opacity={isBlurred ? 0.05 : 0.08} />
       </mesh>
     </group>
   );
@@ -77,15 +86,14 @@ function EnergyCore({ streak, theme, riskLevel, isBlurred }: SceneProps) {
 
 function NeuralParticles({ streak, theme, riskLevel, isBlurred }: SceneProps) {
   const pointsRef = useRef<THREE.Points>(null!);
-  // More particles for higher streaks
   const count = Math.min(400 + streak * 15, 1200);
   
   const positions = useMemo(() => {
     const p = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      p[i * 3] = (Math.random() - 0.5) * 28;
-      p[i * 3 + 1] = (Math.random() - 0.5) * 28;
-      p[i * 3 + 2] = (Math.random() - 0.5) * 18 - 5;
+      p[i * 3] = (Math.random() - 0.5) * 30;
+      p[i * 3 + 1] = (Math.random() - 0.5) * 30;
+      p[i * 3 + 2] = (Math.random() - 0.5) * 20 - 5;
     }
     return p;
   }, [count]);
@@ -103,13 +111,15 @@ function NeuralParticles({ streak, theme, riskLevel, isBlurred }: SceneProps) {
   useFrame((state) => {
     if (!pointsRef.current) return;
     const t = state.clock.getElapsedTime();
-    const speedMultiplier = isBlurred ? 0.01 : 0.08 + streak * 0.002;
-    pointsRef.current.rotation.y = t * speedMultiplier;
-    pointsRef.current.rotation.z = t * (speedMultiplier / 2);
+    const driftSpeed = isBlurred ? 0.005 : 0.03 + (streak * 0.001);
+    
+    pointsRef.current.rotation.y += driftSpeed * 0.1;
     
     const positionsAttr = pointsRef.current.geometry.attributes.position.array as Float32Array;
     for (let i = 0; i < count; i++) {
-      positionsAttr[i * 3 + 1] += Math.sin(t * 1.5 + i) * (isBlurred ? 0.0008 : 0.003 + streak * 0.0001);
+      // Brownian-like jitter motion
+      positionsAttr[i * 3 + 1] += Math.sin(t * 0.5 + i) * 0.001;
+      positionsAttr[i * 3] += Math.cos(t * 0.3 + i) * 0.0005;
     }
     pointsRef.current.geometry.attributes.position.needsUpdate = true;
   });
@@ -119,20 +129,29 @@ function NeuralParticles({ streak, theme, riskLevel, isBlurred }: SceneProps) {
       <PointMaterial
         transparent
         color={color}
-        size={isBlurred ? 0.18 : 0.1 + streak * 0.001}
+        size={isBlurred ? 0.15 : 0.08 + streak * 0.0005}
         sizeAttenuation={true}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
-        opacity={isBlurred ? 0.25 : 0.5}
+        opacity={isBlurred ? 0.15 : 0.4}
       />
     </Points>
   );
 }
 
 function Scene({ streak, theme, riskLevel, isBlurred }: SceneProps) {
+  const { camera } = (window as any).THREE_STATE || { camera: { position: { z: 5 } } };
+  
+  useFrame((state) => {
+    // Camera Dolly Physics: Depth reactive to app state
+    const targetZ = isBlurred ? 7 : 5;
+    state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetZ, 0.05);
+    state.camera.lookAt(0, 0, -3);
+  });
+
   return (
     <>
-      <ambientLight intensity={0.3} />
+      <ambientLight intensity={0.2} />
       <EnergyCore streak={streak} theme={theme} riskLevel={riskLevel} isBlurred={isBlurred} />
       <NeuralParticles streak={streak} theme={theme} riskLevel={riskLevel} isBlurred={isBlurred} />
     </>
@@ -146,13 +165,13 @@ export default function Scene3D({ streak, theme, riskLevel, isBlurred }: ScenePr
     setMounted(true);
   }, []);
 
-  if (!mounted) return <div className="fixed inset-0 -z-10 bg-background" />;
+  if (!mounted) return <div className="fixed inset-0 -z-10 bg-[#05070a]" />;
 
   return (
-    <div className="fixed inset-0 -z-10 pointer-events-none bg-background transition-all duration-1000">
+    <div className="fixed inset-0 -z-10 pointer-events-none bg-[#05070a]">
       <Canvas 
         camera={{ position: [0, 0, 5], fov: 55 }} 
-        gl={{ antialias: true, alpha: true, stencil: false }}
+        gl={{ antialias: true, alpha: true }}
         style={{ pointerEvents: 'none' }}
       >
         <Scene streak={streak} theme={theme} riskLevel={riskLevel} isBlurred={isBlurred} />
