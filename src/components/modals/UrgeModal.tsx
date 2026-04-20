@@ -1,10 +1,10 @@
+
 "use client";
 
 import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
@@ -21,6 +21,8 @@ interface UrgeModalProps {
   onClose: () => void;
   onSubmit: (intensity: UrgeIntensity) => void;
 }
+
+const physicsConfig = { type: "spring", stiffness: 120, damping: 14, mass: 1 };
 
 export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps) {
   const [val, setVal] = useState([50]);
@@ -43,65 +45,68 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
 
   const getIntensityIcon = () => {
     switch(intensity) {
-      case 'Low': return <ShieldCheck size={48} className="animate-pulse" />;
-      case 'Medium': return <Shield size={48} />;
-      case 'High': return <ShieldAlert size={48} className="animate-bounce" />;
+      case 'Low': return <ShieldCheck size={52} />;
+      case 'Medium': return <Shield size={52} />;
+      case 'High': return <ShieldAlert size={52} />;
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[480px] max-h-[90vh] rounded-[3rem] border border-white/10 bg-[rgba(15,15,20,0.95)] backdrop-blur-xl p-0 overflow-hidden outline-none flex flex-col shadow-[0_0_80px_rgba(0,0,0,0.5)]">
-        {/* Header Section */}
-        <div className="bg-gradient-to-br from-purple-900/60 via-blue-900/40 to-black/20 p-8 text-center border-b border-white/5 relative overflow-hidden shrink-0 shadow-[0_10px_20px_rgba(0,0,0,0.4)]">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 animate-pulse pointer-events-none" />
+      <DialogContent className="sm:max-w-[480px] max-h-[90vh] rounded-[3.5rem] border border-white/10 bg-[#07070a]/95 backdrop-blur-3xl p-0 overflow-hidden outline-none flex flex-col shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+        <div className="bg-gradient-to-br from-purple-900/40 via-blue-900/20 to-black/40 p-10 text-center border-b border-white/5 relative overflow-hidden shrink-0">
           <Button 
             type="button"
             variant="ghost" 
             onClick={onClose} 
-            className="absolute left-6 top-8 p-0 h-auto hover:bg-transparent z-10 text-white/70 hover:text-white transition-colors"
+            className="absolute left-6 top-8 p-0 h-auto hover:bg-transparent z-10 text-white/50 hover:text-white transition-all hover:scale-110 active:scale-90"
           >
             <ArrowLeft size={28} />
           </Button>
+          
           <motion.div 
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            className="w-16 h-16 bg-primary rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 shadow-2xl relative z-10 border border-white/20"
+            initial={{ scale: 0.5, rotate: -45, opacity: 0 }}
+            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            transition={physicsConfig}
+            className="w-18 h-18 bg-primary rounded-[1.8rem] flex items-center justify-center mx-auto mb-4 shadow-2xl relative z-10 border border-white/20"
           >
-            <Zap size={32} className="text-white fill-white animate-pulse" />
-            <Sparkles className="absolute -top-2 -right-2 text-yellow-300 animate-spin-slow" size={20} />
+            <Zap size={36} className="text-white fill-white animate-pulse" />
           </motion.div>
           <DialogTitle className="text-2xl font-bold font-headline text-white mb-1 relative z-10">Neural Victory</DialogTitle>
-          <DialogDescription className="text-white/60 font-black uppercase tracking-[0.3em] text-[8px] relative z-10">Conflict Logged & Overcome</DialogDescription>
+          <DialogDescription className="text-white/40 font-black uppercase tracking-[0.3em] text-[8px] relative z-10">Pattern Fortification Log</DialogDescription>
         </div>
 
-        {/* Body Section */}
-        <div className="flex-1 overflow-y-auto bg-[#0b0b0f] p-10 space-y-12 no-scrollbar pb-32">
-          <div className="flex flex-col items-center gap-8">
+        <div className="flex-1 overflow-y-auto bg-[#0b0b0f] p-10 space-y-12 no-scrollbar pb-36">
+          <div className="flex flex-col items-center gap-10">
             <AnimatePresence mode="wait">
                 <motion.div 
                   key={intensity}
-                  initial={{ scale: 0.8, opacity: 0, y: 10 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 0.8, opacity: 0, y: -10 }}
+                  initial={{ scale: 0.8, opacity: 0, rotateY: 90 }}
+                  animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+                  exit={{ scale: 0.8, opacity: 0, rotateY: -90 }}
+                  transition={physicsConfig}
                   className={cn(
-                      "p-8 rounded-full w-44 h-44 flex flex-col items-center justify-center gap-2 transition-all duration-500 bg-white/5 border-4",
+                      "p-10 rounded-full w-48 h-48 flex flex-col items-center justify-center gap-2 transition-all duration-700 bg-white/[0.02] border-4",
                       getIntensityColor()
                   )}
                 >
-                  <div className="drop-shadow-[0_0_15px_currentColor]">
+                  <motion.div 
+                    animate={{ scale: [1, 1.1, 1], rotate: intensity === 'High' ? [-2, 2, -2] : 0 }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="drop-shadow-[0_0_20px_currentColor]"
+                  >
                       {getIntensityIcon()}
-                  </div>
-                  <span className="text-2xl font-bold font-headline mt-1 text-white">
+                  </motion.div>
+                  <span className="text-2xl font-black font-headline mt-2 text-white">
                       {intensity}
                   </span>
                 </motion.div>
             </AnimatePresence>
             
-            <div className="w-full space-y-8">
-              <div className="flex justify-between px-3 text-[10px] uppercase font-black tracking-[0.2em] text-white/80">
-                <span>Trifle</span>
-                <span>Conflict</span>
+            <div className="w-full space-y-8 px-4">
+              <div className="flex justify-between px-2 text-[9px] uppercase font-black tracking-[0.3em] text-white/40">
+                <span>Minimal</span>
+                <span>Moderate</span>
                 <span>Critical</span>
               </div>
               <Slider 
@@ -111,25 +116,29 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
                 step={1} 
                 className="py-6"
               />
-              <p className="text-center text-[10px] font-bold uppercase tracking-widest text-white/50">
-                Log intensity to calibrate recovery patterns
+              <p className="text-center text-[10px] font-bold uppercase tracking-[0.2em] text-white/30 italic">
+                Adjust slider based on neural pressure level
               </p>
             </div>
           </div>
         </div>
 
-        {/* Footer Section */}
-        <DialogFooter className="p-8 pt-0 bg-[#0b0b0f] shrink-0 absolute bottom-0 left-0 w-full border-t border-white/5">
+        <div className="p-8 pt-0 bg-[#0b0b0f] shrink-0 absolute bottom-0 left-0 w-full border-t border-white/5">
           <motion.button 
-            whileHover={{ scale: 1.02, shadow: "0 0 30px rgba(124,58,237,0.4)" }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ 
+              scale: 1.03, 
+              boxShadow: "0 0 40px rgba(124,58,237,0.5)",
+              brightness: 1.2
+            }}
+            whileTap={{ scale: 0.95, y: 5 }}
+            transition={physicsConfig}
             type="button"
-            className="w-full h-16 rounded-[1.5rem] font-black uppercase tracking-widest bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] hover:bg-right transition-all duration-500 text-white text-sm shadow-2xl flex items-center justify-center gap-2"
+            className="w-full h-18 rounded-[2rem] font-black uppercase tracking-[0.25em] bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] hover:bg-right transition-all duration-700 text-white text-xs shadow-2xl flex items-center justify-center gap-3"
             onClick={() => onSubmit(intensity)}
           >
-            Confirm Neural Fortification
+            <Sparkles size={18} /> Confirm Fortification
           </motion.button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -1,6 +1,7 @@
+
 "use client";
 
-import { TrendingUp, ShieldCheck, ChevronRight, Zap, AlertTriangle } from 'lucide-react';
+import { TrendingUp, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -12,6 +13,8 @@ interface InsightsSummaryProps {
   onOpenInsights: (tab: string) => void;
   focusMode: boolean;
 }
+
+const physicsConfig = { type: "spring", stiffness: 120, damping: 14, mass: 1 };
 
 export default function InsightsSummary({ 
   score, 
@@ -25,17 +28,29 @@ export default function InsightsSummary({
 
   return (
     <motion.div 
-      whileHover={{ scale: 1.02 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ 
+        opacity: 1, 
+        y: 0,
+        rotateX: [0, 1, 0],
+        rotateY: [0, -1, 0]
+      }}
+      transition={{
+        ...physicsConfig,
+        rotateX: { duration: 5, repeat: Infinity, ease: "linear" },
+        rotateY: { duration: 7, repeat: Infinity, ease: "linear" }
+      }}
+      whileHover={{ scale: 1.02, y: -8, rotateX: 2 }}
       onClick={() => onOpenInsights('milestones')}
       className={cn(
-        "glass-card p-8 rounded-[2.5rem] cursor-pointer group",
-        isHighRisk && "border-red-500/30 bg-red-500/[0.02]"
+        "glass-card p-8 rounded-[2.8rem] cursor-pointer group transition-colors",
+        isHighRisk ? "border-red-500/40 bg-red-500/[0.03]" : "hover:border-primary/40"
       )}
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex flex-col gap-1">
           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 flex items-center gap-2">
-            <TrendingUp size={14} className="text-primary" /> Behavioral Integrity
+            <TrendingUp size={14} className="text-primary" /> Neural Integrity
           </h3>
           <span className={cn(
             "text-4xl font-black text-white",
@@ -46,8 +61,10 @@ export default function InsightsSummary({
         </div>
         <div className="flex flex-col items-end">
            <div className={cn(
-             "px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
-             resilience === 'Fortress' ? 'bg-green-500/10 text-green-400' : 'bg-primary/10 text-primary'
+             "px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border",
+             resilience === 'Fortress' 
+                ? 'bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.2)]' 
+                : 'bg-primary/10 text-primary border-primary/20'
            )}>
              {resilience}
            </div>
@@ -55,29 +72,33 @@ export default function InsightsSummary({
       </div>
 
       <div className="space-y-4 mb-6">
-        <div className="h-3 w-full bg-white/[0.05] rounded-full overflow-hidden p-0.5 border border-white/5">
+        <div className="h-4 w-full bg-white/[0.05] rounded-full overflow-hidden p-1 border border-white/5">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${score}%` }}
-            transition={{ duration: 1.5 }}
-            className="h-full bg-gradient-to-r from-primary to-secondary rounded-full accent-glow"
+            transition={{ ...physicsConfig, delay: 0.8 }}
+            className="h-full bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] rounded-full primary-glow"
           />
         </div>
-        <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-[0.2em] text-white/40">
+        <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-[0.2em] text-white/20">
            <span>Neural Paths Stable</span>
            <span>90 Day Target</span>
         </div>
       </div>
 
       {!focusMode && (
-        <div className={cn(
-          "p-5 rounded-[1.5rem] flex items-center gap-4 border",
-          riskLevel === 'CRITICAL' ? "bg-red-500/10 border-red-500/20 text-red-400" :
-          "bg-white/5 border-white/5 text-white/60"
-        )}>
-          {isHighRisk ? <AlertTriangle size={20} className="shrink-0" /> : <ShieldCheck size={20} className="shrink-0 text-primary" />}
+        <motion.div 
+          animate={isHighRisk ? { x: [-2, 2, -2] } : {}}
+          transition={{ repeat: Infinity, duration: 0.15 }}
+          className={cn(
+            "p-5 rounded-[1.8rem] flex items-center gap-4 border",
+            riskLevel === 'CRITICAL' ? "bg-red-500/10 border-red-500/30 text-red-400" :
+            "bg-white/5 border-white/5 text-white/60"
+          )}
+        >
+          {isHighRisk ? <AlertTriangle size={20} className="shrink-0 animate-pulse" /> : <ShieldCheck size={20} className="shrink-0 text-primary" />}
           <p className="text-[11px] font-bold uppercase tracking-tight leading-snug">{message}</p>
-        </div>
+        </motion.div>
       )}
     </motion.div>
   );
