@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -7,13 +6,14 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 interface RelapseModalProps {
   isOpen: boolean;
@@ -33,6 +33,7 @@ export default function RelapseModal({ isOpen, onClose, onSubmit }: RelapseModal
       <DialogContent className="glass-card sm:max-w-[425px] rounded-[2rem] border-none shadow-2xl p-8 outline-none">
         <DialogHeader className="relative">
           <Button 
+            type="button"
             variant="ghost" 
             onClick={onClose} 
             className="absolute -left-2 top-0 p-0 h-auto hover:bg-transparent"
@@ -40,7 +41,7 @@ export default function RelapseModal({ isOpen, onClose, onSubmit }: RelapseModal
             <ArrowLeft size={24} />
           </Button>
           <DialogTitle className="text-2xl font-bold font-headline text-center w-full">It's a New Beginning</DialogTitle>
-          <p className="text-center text-muted-foreground mt-2">Failure is part of growth. Let's analyze and move forward.</p>
+          <DialogDescription className="text-center text-muted-foreground mt-2">Failure is part of growth. Let's analyze and move forward.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="space-y-3">
@@ -68,6 +69,7 @@ export default function RelapseModal({ isOpen, onClose, onSubmit }: RelapseModal
         </div>
         <DialogFooter>
           <Button 
+            type="button"
             className="w-full h-12 rounded-xl font-bold bg-primary hover:bg-primary/90 transition-all text-lg shadow-lg"
             onClick={() => onSubmit(reason, time)}
           >

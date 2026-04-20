@@ -13,6 +13,7 @@ export default function ActionCards({ onCheckIn, onUrge, onRelapse, checkedInTod
   return (
     <div className="grid grid-cols-3 gap-3 w-full animate-fade-in-up [animation-delay:100ms]">
       <button 
+        type="button"
         onClick={onCheckIn}
         disabled={checkedInToday}
         className={`neu-button group p-4 rounded-[1.5rem] flex flex-col items-center text-center gap-1.5 transition-all ${checkedInToday ? 'opacity-60 grayscale' : 'hover:scale-105'}`}
@@ -24,6 +25,7 @@ export default function ActionCards({ onCheckIn, onUrge, onRelapse, checkedInTod
       </button>
 
       <button 
+        type="button"
         onClick={onUrge}
         className="neu-button group p-4 rounded-[1.5rem] flex flex-col items-center text-center gap-1.5 hover:scale-105 transition-all"
       >
@@ -34,6 +36,7 @@ export default function ActionCards({ onCheckIn, onUrge, onRelapse, checkedInTod
       </button>
 
       <button 
+        type="button"
         onClick={onRelapse}
         className="neu-button group p-4 rounded-[1.5rem] flex flex-col items-center text-center gap-1.5 hover:scale-105 transition-all"
       >

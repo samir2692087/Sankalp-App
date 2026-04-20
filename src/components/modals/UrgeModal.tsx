@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -7,12 +6,13 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { UrgeIntensity } from '@/lib/types';
-import { ShieldAlert, ShieldCheck, Shield, ArrowLeft, X } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Shield, ArrowLeft } from 'lucide-react';
 
 interface UrgeModalProps {
   isOpen: boolean;
@@ -52,6 +52,7 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
       <DialogContent className="glass-card sm:max-w-[425px] rounded-[2rem] border-none shadow-2xl p-8 outline-none">
         <DialogHeader className="relative">
           <Button 
+            type="button"
             variant="ghost" 
             onClick={onClose} 
             className="absolute -left-2 top-0 p-0 h-auto hover:bg-transparent"
@@ -59,7 +60,7 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
             <ArrowLeft size={24} />
           </Button>
           <DialogTitle className="text-2xl font-bold font-headline text-center w-full">Incredible Self-Control!</DialogTitle>
-          <p className="text-center text-muted-foreground mt-2">Every victory counts. How strong was it?</p>
+          <DialogDescription className="text-center text-muted-foreground mt-2">Every victory counts. How strong was it?</DialogDescription>
         </DialogHeader>
         <div className="py-12 flex flex-col items-center gap-8">
           <div className={`neu-inset p-8 rounded-full w-48 h-48 flex flex-col items-center justify-center gap-2 transition-colors duration-300 ${getIntensityColor()}`}>
@@ -85,6 +86,7 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
         </div>
         <DialogFooter>
           <Button 
+            type="button"
             className="w-full h-14 rounded-xl font-bold bg-secondary hover:bg-secondary/90 transition-all text-lg shadow-lg neu-button border-none"
             onClick={() => onSubmit(intensity)}
           >

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -15,7 +14,7 @@ import InsightsSheet from '@/components/modals/InsightsSheet';
 import EmergencyModal from '@/components/modals/EmergencyModal';
 import CalendarSheet from '@/components/modals/CalendarSheet';
 import FAB from '@/components/dashboard/FAB';
-import { UserData, INITIAL_DATA, AppTheme } from '@/lib/types';
+import { UserData, INITIAL_DATA, AppTheme, UrgeIntensity } from '@/lib/types';
 import { getStoredData, saveData, clearData } from '@/lib/storage';
 import { 
   calculateStreak, 
@@ -24,6 +23,7 @@ import {
   getDailyChallenge
 } from '@/lib/discipline-engine';
 import { Toaster } from '@/components/ui/toaster';
+import { useToast } from '@/hooks/use-toast';
 
 // Dynamically import the 3D scene with SSR disabled
 const Scene3D = dynamic(() => import('@/components/background/Scene3D'), { 
@@ -32,6 +32,7 @@ const Scene3D = dynamic(() => import('@/components/background/Scene3D'), {
 });
 
 export default function IronWillDashboard() {
+  const { toast } = useToast();
   const [data, setData] = useState<UserData>(INITIAL_DATA);
   const [showRelapseModal, setShowRelapseModal] = useState(false);
   const [showUrgeModal, setShowUrgeModal] = useState(false);
@@ -43,9 +44,13 @@ export default function IronWillDashboard() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Reset interaction blocking
+    // Reset interaction blocking logic to fix "UI not clickable" issues
     const forceReset = () => {
-      const activeOverlays = document.querySelectorAll('[role="dialog"], [data-state="open"], .fixed.inset-0');
+      if (typeof document === 'undefined') return;
+      
+      const activeOverlays = Array.from(document.querySelectorAll('[role="dialog"], [data-state="open"]'))
+        .filter(el => !el.classList.contains('pointer-events-none'));
+        
       if (activeOverlays.length === 0) {
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
@@ -75,13 +80,19 @@ export default function IronWillDashboard() {
   }, []);
 
   const updateState = (newData: UserData) => {
-    newData.currentStreak = calculateStreak(newData.lastRelapseTimestamp);
-    if (newData.currentStreak > (newData.bestStreak || 0)) {
-      newData.bestStreak = newData.currentStreak;
+    const updatedData = { ...newData };
+    updatedData.currentStreak = calculateStreak(updatedData.lastRelapseTimestamp);
+    if (updatedData.currentStreak > (updatedData.bestStreak || 0)) {
+      updatedData.bestStreak = updatedData.currentStreak;
     }
-    newData.disciplineScore = calculateDisciplineScore(newData);
-    setData(newData);
-    saveData(newData);
+    updatedData.disciplineScore = calculateDisciplineScore(updatedData);
+    
+    setData(updatedData);
+    saveData(updatedData);
+    
+    if (typeof document !== 'undefined') {
+      document.body.setAttribute('data-theme', updatedData.theme || 'dark');
+    }
   };
 
   const handleOpenModal = useCallback((setter: (v: boolean) => void) => {
@@ -93,6 +104,39 @@ export default function IronWillDashboard() {
     if (window.history.state?.modalOpen) window.history.back();
     setter(false);
   }, []);
+
+  const handleRelapseSubmit = (reason: string, time: string) => {
+    const newRelapse = {
+      id: Date.now().toString(),
+      timestamp: Date.now(),
+      reason,
+      timeOfDay: time
+    };
+    const newData = {
+      ...data,
+      lastRelapseTimestamp: Date.now(),
+      relapses: [newRelapse, ...data.relapses],
+      streakFreezes: Math.min(data.streakFreezes + 1, data.maxFreezes) // Reward for honesty? or just reset
+    };
+    updateState(newData);
+    handleCloseModal(setShowRelapseModal);
+    toast({ title: "Protocol Reset", description: "New chapter started. Stay focused." });
+  };
+
+  const handleUrgeSubmit = (intensity: UrgeIntensity) => {
+    const newUrge = {
+      id: Date.now().toString(),
+      timestamp: Date.now(),
+      intensity
+    };
+    const newData = {
+      ...data,
+      urges: [newUrge, ...data.urges]
+    };
+    updateState(newData);
+    handleCloseModal(setShowUrgeModal);
+    toast({ title: "Battle Won", description: "Your neural pathways are strengthening." });
+  };
 
   const insights = useMemo(() => getBehavioralInsights(data), [data]);
   const challenge = useMemo(() => getDailyChallenge(data.currentStreak), [data.currentStreak]);
@@ -127,14 +171,25 @@ export default function IronWillDashboard() {
           best={data.bestStreak} 
           focusMode={data.focusMode} 
           freezes={data.streakFreezes}
-          onUseFreeze={() => {}}
+          onUseFreeze={() => {
+            if (data.streakFreezes > 0) {
+              updateState({ ...data, streakFreezes: data.streakFreezes - 1 });
+              toast({ title: "Freeze Activated", description: "Momentum preserved." });
+            }
+          }}
         />
         
         <ActionCards 
-          onCheckIn={() => {}} 
+          onCheckIn={() => {
+            const today = new Date().toISOString().split('T')[0];
+            if (!data.checkIns.some(c => c.date === today)) {
+              updateState({ ...data, checkIns: [{ date: today, timestamp: Date.now() }, ...data.checkIns] });
+              toast({ title: "Daily Protocol Marked", description: "Consistency is key." });
+            }
+          }} 
           onUrge={() => handleOpenModal(setShowUrgeModal)} 
           onRelapse={() => handleOpenModal(setShowRelapseModal)} 
-          checkedInToday={false}
+          checkedInToday={data.checkIns.some(c => c.date === new Date().toISOString().split('T')[0])}
         />
 
         <InsightsSummary 
@@ -176,8 +231,8 @@ export default function IronWillDashboard() {
 
       <Toaster />
 
-      {showRelapseModal && <RelapseModal isOpen={showRelapseModal} onClose={() => handleCloseModal(setShowRelapseModal)} onSubmit={() => {}} />}
-      {showUrgeModal && <UrgeModal isOpen={showUrgeModal} onClose={() => handleCloseModal(setShowUrgeModal)} onSubmit={() => {}} />}
+      {showRelapseModal && <RelapseModal isOpen={showRelapseModal} onClose={() => handleCloseModal(setShowRelapseModal)} onSubmit={handleRelapseSubmit} />}
+      {showUrgeModal && <UrgeModal isOpen={showUrgeModal} onClose={() => handleCloseModal(setShowUrgeModal)} onSubmit={handleUrgeSubmit} />}
       {showInsightsSheet && <InsightsSheet isOpen={showInsightsSheet} onClose={() => handleCloseModal(setShowInsightsSheet)} data={data} defaultTab={insightsTab} />}
       {showCalendarSheet && <CalendarSheet isOpen={showCalendarSheet} onClose={() => handleCloseModal(setShowCalendarSheet)} data={data} onToggleDate={() => {}} onSaveNote={() => {}} />}
       {showEmergencyModal && <EmergencyModal isOpen={showEmergencyModal} onClose={() => handleCloseModal(setShowEmergencyModal)} />}

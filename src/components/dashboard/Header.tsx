@@ -53,6 +53,7 @@ export default function Header({
   // Global Interaction Cleanup Trigger
   const runGlobalCleanup = useCallback(() => {
     setTimeout(() => {
+      if (typeof document === 'undefined') return;
       const activeOverlays = document.querySelectorAll('[role="dialog"], [data-state="open"]');
       if (activeOverlays.length === 0) {
         document.body.style.pointerEvents = 'auto';
@@ -81,6 +82,7 @@ export default function Header({
       {themes.map((t) => (
         <button 
           key={t.id}
+          type="button"
           onClick={() => {
             onThemeChange(t.id);
             if (isMobile) setIsThemeSheetOpen(false);
@@ -119,7 +121,7 @@ export default function Header({
           if (!open) runGlobalCleanup();
         }}>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="rounded-xl p-2 h-10 w-10 neu-button border-none bg-card flex items-center justify-center outline-none">
+            <Button type="button" variant="ghost" className="rounded-xl p-2 h-10 w-10 neu-button border-none bg-card flex items-center justify-center outline-none">
               <Settings size={20} />
             </Button>
           </DropdownMenuTrigger>
@@ -157,9 +159,9 @@ export default function Header({
         if (!open) runGlobalCleanup();
       }}>
         <SheetContent side="bottom" className="rounded-t-[3.5rem] glass-card border-none p-8 pb-12 outline-none">
-          <div className="theme-sheet-handle" />
           <SheetHeader className="mb-8 relative">
             <Button 
+              type="button"
               variant="ghost" 
               onClick={() => setIsThemeSheetOpen(false)} 
               className="absolute left-0 top-0 p-0 h-auto hover:bg-transparent"
@@ -169,6 +171,7 @@ export default function Header({
             <SheetTitle className="text-2xl font-bold font-headline text-center">Visual Identity</SheetTitle>
             <SheetDescription className="text-center font-medium">Choose your focus environment.</SheetDescription>
             <Button 
+              type="button"
               variant="ghost" 
               onClick={() => setIsThemeSheetOpen(false)} 
               className="absolute right-0 top-0 p-0 h-auto hover:bg-transparent"
