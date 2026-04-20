@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -8,7 +7,6 @@ import ActionCards from '@/components/dashboard/ActionCards';
 import Analytics from '@/components/dashboard/Analytics';
 import RelapseModal from '@/components/modals/RelapseModal';
 import UrgeModal from '@/components/modals/UrgeModal';
-import ExportModal from '@/components/modals/ExportModal';
 import FAB from '@/components/dashboard/FAB';
 import { UserData, INITIAL_DATA, UrgeIntensity, AppTheme } from '@/lib/types';
 import { getStoredData, saveData, clearData } from '@/lib/storage';
@@ -26,7 +24,6 @@ export default function IronWillDashboard() {
   const [data, setData] = useState<UserData>(INITIAL_DATA);
   const [showRelapseModal, setShowRelapseModal] = useState(false);
   const [showUrgeModal, setShowUrgeModal] = useState(false);
-  const [showExportModal, setShowExportModal] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -63,12 +60,15 @@ export default function IronWillDashboard() {
 
   const handleCheckIn = () => {
     const today = new Date().toISOString().split('T')[0];
-    if (data.checkIns.some(c => c.date === today)) return;
+    if (data.checkIns.some(c => c.date === today)) {
+      toast({ variant: "destructive", title: "Daily Limit Reached", description: "You've already marked today as clean!" });
+      return;
+    }
 
     const newData = { ...data };
     newData.checkIns.push({ date: today, timestamp: Date.now() });
     updateState(newData);
-    toast({ title: "+10 Discipline Points", description: "Consistency is key. Great job!" });
+    toast({ title: "+1 Day Added", description: "Consistency is your greatest weapon. +10 Points!" });
   };
 
   const handleUrgeResisted = (intensity: UrgeIntensity) => {
@@ -76,7 +76,7 @@ export default function IronWillDashboard() {
     newData.urges.push({ id: Math.random().toString(36), timestamp: Date.now(), intensity });
     updateState(newData);
     setShowUrgeModal(false);
-    toast({ title: "Victory Logged!", description: "Every urge resisted makes you stronger." });
+    toast({ title: "Urge Logged 💪", description: `You overcame a ${intensity} intensity urge. Powerful.` });
   };
 
   const handleRelapse = (reason: string, time: string) => {
@@ -86,7 +86,7 @@ export default function IronWillDashboard() {
     newData.currentStreak = 0;
     updateState(newData);
     setShowRelapseModal(false);
-    toast({ variant: "destructive", title: "Journey Reset", description: "Analyze the trigger, and start again stronger." });
+    toast({ variant: "destructive", title: "Relapse Recorded", description: "Learn from the trigger. Your journey resumes now." });
   };
 
   const handleReset = () => {
@@ -94,7 +94,7 @@ export default function IronWillDashboard() {
       clearData();
       setData(INITIAL_DATA);
       document.body.setAttribute('data-theme', 'light');
-      toast({ title: "All Data Cleared", description: "You are starting from scratch." });
+      toast({ title: "System Reset", description: "All data cleared. Starting fresh." });
     }
   };
 
@@ -109,8 +109,8 @@ export default function IronWillDashboard() {
       <Header 
         focusMode={data.focusMode} 
         theme={data.theme || 'light'}
+        data={data}
         onThemeChange={handleThemeChange}
-        onExport={() => setShowExportModal(true)}
         onReset={handleReset}
         onToggleFocus={() => updateState({ ...data, focusMode: !data.focusMode })}
       />
@@ -146,12 +146,6 @@ export default function IronWillDashboard() {
         isOpen={showUrgeModal} 
         onClose={() => setShowUrgeModal(false)} 
         onSubmit={handleUrgeResisted} 
-      />
-
-      <ExportModal 
-        isOpen={showExportModal} 
-        onClose={() => setShowExportModal(false)} 
-        data={data} 
       />
 
       <FAB 

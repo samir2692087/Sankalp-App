@@ -1,4 +1,3 @@
-
 import { UserData } from './types';
 import jsPDF from 'jspdf';
 
@@ -12,18 +11,18 @@ export function downloadFile(content: string, fileName: string, contentType: str
 }
 
 export function exportToCSV(data: UserData) {
-  let csv = "Type,Timestamp,Detail\n";
+  let csv = "Date,Type,Detail\n";
   
   data.relapses.forEach(r => {
-    csv += `Relapse,${new Date(r.timestamp).toLocaleString()},Reason: ${r.reason} | Time: ${r.timeOfDay}\n`;
+    csv += `"${new Date(r.timestamp).toLocaleDateString()}","Relapse","Reason: ${r.reason} | Time: ${r.timeOfDay}"\n`;
   });
   
   data.urges.forEach(u => {
-    csv += `Urge Resisted,${new Date(u.timestamp).toLocaleString()},Intensity: ${u.intensity}\n`;
+    csv += `"${new Date(u.timestamp).toLocaleDateString()}","Urge Resisted","Intensity: ${u.intensity}"\n`;
   });
   
   data.checkIns.forEach(c => {
-    csv += `Check-in,${c.date},Completed\n`;
+    csv += `"${c.date}","Check-in","Completed"\n`;
   });
 
   downloadFile(csv, `ironwill-report-${new Date().toISOString().split('T')[0]}.csv`, "text/csv");
@@ -33,46 +32,73 @@ export function exportToText(data: UserData) {
   const report = `
 IRONWILL DISCIPLINE REPORT
 Generated: ${new Date().toLocaleString()}
+------------------------------------------
 
 SUMMARY:
-Current Streak: ${data.currentStreak} days
-Best Streak: ${data.bestStreak} days
-Discipline Score: ${data.disciplineScore}/100
-Total Urges Resisted: ${data.urges.length}
-Total Relapses: ${data.relapses.length}
+- Current Streak: ${data.currentStreak} Days
+- Personal Best: ${data.bestStreak} Days
+- Discipline Score: ${data.disciplineScore}/100
+- Total Urges Resisted: ${data.urges.length}
+- Total Relapses: ${data.relapses.length}
 
 BEHAVIORAL NOTES:
-Keep pushing forward. Every day is a victory.
+Stay strong. Every urge resisted is a brain-rewiring victory.
+Consistency is the only path to mastery.
+
+Stay strong 💪
   `;
-  downloadFile(report, `ironwill-report.txt`, "text/plain");
+  downloadFile(report.trim(), `ironwill-summary.txt`, "text/plain");
 }
 
 export async function exportToPDF(data: UserData) {
   const doc = new jsPDF();
   
-  doc.setFontSize(22);
-  doc.text("IronWill Progress Report", 20, 20);
+  // Header
+  doc.setFillColor(108, 76, 255); // Primary color
+  doc.rect(0, 0, 210, 40, 'F');
   
-  doc.setFontSize(14);
-  doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 30);
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(24);
+  doc.text("IronWill Mastery Report", 20, 25);
   
-  doc.setLineWidth(0.5);
-  doc.line(20, 35, 190, 35);
+  doc.setFontSize(10);
+  doc.text(`Generated on ${new Date().toLocaleDateString()}`, 20, 32);
   
+  // Stats Section
+  doc.setTextColor(0, 0, 0);
   doc.setFontSize(16);
-  doc.text("Statistics", 20, 50);
-  doc.setFontSize(12);
-  doc.text(`Current Streak: ${data.currentStreak} Days`, 25, 60);
-  doc.text(`Best Streak: ${data.bestStreak} Days`, 25, 70);
-  doc.text(`Discipline Score: ${data.disciplineScore}/100`, 25, 80);
-  doc.text(`Urges Resisted: ${data.urges.length}`, 25, 90);
-  doc.text(`Total Relapses: ${data.relapses.length}`, 25, 100);
+  doc.text("Performance Overview", 20, 60);
   
-  doc.setFontSize(16);
-  doc.text("Encouragement", 20, 120);
   doc.setFontSize(12);
-  doc.text("Discipline is the bridge between goals and accomplishment.", 25, 130);
-  doc.text("You are stronger than your weakest moments.", 25, 140);
+  const stats = [
+    ["Current Mastery Streak", `${data.currentStreak} Days`],
+    ["Personal Best", `${data.bestStreak} Days`],
+    ["Discipline Integrity Score", `${data.disciplineScore}/100`],
+    ["Total Battles Won (Urges)", `${data.urges.length}`],
+    ["Recorded Relapses", `${data.relapses.length}`]
+  ];
+
+  let y = 75;
+  stats.forEach(([label, value]) => {
+    doc.setFont("helvetica", "bold");
+    doc.text(label + ":", 25, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(value, 100, y);
+    y += 10;
+  });
+
+  // Insights
+  doc.setFontSize(16);
+  doc.text("Behavioral Insights", 20, 140);
+  doc.setFontSize(11);
+  doc.text("• Consistency builds neural resilience.", 25, 150);
+  doc.text("• Every urge resisted strengthens your willpower muscle.", 25, 158);
+  doc.text("• A relapse is a lesson, not a finality.", 25, 166);
+
+  // Footer
+  doc.setFontSize(10);
+  doc.setTextColor(150, 150, 150);
+  doc.text("IronWill - Discipline Monitor Pro", 105, 285, { align: "center" });
   
   doc.save(`ironwill-report-${Date.now()}.pdf`);
 }
