@@ -13,8 +13,6 @@ import {
   Shield,
   RefreshCw,
   AlertTriangle,
-  ArrowRight,
-  ArrowLeft,
   ChevronLeft,
   ChevronRight,
   Home,
@@ -42,7 +40,7 @@ const QUICK_ACCESS = [
   { name: 'Wikipedia', icon: BookOpen, url: 'https://en.wikipedia.org' },
   { name: 'Scholar', icon: GraduationCap, url: 'https://scholar.google.com' },
   { name: 'Medium', icon: FileText, url: 'https://medium.com' },
-  { name: 'YouTube (Safe)', icon: Youtube, url: 'https://www.youtube.com' },
+  { name: 'YouTube', icon: Youtube, url: 'https://www.youtube.com' },
   { name: 'Docs', icon: SearchCode, url: 'https://nextjs.org/docs' }
 ];
 
@@ -55,6 +53,8 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
   const [guardianScore, setGuardianScore] = useState(100);
   const [blockReason, setBlockReason] = useState('');
   const [shake, setShake] = useState(false);
+  const [isBlurActive, setIsBlurActive] = useState(false);
+  
   const [history, setHistory] = useState<string[]>(['https://www.google.com']);
   const [historyIndex, setHistoryIndex] = useState(0);
 
@@ -64,9 +64,11 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
     setIsLoading(true);
     const scrubbed = filterSearchQuery(target);
     const finalUrl = formatBrowserInput(scrubbed);
+    
+    // Guardian Content Assessment
     const assessment = assessContentSafety(finalUrl, streak);
 
-    if (assessment.isBlocked || assessment.riskLevel === 'EXTREME') {
+    if (assessment.status === 'BLOCKED') {
       setSafetyStatus('BLOCKED');
       setGuardianScore(0);
       setBlockReason(assessment.reason);
@@ -76,21 +78,11 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
       return;
     }
 
-    if (assessment.riskLevel === 'HIGH') {
-      setSafetyStatus('BLOCKED');
-      setGuardianScore(30);
-      setBlockReason(assessment.reason);
-      setIsLoading(false);
-      return;
-    }
-
-    if (assessment.riskLevel === 'MEDIUM') {
-      setSafetyStatus('WARN');
-      setGuardianScore(65);
-    } else {
-      setSafetyStatus('SAFE');
-      setGuardianScore(100);
-    }
+    // Update Stability State
+    setSafetyStatus(assessment.status);
+    setGuardianScore(100 - assessment.riskScore);
+    setIsBlurActive(assessment.isBlurRequired);
+    setBlockReason(assessment.reason);
 
     setUrl(finalUrl);
     setInputUrl(finalUrl);
@@ -102,6 +94,7 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
       setHistoryIndex(newHistory.length - 1);
     }
 
+    // Simulate Network environment scanning
     setTimeout(() => setIsLoading(false), 800);
   }, [streak, history, historyIndex]);
 
@@ -121,13 +114,8 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
     }
   };
 
-  const handleReload = () => {
-    navigateTo(url, false);
-  };
-
-  const handleHome = () => {
-    navigateTo('https://www.google.com');
-  };
+  const handleReload = () => navigateTo(url, false);
+  const handleHome = () => navigateTo('https://www.google.com');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,12 +124,12 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] lg:max-w-7xl h-[94vh] p-0 overflow-hidden bg-[#07070a] border-white/5 rounded-[2.5rem] shadow-[0_0_120px_rgba(0,0,0,0.9)] flex flex-col pointer-events-auto outline-none">
+      <DialogContent className="max-w-[96vw] lg:max-w-7xl h-[92vh] p-0 overflow-hidden bg-[#07070a] border-white/5 rounded-[2.5rem] shadow-[0_0_120px_rgba(0,0,0,0.9)] flex flex-col pointer-events-auto outline-none">
         <div className="sr-only">
           <DialogTitle>Discipline Browser - Neural Navigation HUD</DialogTitle>
         </div>
 
-        {/* Browser Top Bar - Chrome Inspired HUD */}
+        {/* Browser Top Bar - Chrome HUD */}
         <div className="bg-[#0b0b0f]/95 backdrop-blur-3xl border-b border-white/5 p-4 flex flex-col gap-4 shrink-0 z-50">
           <div className="flex items-center gap-4">
             {/* Control Group */}
@@ -163,7 +151,7 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
               </Button>
             </div>
 
-            {/* Address Bar */}
+            {/* Glassmorphism Search Bar */}
             <form onSubmit={handleSubmit} className="flex-1">
               <motion.div 
                 animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
@@ -193,7 +181,7 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
               </motion.div>
             </form>
 
-            {/* Status Group */}
+            {/* Neural Stability Monitor */}
             <div className="flex items-center gap-6 pr-2">
               <div className="hidden sm:flex flex-col items-end">
                 <div className="flex items-center gap-2 mb-1">
@@ -221,9 +209,9 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
               </div>
               <div className={cn(
                 "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 border border-white/5",
-                safetyStatus === 'SAFE' ? "bg-green-500/10 text-green-500" : 
-                safetyStatus === 'WARN' ? "bg-amber-500/10 text-amber-500" :
-                "bg-red-500/10 text-red-500"
+                safetyStatus === 'SAFE' ? "bg-green-500/10 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]" : 
+                safetyStatus === 'WARN' ? "bg-amber-500/10 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]" :
+                "bg-red-500/10 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
               )}>
                 {safetyStatus === 'SAFE' ? <ShieldCheck size={20} /> : 
                  safetyStatus === 'WARN' ? <Shield size={20} /> : 
@@ -232,7 +220,7 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
             </div>
           </div>
 
-          {/* Quick Access Toolbar */}
+          {/* Quick Access Matrix */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
             <span className="text-[8px] font-black uppercase text-white/20 tracking-widest mr-2 shrink-0">Neural Links</span>
             {QUICK_ACCESS.map((item) => (
@@ -251,9 +239,9 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
           </div>
         </div>
 
-        {/* Browser Viewport with Intelligent Overlays */}
+        {/* Viewport with Neural Stabilizers */}
         <div className="flex-1 relative bg-white overflow-hidden flex flex-col">
-          {/* Progress Bar */}
+          {/* Environment Scan Progress Bar */}
           <div className="absolute top-0 left-0 w-full h-[2px] bg-transparent z-[60] overflow-hidden">
              <AnimatePresence>
                {isLoading && (
@@ -308,29 +296,30 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
                 animate={{ opacity: 1 }}
                 className="flex-1 relative"
               >
+                {/* Real Viewport Content */}
                 <iframe 
                   src={url} 
                   className={cn(
-                    "w-full h-full border-none transition-all duration-700 bg-white",
-                    safetyStatus === 'WARN' && "blur-[15px] grayscale-[0.5] pointer-events-none"
+                    "w-full h-full border-none transition-all duration-1000 bg-white",
+                    isBlurActive && "blur-[12px] grayscale-[0.3] pointer-events-none"
                   )}
                   title="Discipline Browser Viewport"
                 />
                 
-                {/* HUD Overlay for Risk Warnings */}
-                {safetyStatus === 'WARN' && (
-                  <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex flex-col items-center justify-center p-12 text-center z-50">
+                {/* Holographic Warning Overlay for Risk Warnings */}
+                {isBlurActive && (
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex flex-col items-center justify-center p-12 text-center z-50">
                     <motion.div 
                       initial={{ scale: 0.9, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="bg-[#0b0b0f] border border-amber-500/30 p-10 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-6 max-w-sm"
+                      className="bg-[#0b0b0f]/90 backdrop-blur-xl border border-amber-500/30 p-10 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-6 max-w-sm"
                     >
                        <div className="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center">
                          <AlertTriangle size={32} />
                        </div>
                        <div>
-                         <h3 className="text-xl font-bold text-white mb-2 font-headline">Neural Instability</h3>
-                         <p className="text-sm text-white/50 leading-relaxed">The Guardian has flagged this environment as a distraction risk. Neural Stabilizers are active to preserve your focus.</p>
+                         <h3 className="text-xl font-bold text-white mb-2 font-headline">Neural Fog Active</h3>
+                         <p className="text-sm text-white/50 leading-relaxed">{blockReason || "This environment is flagged as a high distraction risk. Stabilization protocols are active."}</p>
                        </div>
                        <Button 
                         type="button"
@@ -351,20 +340,20 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
         <div className="bg-[#0b0b0f] border-t border-white/5 p-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2 text-[9px] font-black uppercase text-white/20 tracking-widest">
-              <Lock size={12} className="text-green-500/50" /> 256-Bit SSL Encrypted
+              <Lock size={12} className="text-green-500/50" /> 256-Bit Neural Encryption
             </div>
             <div className="flex items-center gap-2 text-[9px] font-black uppercase text-white/20 tracking-widest">
-              <Sparkles size={12} className="text-amber-500/50" /> Guardian Active
+              <Sparkles size={12} className="text-amber-500/50" /> Protocol Integrity High
             </div>
           </div>
           <div className="flex items-center gap-4">
              <div className="text-[9px] font-black uppercase text-primary/40 tracking-tight flex items-center gap-2">
                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-               Mastery Level {Math.floor(streak / 7)} Verified
+               Streak Level {Math.floor(streak / 7)} Active
              </div>
              <div className="w-px h-3 bg-white/10" />
              <div className="text-[9px] font-black uppercase text-white/20">
-               Neural Session Pro
+               Neural Session v2.5
              </div>
           </div>
         </div>

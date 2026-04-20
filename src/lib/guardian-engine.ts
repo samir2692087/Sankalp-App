@@ -3,10 +3,9 @@
  * Provides real-time filtering and risk detection without external API dependencies.
  */
 
-const BLOCKED_KEYWORDS = [
+const EXPLICIT_KEYWORDS = [
   'porn', 'sex', 'nude', 'adult', 'xxx', 'hentai', 'escort', 'gamble', 'betting', 'casino',
-  'hookup', 'dating', 'tinder', 'bumble', 'grindr', 'erotic', 'naked', 'lust', 'violence',
-  'gore', 'nsfw', 'pussy', 'dick', 'cock'
+  'hookup', 'dating', 'tinder', 'bumble', 'grindr', 'erotic', 'naked', 'pussy', 'dick', 'cock'
 ];
 
 const BLOCKED_DOMAINS = [
@@ -17,77 +16,79 @@ const BLOCKED_DOMAINS = [
 
 const DISTRACTION_DOMAINS = [
   'instagram.com', 'facebook.com', 'twitter.com', 'x.com', 
-  'reddit.com', 'tiktok.com', 'twitch.tv', 'netflix.com'
+  'reddit.com', 'tiktok.com', 'twitch.tv', 'netflix.com', 'youtube.com'
 ];
 
-const WHITELIST_DOMAINS = [
-  'google.com', 'wikipedia.org', 'coursera.org', 'duolingo.com', 'github.com', 
+const KNOWLEDGE_DOMAINS = [
+  'wikipedia.org', 'coursera.org', 'duolingo.com', 'github.com', 
   'stackoverflow.com', 'nextjs.org', 'reuters.com', 'bbc.com', 'ted.com', 
-  'khanacademy.org', 'medium.com', 'scholar.google.com'
+  'khanacademy.org', 'medium.com', 'scholar.google.com', 'google.com'
 ];
 
 export interface GuardianRiskAssessment {
-  isBlocked: boolean;
+  status: 'SAFE' | 'WARN' | 'BLOCKED';
   reason: string;
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'EXTREME';
-  suggestedAction?: string;
+  riskScore: number; // 0 to 100
+  isBlurRequired: boolean;
 }
 
 /**
  * Assesses content safety entirely locally based on keywords and domains.
+ * This version allows full browsing but applies "Neural Stabilizers" (blurs).
  */
 export function assessContentSafety(input: string, streak: number = 0): GuardianRiskAssessment {
   const normalized = input.toLowerCase().trim();
   
-  // 1. Extreme Block Check (Hard Blocked Keywords/Domains)
-  for (const domain of BLOCKED_DOMAINS) {
-    if (normalized.includes(domain)) {
-      return {
-        isBlocked: true,
-        reason: "Neural Threat: Blacklisted Domain Intercepted.",
-        riskLevel: 'EXTREME'
-      };
-    }
-  }
-
-  for (const keyword of BLOCKED_KEYWORDS) {
-    if (normalized.includes(keyword)) {
-      return {
-        isBlocked: true,
-        reason: `Neural Breach: Explicit keyword detected ("${keyword}").`,
-        riskLevel: 'EXTREME'
-      };
-    }
-  }
-
-  // 2. High Risk (Strong Warning/Blur)
-  if (streak < 3) {
-    const isWhitelisted = WHITELIST_DOMAINS.some(domain => normalized.includes(domain));
-    const isSearching = !normalized.includes('.');
-    
-    if (!isWhitelisted && !isSearching && normalized.includes('.') && !normalized.includes('google.com')) {
-      return {
-        isBlocked: false,
-        reason: "Emergency Stabilization: High focus required for low streaks.",
-        riskLevel: 'HIGH',
-        suggestedAction: "Stabilize for 3 days to unlock standard freedom."
-      };
-    }
-  }
-
-  // 3. Distraction Detection (Medium Risk/Soft Blur)
-  if (DISTRACTION_DOMAINS.some(d => normalized.includes(d))) {
+  // 1. Extreme Risk (Blacklisted Domains)
+  const isBlacklisted = BLOCKED_DOMAINS.some(domain => normalized.includes(domain));
+  if (isBlacklisted) {
     return {
-      isBlocked: false,
-      reason: "High Distraction Potential detected. Neural pulse active.",
-      riskLevel: 'MEDIUM'
+      status: 'BLOCKED',
+      reason: "Neural Protocol Violation: Blacklisted environment intercepted.",
+      riskScore: 100,
+      isBlurRequired: true
     };
   }
 
+  // 2. Search Keyword Detection (Pre-execution check)
+  const explicitMatch = EXPLICIT_KEYWORDS.find(keyword => normalized.includes(keyword));
+  if (explicitMatch) {
+    return {
+      status: 'BLOCKED',
+      reason: `Neural Breach: Explicit content intent detected ("${explicitMatch}").`,
+      riskScore: 100,
+      isBlurRequired: true
+    };
+  }
+
+  // 3. Distraction Assessment
+  const isDistraction = DISTRACTION_DOMAINS.some(domain => normalized.includes(domain));
+  if (isDistraction) {
+    return {
+      status: 'WARN',
+      reason: "High Distraction Potential: Neural stabilizers active to preserve focus.",
+      riskScore: 60,
+      isBlurRequired: streak < 7 // Apply blur to distractions if streak is low
+    };
+  }
+
+  // 4. Safe Knowledge Hubs
+  const isKnowledge = KNOWLEDGE_DOMAINS.some(domain => normalized.includes(domain));
+  if (isKnowledge) {
+    return {
+      status: 'SAFE',
+      reason: 'Neural Environment Stable: Knowledge zone verified.',
+      riskScore: 0,
+      isBlurRequired: false
+    };
+  }
+
+  // 5. Default "Gray" Browsing
   return {
-    isBlocked: false,
-    reason: 'Neural Environment Stable.',
-    riskLevel: 'LOW'
+    status: 'SAFE',
+    reason: 'Neural Stability Maintained.',
+    riskScore: 20,
+    isBlurRequired: false
   };
 }
 
@@ -98,18 +99,18 @@ export function formatBrowserInput(input: string): string {
   const normalized = input.trim();
   if (!normalized) return 'https://www.google.com';
 
-  // Check if it's a URL (contains a dot and no spaces)
-  const isUrl = normalized.includes('.') && !normalized.includes(' ');
+  // Heuristic for URL detection
+  const isUrl = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(normalized);
   
-  if (isUrl) {
-    // Add protocol if missing
+  if (isUrl && !normalized.includes(' ')) {
     return normalized.startsWith('http') ? normalized : `https://${normalized}`;
   }
 
-  // Otherwise, treat as a search query
+  // Treat as search query
   return `https://www.google.com/search?q=${encodeURIComponent(normalized)}&safe=active`;
 }
 
 export function filterSearchQuery(query: string): string {
-  return query.replace(/[^\w\s\.\/]/gi, '');
+  // Removes common malicious or bypass patterns
+  return query.replace(/[^\w\s\.\/\?\&\=\-]/gi, '');
 }
