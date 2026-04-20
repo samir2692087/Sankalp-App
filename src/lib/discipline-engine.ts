@@ -8,35 +8,42 @@ export function calculateStreak(lastRelapseTimestamp: number | null): number {
 }
 
 export function calculateDisciplineScore(data: UserData): number {
-  const streakFactor = Math.min(data.currentStreak * 2, 50);
-  const urgeFactor = Math.min(data.urges.length * 3, 40);
-  const checkInFactor = Math.min(data.checkIns.length * 0.5, 20);
-  const relapsePenalty = Math.min(data.relapses.length * 15, 90);
+  const urges = data.urges || [];
+  const relapses = data.relapses || [];
+  const checkIns = data.checkIns || [];
+  
+  const streakFactor = Math.min((data.currentStreak || 0) * 2, 50);
+  const urgeFactor = Math.min(urges.length * 3, 40);
+  const checkInFactor = Math.min(checkIns.length * 0.5, 20);
+  const relapsePenalty = Math.min(relapses.length * 15, 90);
   
   const rawScore = 40 + streakFactor + urgeFactor + checkInFactor - relapsePenalty;
   return Math.max(0, Math.min(100, Math.round(rawScore)));
 }
 
 export function getBehavioralInsights(data: UserData) {
-  const reasons = data.relapses.map(r => r.reason);
+  const relapses = data.relapses || [];
+  const urges = data.urges || [];
+  
+  const reasons = relapses.map(r => r.reason);
   const mostCommonTrigger = reasons.length > 0 
     ? reasons.reduce((a, b, i, arr) => 
         (arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b)
       ) 
     : "Consistent data required";
 
-  const times = data.relapses.map(r => r.timeOfDay);
+  const times = relapses.map(r => r.timeOfDay);
   const highRiskWindow = times.length > 0
     ? times.reduce((a, b, i, arr) => 
         (arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b)
       )
     : "N/A";
 
-  const totalBattles = data.urges.length + data.relapses.length;
-  const winRate = totalBattles > 0 ? Math.round((data.urges.length / totalBattles) * 100) : 100;
+  const totalBattles = urges.length + relapses.length;
+  const winRate = totalBattles > 0 ? Math.round((urges.length / totalBattles) * 100) : 100;
 
   // Streak Protection: Risk Detection
-  const recentUrges = data.urges.filter(u => Date.now() - u.timestamp < 1000 * 60 * 60 * 48).length;
+  const recentUrges = urges.filter(u => Date.now() - u.timestamp < 1000 * 60 * 60 * 48).length;
   const riskLevel = recentUrges >= 3 ? 'CRITICAL' : recentUrges >= 1 ? 'ELEVATED' : 'STABLE';
 
   return { 
@@ -52,6 +59,10 @@ export function getBehavioralInsights(data: UserData) {
 }
 
 export function getWeeklyData(data: UserData) {
+  const urges = data.urges || [];
+  const relapses = data.relapses || [];
+  const checkIns = data.checkIns || [];
+  
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
@@ -60,19 +71,19 @@ export function getWeeklyData(data: UserData) {
 
   return last7Days.map(date => ({
     name: date.split('-').slice(1).join('/'),
-    urges: data.urges.filter(u => new Date(u.timestamp).toISOString().split('T')[0] === date).length,
-    relapses: data.relapses.filter(r => new Date(r.timestamp).toISOString().split('T')[0] === date).length,
-    checkins: data.checkIns.filter(c => c.date === date).length
+    urges: urges.filter(u => new Date(u.timestamp).toISOString().split('T')[0] === date).length,
+    relapses: relapses.filter(r => new Date(r.timestamp).toISOString().split('T')[0] === date).length,
+    checkins: checkIns.filter(c => c.date === date).length
   }));
 }
 
 export function getAchievements(streak: number, score: number) {
   return [
-    { id: '1', name: 'Initiate', desc: 'First 24 hours clean', unlocked: streak >= 1 },
-    { id: '2', name: 'Warrior', desc: '7 Day Streak reached', unlocked: streak >= 7 },
-    { id: '3', name: 'Steel Mind', desc: '30 Day Mastery', unlocked: streak >= 30 },
-    { id: '4', name: 'Iron Will', desc: '90 Day Ascension', unlocked: streak >= 90 },
-    { id: '5', name: 'Fortress', desc: 'Maintain Score > 90', unlocked: score >= 90 },
+    { id: '1', name: 'Initiate', desc: 'First 24 hours clean', unlocked: (streak || 0) >= 1 },
+    { id: '2', name: 'Warrior', desc: '7 Day Streak reached', unlocked: (streak || 0) >= 7 },
+    { id: '3', name: 'Steel Mind', desc: '30 Day Mastery', unlocked: (streak || 0) >= 30 },
+    { id: '4', name: 'Iron Will', desc: '90 Day Ascension', unlocked: (streak || 0) >= 90 },
+    { id: '5', name: 'Fortress', desc: 'Maintain Score > 90', unlocked: (score || 0) >= 90 },
   ];
 }
 
@@ -96,7 +107,7 @@ export function getDailyChallenge(streak: number) {
     "Reflect on your 90-day transformation."
   ];
 
-  const pool = streak >= 90 ? highStreak : streak >= 30 ? midStreak : lowStreak;
+  const pool = (streak || 0) >= 90 ? highStreak : (streak || 0) >= 30 ? midStreak : lowStreak;
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
   return pool[dayOfYear % pool.length];
 }

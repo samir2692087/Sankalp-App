@@ -1,3 +1,4 @@
+
 import { UserData } from './types';
 import jsPDF from 'jspdf';
 
@@ -13,15 +14,15 @@ export function downloadFile(content: string, fileName: string, contentType: str
 export function exportToCSV(data: UserData) {
   let csv = "Date,Type,Detail\n";
   
-  data.relapses.forEach(r => {
+  (data.relapses || []).forEach(r => {
     csv += `"${new Date(r.timestamp).toLocaleDateString()}","Relapse","Reason: ${r.reason} | Time: ${r.timeOfDay}"\n`;
   });
   
-  data.urges.forEach(u => {
+  (data.urges || []).forEach(u => {
     csv += `"${new Date(u.timestamp).toLocaleDateString()}","Urge Resisted","Intensity: ${u.intensity}"\n`;
   });
   
-  data.checkIns.forEach(c => {
+  (data.checkIns || []).forEach(c => {
     csv += `"${c.date}","Check-in","Completed"\n`;
   });
 
@@ -35,11 +36,11 @@ Generated: ${new Date().toLocaleString()}
 ------------------------------------------
 
 SUMMARY:
-- Current Streak: ${data.currentStreak} Days
-- Personal Best: ${data.bestStreak} Days
-- Discipline Score: ${data.disciplineScore}/100
-- Total Urges Resisted: ${data.urges.length}
-- Total Relapses: ${data.relapses.length}
+- Current Streak: ${data.currentStreak || 0} Days
+- Personal Best: ${data.bestStreak || 0} Days
+- Discipline Score: ${data.disciplineScore || 0}/100
+- Total Urges Resisted: ${(data.urges || []).length}
+- Total Relapses: ${(data.relapses || []).length}
 
 BEHAVIORAL NOTES:
 Stay strong. Every urge resisted is a brain-rewiring victory.
@@ -71,11 +72,11 @@ export async function exportToPDF(data: UserData) {
   
   doc.setFontSize(12);
   const stats = [
-    ["Current Mastery Streak", `${data.currentStreak} Days`],
-    ["Personal Best", `${data.bestStreak} Days`],
-    ["Discipline Integrity Score", `${data.disciplineScore}/100`],
-    ["Total Battles Won (Urges)", `${data.urges.length}`],
-    ["Recorded Relapses", `${data.relapses.length}`]
+    ["Current Mastery Streak", `${data.currentStreak || 0} Days`],
+    ["Personal Best", `${data.bestStreak || 0} Days`],
+    ["Discipline Integrity Score", `${data.disciplineScore || 0}/100`],
+    ["Total Battles Won (Urges)", `${(data.urges || []).length}`],
+    ["Recorded Relapses", `${(data.relapses || []).length}`]
   ];
 
   let y = 75;

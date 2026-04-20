@@ -31,7 +31,7 @@ interface AnalyticsProps {
 export default function Analytics({ score, trigger, window, challenge, data, focusMode }: AnalyticsProps) {
   const [displayScore, setDisplayScore] = useState(0);
   const weeklyReport = useMemo(() => getWeeklyData(data), [data]);
-  const achievements = useMemo(() => getAchievements(data.currentStreak, score), [data.currentStreak, score]);
+  const achievements = useMemo(() => getAchievements(data?.currentStreak || 0, score), [data?.currentStreak, score]);
   const insights = useMemo(() => getBehavioralInsights(data), [data]);
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export default function Analytics({ score, trigger, window, challenge, data, foc
           <Trophy className="text-yellow-500" size={20} /> Achievements
         </h3>
         <div className="flex flex-wrap gap-3">
-          {achievements.map((ach) => (
+          {(achievements || []).map((ach) => (
             <div 
               key={ach.id} 
               className={cn(
@@ -166,7 +166,7 @@ export default function Analytics({ score, trigger, window, challenge, data, foc
           ))}
         </div>
         <p className="text-[10px] font-bold uppercase text-muted-foreground">
-          {achievements.filter(a => a.unlocked).length} / {achievements.length} Unlocked
+          {(achievements || []).filter(a => a.unlocked).length} / {(achievements || []).length} Unlocked
         </p>
       </div>
 

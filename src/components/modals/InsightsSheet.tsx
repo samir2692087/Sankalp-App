@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from 'react';
@@ -33,7 +34,7 @@ interface InsightsSheetProps {
 
 export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'milestones' }: InsightsSheetProps) {
   const weeklyData = getWeeklyData(data);
-  const achievements = getAchievements(data.currentStreak, data.disciplineScore);
+  const achievements = getAchievements(data?.currentStreak || 0, data?.disciplineScore || 0);
 
   const timelineData = useMemo(() => {
     return weeklyData.map(d => ({
@@ -70,7 +71,7 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
             <TabsContent value="milestones" className="mt-0 outline-none space-y-3">
               <div className="grid grid-cols-1 gap-3">
                 {[7, 30, 90, 365].map((goal) => {
-                  const progress = Math.min((data.currentStreak / goal) * 100, 100);
+                  const progress = Math.min(((data?.currentStreak || 0) / goal) * 100, 100);
                   return (
                     <motion.div 
                       key={goal} 
@@ -118,18 +119,18 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white border border-slate-200 p-6 rounded-[2rem] text-center shadow-sm">
                   <p className="text-[9px] font-black uppercase text-slate-400 mb-1">Total Conflicts</p>
-                  <p className="text-2xl font-bold text-slate-900">{data.urges.length + data.relapses.length}</p>
+                  <p className="text-2xl font-bold text-slate-900">{(data?.urges || []).length + (data?.relapses || []).length}</p>
                 </div>
                 <div className="bg-white border border-slate-200 p-6 rounded-[2rem] text-center shadow-sm">
                   <p className="text-[9px] font-black uppercase text-slate-400 mb-1">Victory Rate</p>
-                  <p className="text-2xl font-bold text-slate-900">{Math.round((data.urges.length / (data.urges.length + data.relapses.length || 1)) * 100)}%</p>
+                  <p className="text-2xl font-bold text-slate-900">{Math.round(((data?.urges || []).length / ((data?.urges || []).length + (data?.relapses || []).length || 1)) * 100)}%</p>
                 </div>
               </div>
             </TabsContent>
 
             <TabsContent value="achievements" className="mt-0 outline-none">
               <div className="grid grid-cols-2 gap-4">
-                {achievements.map((ach) => (
+                {(achievements || []).map((ach) => (
                   <div 
                     key={ach.id} 
                     className={cn(
