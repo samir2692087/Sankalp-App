@@ -32,7 +32,7 @@ export default function IronWillDashboard() {
   const [insightsTab, setInsightsTab] = useState('milestones');
   const [mounted, setMounted] = useState(false);
 
-  // Interaction Cleanup Engine
+  // Interaction Cleanup Engine - Prevents invisible blocking layers
   useEffect(() => {
     const isAnyModalOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal;
     
@@ -47,6 +47,7 @@ export default function IronWillDashboard() {
       };
 
       forceCleanup();
+      // Periodically check for 1 second to catch any lingering locks from transition animations
       const interval = setInterval(forceCleanup, 100);
       const timer = setTimeout(() => clearInterval(interval), 1000);
       return () => {
@@ -171,7 +172,7 @@ export default function IronWillDashboard() {
         onUpdateReminder={(enabled, time) => updateState({ ...data, notificationsEnabled: enabled, reminderTime: time })}
       />
 
-      <main className="flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-8 justify-center pb-24">
+      <main className="flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-6 justify-center pb-20 overflow-hidden">
         <StreakDisplay current={data.currentStreak} best={data.bestStreak} focusMode={data.focusMode} />
         
         <ActionCards 

@@ -11,25 +11,25 @@ interface StreakDisplayProps {
 
 export default function StreakDisplay({ current, best, focusMode }: StreakDisplayProps) {
   return (
-    <div className="flex flex-col gap-6 w-full animate-fade-in-up">
-      <div className="neu-flat p-10 rounded-[3.5rem] flex flex-col items-center justify-center relative overflow-hidden group transition-all hover:scale-[1.01]">
+    <div className="flex flex-col gap-4 w-full animate-fade-in-up">
+      <div className="neu-flat p-8 rounded-[3rem] flex flex-col items-center justify-center relative overflow-hidden group transition-all hover:scale-[1.01]">
         <div className="absolute -top-4 -right-4 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-          <Flame size={180} className="text-primary fill-primary" />
+          <Flame size={140} className="text-primary fill-primary" />
         </div>
         
-        <span className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px] mb-4">Mastery Streak</span>
-        <div className="flex items-baseline gap-2 mb-2">
+        <span className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px] mb-2">Current Mastery</span>
+        <div className="flex items-baseline gap-2 mb-1">
           <h2 className={cn(
-            "font-headline text-8xl font-bold text-primary streak-glow transition-all duration-500",
+            "font-headline text-7xl font-bold text-primary streak-glow transition-all duration-500",
             focusMode && "blur-2xl select-none"
           )}>
             {current}
           </h2>
-          <span className="text-xl font-bold text-primary/40 uppercase">Days</span>
+          <span className="text-lg font-bold text-primary/40 uppercase tracking-widest">Days</span>
         </div>
         
-        <div className="flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-full">
-          <Trophy size={14} className="text-yellow-600" />
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/5 rounded-full">
+          <Trophy size={12} className="text-yellow-600" />
           <span className="text-[10px] font-black uppercase text-primary/60">Best: {best} Days</span>
         </div>
       </div>
