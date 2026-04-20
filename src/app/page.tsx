@@ -150,10 +150,11 @@ export default function IronWillDashboard() {
         streak={data.currentStreak} 
         theme={data.theme || 'dark'} 
         riskLevel={insights.riskLevel}
+        isBlurred={isAnySheetOpen}
       />
       
       {/* Immersive Dimmer */}
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-[1px] -z-[5] pointer-events-none" />
+      <div className={`fixed inset-0 transition-all duration-700 -z-[5] pointer-events-none ${isAnySheetOpen ? 'bg-black/70 backdrop-blur-md' : 'bg-black/40 backdrop-blur-[1px]'}`} />
 
       <Header 
         focusMode={data.focusMode} 

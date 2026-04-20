@@ -12,7 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { UrgeIntensity } from '@/lib/types';
-import { ShieldAlert, ShieldCheck, Shield, ArrowLeft } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Shield, ArrowLeft, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface UrgeModalProps {
   isOpen: boolean;
@@ -33,9 +34,9 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
 
   const getIntensityColor = () => {
     switch(intensity) {
-      case 'Low': return 'text-green-500';
-      case 'Medium': return 'text-blue-500';
-      case 'High': return 'text-red-500';
+      case 'Low': return 'text-green-400';
+      case 'Medium': return 'text-blue-400';
+      case 'High': return 'text-red-400';
     }
   };
 
@@ -49,50 +50,65 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-card sm:max-w-[425px] rounded-[2rem] border-none shadow-2xl p-8 outline-none">
-        <DialogHeader className="relative">
+      <DialogContent className="glass-card sm:max-w-[450px] rounded-[3.5rem] border border-white/10 shadow-[0_0_50px_rgba(59,130,246,0.15)] p-0 overflow-hidden outline-none">
+        <div className="bg-primary/10 p-10 text-center border-b border-white/5 relative">
           <Button 
             type="button"
             variant="ghost" 
             onClick={onClose} 
-            className="absolute -left-2 top-0 p-0 h-auto hover:bg-transparent"
+            className="absolute -left-2 sm:left-6 top-10 p-0 h-auto hover:bg-transparent"
           >
             <ArrowLeft size={24} />
           </Button>
-          <DialogTitle className="text-2xl font-bold font-headline text-center w-full">Incredible Self-Control!</DialogTitle>
-          <DialogDescription className="text-center text-muted-foreground mt-2">Every victory counts. How strong was it?</DialogDescription>
-        </DialogHeader>
-        <div className="py-12 flex flex-col items-center gap-8">
-          <div className={`neu-inset p-8 rounded-full w-48 h-48 flex flex-col items-center justify-center gap-2 transition-colors duration-300 ${getIntensityColor()}`}>
-            {getIntensityIcon()}
-            <span className="text-3xl font-bold font-headline">
-              {intensity}
-            </span>
+          <div className="w-16 h-16 bg-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Zap size={32} className="animate-pulse" />
           </div>
-          <div className="w-full space-y-4">
-            <Slider 
-              value={val} 
-              onValueChange={setVal} 
-              max={100} 
-              step={1} 
-              className="py-4"
-            />
-            <div className="flex justify-between px-1 text-[10px] uppercase font-black tracking-widest text-muted-foreground">
-              <span>Low</span>
-              <span>Med</span>
-              <span>High</span>
+          <DialogTitle className="text-2xl font-bold font-headline">Battle Won</DialogTitle>
+          <DialogDescription className="text-muted-foreground/60 font-medium uppercase tracking-[0.2em] text-[9px] mt-1">Neural Rewiring Confirmation</DialogDescription>
+        </div>
+
+        <div className="p-8 space-y-12">
+          <div className="flex flex-col items-center gap-6">
+            <motion.div 
+              key={intensity}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className={`neu-inset p-10 rounded-full w-48 h-48 flex flex-col items-center justify-center gap-2 transition-all duration-500 bg-white/5 border border-white/10 ${getIntensityColor()}`}
+            >
+              <div className="drop-shadow-[0_0_15px_currentColor]">
+                {getIntensityIcon()}
+              </div>
+              <span className="text-3xl font-bold font-headline mt-2">
+                {intensity}
+              </span>
+            </motion.div>
+            
+            <div className="w-full space-y-6">
+              <div className="flex justify-between px-2 text-[10px] uppercase font-black tracking-widest text-muted-foreground/60">
+                <span>Vulnerable</span>
+                <span>Moderate</span>
+                <span>Critical</span>
+              </div>
+              <Slider 
+                value={val} 
+                onValueChange={setVal} 
+                max={100} 
+                step={1} 
+                className="py-4"
+              />
             </div>
           </div>
+
+          <DialogFooter>
+            <Button 
+              type="button"
+              className="w-full h-16 rounded-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-[1.02] active:scale-95 transition-all text-base shadow-[0_10px_30px_rgba(37,99,235,0.3)]"
+              onClick={() => onSubmit(intensity)}
+            >
+              Log Neural Victory
+            </Button>
+          </DialogFooter>
         </div>
-        <DialogFooter>
-          <Button 
-            type="button"
-            className="w-full h-14 rounded-xl font-bold bg-secondary hover:bg-secondary/90 transition-all text-lg shadow-lg neu-button border-none"
-            onClick={() => onSubmit(intensity)}
-          >
-            I Won This Battle
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

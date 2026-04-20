@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useRef } from 'react';
@@ -10,11 +9,12 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileJson, FileText, FileSpreadsheet, FileBox, Trophy, Shield, Flame, Activity, ArrowLeft, Upload } from 'lucide-react';
+import { FileJson, FileText, FileSpreadsheet, FileBox, Trophy, Shield, Flame, Activity, ArrowLeft, Upload, Share2 } from 'lucide-react';
 import { UserData } from "@/lib/types";
 import { exportToCSV, exportToText, exportToPDF } from "@/lib/export-utils";
 import { importData } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
+import { motion } from 'framer-motion';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -36,7 +36,7 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
     link.download = `ironwill-backup-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    toast({ title: "Backup Created", description: "JSON snapshot saved to your device." });
+    toast({ title: "Neural Snapshot Saved", description: "JSON archive encrypted and stored." });
   };
 
   const handleJSONImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,11 +49,11 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
       if (typeof result === 'string') {
         const success = importData(result);
         if (success) {
-          toast({ title: "Protocol Restored", description: "All discipline data has been successfully imported." });
+          toast({ title: "Protocol Restored", description: "All mastery logs have been successfully imported." });
           onDataImport();
           onClose();
         } else {
-          toast({ variant: "destructive", title: "Import Failed", description: "The backup file is invalid or corrupted." });
+          toast({ variant: "destructive", title: "Import Error", description: "Incompatible backup format." });
         }
       }
     };
@@ -61,15 +61,13 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
   };
 
   const stats = [
-    { label: 'Current Streak', val: `${data.currentStreak} Days`, icon: Flame, color: 'text-orange-500' },
-    { label: 'Personal Best', val: `${data.bestStreak} Days`, icon: Trophy, color: 'text-yellow-500' },
-    { label: 'Urges Resisted', val: data.urges.length, icon: Shield, color: 'text-blue-500' },
-    { label: 'Relapses Logged', val: data.relapses.length, icon: Activity, color: 'text-red-500' },
+    { label: 'Current Streak', val: `${data.currentStreak}D`, icon: Flame, color: 'text-orange-500' },
+    { label: 'Integrity Score', val: data.disciplineScore, icon: Shield, color: 'text-blue-500' },
   ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-card sm:max-w-[550px] rounded-[3.5rem] border-none shadow-2xl p-0 overflow-hidden outline-none">
+      <DialogContent className="glass-card sm:max-w-[550px] rounded-[3.5rem] border border-white/10 shadow-[0_0_60px_rgba(124,58,237,0.15)] p-0 overflow-hidden outline-none">
         <div className="bg-primary/10 p-10 text-center border-b border-white/5 relative">
           <Button 
             variant="ghost" 
@@ -78,49 +76,52 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
           >
             <ArrowLeft size={24} />
           </Button>
-          
-          <DialogTitle className="text-3xl font-bold font-headline mb-2">Export Center</DialogTitle>
-          <DialogDescription className="text-muted-foreground font-medium">Archive your discipline journey for local backup or review.</DialogDescription>
+          <div className="w-16 h-16 bg-primary/20 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Share2 size={32} />
+          </div>
+          <DialogTitle className="text-3xl font-bold font-headline">Archive Center</DialogTitle>
+          <DialogDescription className="text-muted-foreground/60 font-medium uppercase tracking-[0.2em] text-[9px] mt-1">Neural Data Management</DialogDescription>
         </div>
         
-        <div className="p-8 sm:p-10 space-y-8">
+        <div className="p-8 sm:p-10 space-y-10">
           <div className="grid grid-cols-2 gap-4">
             {stats.map((s, idx) => (
-              <div key={idx} className="neu-inset p-4 rounded-2xl flex items-center gap-3">
-                <div className={`p-2 rounded-lg bg-card shadow-sm ${s.color}`}>
-                  <s.icon size={18} />
+              <div key={idx} className="bg-white/5 border border-white/5 p-5 rounded-3xl flex items-center gap-4">
+                <div className={`p-2.5 rounded-xl bg-card shadow-sm ${s.color}`}>
+                  <s.icon size={20} />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase text-muted-foreground leading-none mb-1">{s.label}</p>
-                  <p className="text-lg font-bold font-headline leading-none">{s.val}</p>
+                  <p className="text-[9px] font-black uppercase text-muted-foreground opacity-60 leading-none mb-1.5">{s.label}</p>
+                  <p className="text-xl font-bold font-headline leading-none">{s.val}</p>
                 </div>
               </div>
             ))}
           </div>
 
           <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground px-1">Select Report Format</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Export Protocol</h4>
             <div className="grid grid-cols-2 gap-4">
-              <Button onClick={() => exportToPDF(data)} className="h-24 flex flex-col gap-2 rounded-3xl neu-button border-none group">
-                <FileBox className="text-red-500 group-hover:scale-110 transition-transform" />
-                <span className="font-bold text-sm">PDF Summary</span>
-              </Button>
-              <Button onClick={() => exportToCSV(data)} className="h-24 flex flex-col gap-2 rounded-3xl neu-button border-none group">
-                <FileSpreadsheet className="text-green-500 group-hover:scale-110 transition-transform" />
-                <span className="font-bold text-sm">CSV Ledger</span>
-              </Button>
-              <Button onClick={() => exportToText(data)} className="h-24 flex flex-col gap-2 rounded-3xl neu-button border-none group">
-                <FileText className="text-primary group-hover:scale-110 transition-transform" />
-                <span className="font-bold text-sm">Text Report</span>
-              </Button>
-              <Button onClick={handleJSONExport} className="h-24 flex flex-col gap-2 rounded-3xl neu-button border-none group">
-                <FileJson className="text-blue-500 group-hover:scale-110 transition-transform" />
-                <span className="font-bold text-sm">JSON Backup</span>
-              </Button>
+              {[
+                { label: 'PDF Report', icon: FileBox, color: 'text-red-400', action: () => exportToPDF(data) },
+                { label: 'CSV Ledger', icon: FileSpreadsheet, color: 'text-green-400', action: () => exportToCSV(data) },
+                { label: 'Text Log', icon: FileText, color: 'text-primary', action: () => exportToText(data) },
+                { label: 'JSON Backup', icon: FileJson, color: 'text-blue-400', action: handleJSONExport }
+              ].map((item) => (
+                <motion.button 
+                  key={item.label}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={item.action} 
+                  className="h-28 flex flex-col items-center justify-center gap-3 rounded-[2rem] bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group"
+                >
+                  <item.icon className={cn("size-7 transition-transform group-hover:scale-110", item.color)} />
+                  <span className="font-bold text-xs uppercase tracking-tighter">{item.label}</span>
+                </motion.button>
+              ))}
             </div>
           </div>
 
-          <div className="pt-4 border-t border-muted">
+          <div className="pt-6 border-t border-white/5">
             <input 
               type="file" 
               ref={fileInputRef} 
@@ -131,10 +132,10 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
             <Button 
               variant="ghost" 
               onClick={() => fileInputRef.current?.click()}
-              className="w-full h-14 rounded-2xl border-2 border-dashed border-muted hover:border-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-3 font-bold text-muted-foreground hover:text-primary"
+              className="w-full h-16 rounded-2xl border border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-all flex items-center justify-center gap-4 font-bold text-muted-foreground/80 hover:text-primary"
             >
-              <Upload size={20} />
-              Restore Protocol from Backup
+              <Upload size={22} />
+              Restore Mastery Logs
             </Button>
           </div>
         </div>

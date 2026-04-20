@@ -2,7 +2,7 @@
 
 import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Points, PointMaterial, MeshDistortMaterial, Sphere } from '@react-three/drei';
+import { Float, Points, PointMaterial, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 import { AppTheme } from '@/lib/types';
 
@@ -10,9 +10,10 @@ interface SceneProps {
   streak: number;
   theme: AppTheme;
   riskLevel?: string;
+  isBlurred?: boolean;
 }
 
-function EnergyCore({ streak, theme, riskLevel }: SceneProps) {
+function EnergyCore({ streak, theme, riskLevel, isBlurred }: SceneProps) {
   const meshRef = useRef<THREE.Mesh>(null!);
   const lightRef = useRef<THREE.PointLight>(null!);
   
@@ -27,15 +28,15 @@ function EnergyCore({ streak, theme, riskLevel }: SceneProps) {
     }
   }, [theme, riskLevel]);
 
-  const baseIntensity = Math.min(0.5 + streak * 0.1, 2.5);
-  const baseSpeed = Math.min(0.8 + streak * 0.08, 3.5);
+  const baseIntensity = isBlurred ? 4 : Math.min(0.5 + streak * 0.1, 2.5);
+  const baseSpeed = isBlurred ? 0.2 : Math.min(0.8 + streak * 0.08, 3.5);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     if (meshRef.current) {
-      meshRef.current.rotation.y = t * 0.2;
-      meshRef.current.rotation.z = t * 0.1;
-      const breathing = 1 + Math.sin(t * 1.5) * 0.05;
+      meshRef.current.rotation.y = t * (isBlurred ? 0.05 : 0.2);
+      meshRef.current.rotation.z = t * (isBlurred ? 0.02 : 0.1);
+      const breathing = 1 + Math.sin(t * (isBlurred ? 0.5 : 1.5)) * 0.05;
       meshRef.current.scale.set(breathing, breathing, breathing);
     }
     if (lightRef.current) {
@@ -46,13 +47,13 @@ function EnergyCore({ streak, theme, riskLevel }: SceneProps) {
   return (
     <group>
       <pointLight ref={lightRef} position={[0, 0, 2]} color={themeColor} intensity={baseIntensity} />
-      <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+      <Float speed={isBlurred ? 0.5 : 2} rotationIntensity={0.5} floatIntensity={0.5}>
         <mesh ref={meshRef} position={[0, 0, -3]}>
           <sphereGeometry args={[1.5, 64, 64]} />
           <MeshDistortMaterial
             color={themeColor}
             speed={baseSpeed}
-            distort={0.4}
+            distort={isBlurred ? 0.1 : 0.4}
             radius={1}
             emissive={themeColor}
             emissiveIntensity={baseIntensity * 0.5}
@@ -63,16 +64,15 @@ function EnergyCore({ streak, theme, riskLevel }: SceneProps) {
           />
         </mesh>
       </Float>
-      {/* Outer Glow Sphere */}
       <mesh position={[0, 0, -3]}>
         <sphereGeometry args={[1.7, 32, 32]} />
-        <meshBasicMaterial color={themeColor} transparent opacity={0.05} />
+        <meshBasicMaterial color={themeColor} transparent opacity={isBlurred ? 0.1 : 0.05} />
       </mesh>
     </group>
   );
 }
 
-function NeuralParticles({ streak, theme, riskLevel }: SceneProps) {
+function NeuralParticles({ streak, theme, riskLevel, isBlurred }: SceneProps) {
   const pointsRef = useRef<THREE.Points>(null!);
   const count = Math.min(200 + streak * 10, 800);
   
@@ -99,13 +99,12 @@ function NeuralParticles({ streak, theme, riskLevel }: SceneProps) {
   useFrame((state) => {
     if (!pointsRef.current) return;
     const t = state.clock.getElapsedTime();
-    pointsRef.current.rotation.y = t * 0.05;
-    pointsRef.current.rotation.z = t * 0.02;
+    pointsRef.current.rotation.y = t * (isBlurred ? 0.01 : 0.05);
+    pointsRef.current.rotation.z = t * (isBlurred ? 0.005 : 0.02);
     
-    // Subtle drift
     const positions = pointsRef.current.geometry.attributes.position.array as Float32Array;
     for (let i = 0; i < count; i++) {
-      positions[i * 3 + 1] += Math.sin(t + i) * 0.002;
+      positions[i * 3 + 1] += Math.sin(t + i) * (isBlurred ? 0.0005 : 0.002);
     }
     pointsRef.current.geometry.attributes.position.needsUpdate = true;
   });
@@ -115,27 +114,27 @@ function NeuralParticles({ streak, theme, riskLevel }: SceneProps) {
       <PointMaterial
         transparent
         color={color}
-        size={0.08}
+        size={isBlurred ? 0.15 : 0.08}
         sizeAttenuation={true}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
-        opacity={0.4}
+        opacity={isBlurred ? 0.2 : 0.4}
       />
     </Points>
   );
 }
 
-function Scene({ streak, theme, riskLevel }: SceneProps) {
+function Scene({ streak, theme, riskLevel, isBlurred }: SceneProps) {
   return (
     <>
       <ambientLight intensity={0.2} />
-      <EnergyCore streak={streak} theme={theme} riskLevel={riskLevel} />
-      <NeuralParticles streak={streak} theme={theme} riskLevel={riskLevel} />
+      <EnergyCore streak={streak} theme={theme} riskLevel={riskLevel} isBlurred={isBlurred} />
+      <NeuralParticles streak={streak} theme={theme} riskLevel={riskLevel} isBlurred={isBlurred} />
     </>
   );
 }
 
-export default function Scene3D({ streak, theme, riskLevel }: SceneProps) {
+export default function Scene3D({ streak, theme, riskLevel, isBlurred }: SceneProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -145,13 +144,13 @@ export default function Scene3D({ streak, theme, riskLevel }: SceneProps) {
   if (!mounted) return <div className="fixed inset-0 -z-10 bg-background" />;
 
   return (
-    <div className="fixed inset-0 -z-10 pointer-events-none bg-background transition-colors duration-1000">
+    <div className="fixed inset-0 -z-10 pointer-events-none bg-background transition-all duration-1000">
       <Canvas 
         camera={{ position: [0, 0, 5], fov: 60 }} 
         gl={{ antialias: true, alpha: true, stencil: false }}
         style={{ pointerEvents: 'none' }}
       >
-        <Scene streak={streak} theme={theme} riskLevel={riskLevel} />
+        <Scene streak={streak} theme={theme} riskLevel={riskLevel} isBlurred={isBlurred} />
       </Canvas>
     </div>
   );

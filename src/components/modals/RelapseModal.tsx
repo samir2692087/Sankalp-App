@@ -13,7 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, BrainCircuit } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface RelapseModalProps {
   isOpen: boolean;
@@ -30,52 +32,68 @@ export default function RelapseModal({ isOpen, onClose, onSubmit }: RelapseModal
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-card sm:max-w-[425px] rounded-[2rem] border-none shadow-2xl p-8 outline-none">
-        <DialogHeader className="relative">
+      <DialogContent className="glass-card sm:max-w-[450px] rounded-[3.5rem] border border-white/10 shadow-[0_0_50px_rgba(124,58,237,0.15)] p-0 overflow-hidden outline-none">
+        <div className="bg-destructive/10 p-10 text-center border-b border-white/5 relative">
           <Button 
             type="button"
             variant="ghost" 
             onClick={onClose} 
-            className="absolute -left-2 top-0 p-0 h-auto hover:bg-transparent"
+            className="absolute left-6 top-10 p-0 h-auto hover:bg-transparent"
           >
             <ArrowLeft size={24} />
           </Button>
-          <DialogTitle className="text-2xl font-bold font-headline text-center w-full">It's a New Beginning</DialogTitle>
-          <DialogDescription className="text-center text-muted-foreground mt-2">Failure is part of growth. Let's analyze and move forward.</DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-6 py-4">
-          <div className="space-y-3">
-            <Label className="font-bold">What was the trigger?</Label>
-            <RadioGroup value={reason} onValueChange={setReason} className="grid grid-cols-2 gap-2">
+          <div className="w-16 h-16 bg-destructive/20 text-destructive rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <BrainCircuit size={32} />
+          </div>
+          <DialogTitle className="text-2xl font-bold font-headline">New Protocol Initiated</DialogTitle>
+          <DialogDescription className="text-muted-foreground/60 font-medium uppercase tracking-[0.2em] text-[9px] mt-1">Data collection for behavioral analysis</DialogDescription>
+        </div>
+
+        <div className="p-8 space-y-8">
+          <div className="space-y-4">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Trigger Analysis</Label>
+            <RadioGroup value={reason} onValueChange={setReason} className="grid grid-cols-2 gap-3">
               {REASONS.map((r) => (
-                <div key={r} className="flex items-center space-x-2 p-2 rounded-xl neu-inset">
-                  <RadioGroupItem value={r} id={r} />
-                  <Label htmlFor={r} className="cursor-pointer text-xs">{r}</Label>
-                </div>
+                <motion.div key={r} whileTap={{ scale: 0.98 }}>
+                  <label 
+                    htmlFor={r}
+                    className={cn(
+                      "flex items-center gap-3 p-4 rounded-2xl border transition-all cursor-pointer",
+                      reason === r 
+                        ? "bg-primary/10 border-primary text-primary shadow-[0_0_15px_rgba(124,58,237,0.2)]" 
+                        : "bg-white/5 border-white/5 text-foreground/70 hover:bg-white/10"
+                    )}
+                  >
+                    <RadioGroupItem value={r} id={r} className="sr-only" />
+                    <span className="text-xs font-bold">{r}</span>
+                  </label>
+                </motion.div>
               ))}
             </RadioGroup>
           </div>
-          <div className="space-y-3">
-            <Label className="font-bold">When did it happen?</Label>
+
+          <div className="space-y-4">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Temporal Data</Label>
             <Select value={time} onValueChange={setTime}>
-              <SelectTrigger className="neu-inset border-none rounded-xl h-12">
-                <SelectValue placeholder="Select time" />
+              <SelectTrigger className="h-14 rounded-2xl bg-white/5 border-white/5 font-bold focus:ring-1 focus:ring-primary/20">
+                <SelectValue placeholder="Select window" />
               </SelectTrigger>
-              <SelectContent>
-                {TIMES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+              <SelectContent className="glass-card border-white/10 rounded-2xl">
+                {TIMES.map(t => <SelectItem key={t} value={t} className="rounded-xl p-3 font-bold">{t}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
+
+          <DialogFooter className="pt-4">
+            <Button 
+              type="button"
+              className="w-full h-16 rounded-2xl font-bold bg-gradient-to-r from-primary to-secondary hover:scale-[1.02] active:scale-95 transition-all text-base shadow-[0_10px_30px_rgba(124,58,237,0.3)]"
+              onClick={() => onSubmit(reason, time)}
+            >
+              Restart Recovery Protocol
+            </Button>
+          </DialogFooter>
         </div>
-        <DialogFooter>
-          <Button 
-            type="button"
-            className="w-full h-12 rounded-xl font-bold bg-primary hover:bg-primary/90 transition-all text-lg shadow-lg"
-            onClick={() => onSubmit(reason, time)}
-          >
-            Restart My Journey
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
