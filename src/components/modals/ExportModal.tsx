@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -8,7 +9,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileJson, FileText, FileSpreadsheet, FileBox, Trophy, Shield, Flame, Activity } from 'lucide-react';
+import { FileJson, FileText, FileSpreadsheet, FileBox, Trophy, Shield, Flame, Activity, ArrowLeft, X } from 'lucide-react';
 import { UserData } from "@/lib/types";
 import { exportToCSV, exportToText, exportToPDF } from "@/lib/export-utils";
 
@@ -39,13 +40,21 @@ export default function ExportModal({ isOpen, onClose, data }: ExportModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-card sm:max-w-[550px] rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden">
-        <div className="bg-primary/10 p-10 text-center border-b border-white/5">
-          <DialogTitle className="text-3xl font-bold font-headline mb-2">Export Center</DialogTitle>
+      <DialogContent className="glass-card sm:max-w-[550px] rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden outline-none">
+        <div className="bg-primary/10 p-6 sm:p-10 text-center border-b border-white/5 relative">
+          <Button 
+            variant="ghost" 
+            onClick={onClose} 
+            className="absolute left-6 top-6 sm:top-10 p-0 h-auto hover:bg-transparent hidden sm:flex"
+          >
+            <ArrowLeft size={24} />
+          </Button>
+          
+          <DialogTitle className="text-2xl sm:text-3xl font-bold font-headline mb-2">Export Center</DialogTitle>
           <DialogDescription className="text-muted-foreground font-medium">Archive your discipline journey for local backup or review.</DialogDescription>
         </div>
         
-        <div className="p-10 space-y-8">
+        <div className="p-6 sm:p-10 space-y-8">
           <div className="grid grid-cols-2 gap-4">
             {stats.map((s, idx) => (
               <div key={idx} className="neu-inset p-4 rounded-2xl flex items-center gap-3">
@@ -54,7 +63,7 @@ export default function ExportModal({ isOpen, onClose, data }: ExportModalProps)
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase text-muted-foreground leading-none mb-1">{s.label}</p>
-                  <p className="text-lg font-bold font-headline leading-none">{s.val}</p>
+                  <p className="text-base sm:text-lg font-bold font-headline leading-none">{s.val}</p>
                 </div>
               </div>
             ))}
@@ -65,19 +74,19 @@ export default function ExportModal({ isOpen, onClose, data }: ExportModalProps)
             <div className="grid grid-cols-2 gap-4">
               <Button onClick={() => exportToPDF(data)} className="h-20 flex flex-col gap-2 rounded-2xl neu-button border-none group">
                 <FileBox className="text-red-500 group-hover:scale-110 transition-transform" />
-                <span className="font-bold">PDF Summary</span>
+                <span className="font-bold text-xs sm:text-sm">PDF Summary</span>
               </Button>
               <Button onClick={() => exportToCSV(data)} className="h-20 flex flex-col gap-2 rounded-2xl neu-button border-none group">
                 <FileSpreadsheet className="text-green-500 group-hover:scale-110 transition-transform" />
-                <span className="font-bold">CSV Ledger</span>
+                <span className="font-bold text-xs sm:text-sm">CSV Ledger</span>
               </Button>
               <Button onClick={() => exportToText(data)} className="h-20 flex flex-col gap-2 rounded-2xl neu-button border-none group">
                 <FileText className="text-primary group-hover:scale-110 transition-transform" />
-                <span className="font-bold">Text Report</span>
+                <span className="font-bold text-xs sm:text-sm">Text Report</span>
               </Button>
               <Button onClick={handleJSON} className="h-20 flex flex-col gap-2 rounded-2xl neu-button border-none group">
                 <FileJson className="text-blue-500 group-hover:scale-110 transition-transform" />
-                <span className="font-bold">JSON Backup</span>
+                <span className="font-bold text-xs sm:text-sm">JSON Backup</span>
               </Button>
             </div>
           </div>

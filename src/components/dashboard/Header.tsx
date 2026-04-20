@@ -1,7 +1,8 @@
+
 "use client";
 
-import { useState } from 'react';
-import { Settings, Download, Trash2, Palette, Sun, Moon, Sparkles, Terminal, Shield, Zap, ChevronRight, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, Download, Trash2, Palette, Sun, Moon, Sparkles, Terminal, Shield, Zap, ChevronRight, Check, ArrowLeft, X } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +21,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
+  SheetClose,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { AppTheme, UserData } from '@/lib/types';
@@ -40,6 +42,27 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
   const isMobile = useIsMobile();
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
 
+  // Popstate handling for navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      setIsThemeSheetOpen(false);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const openThemeSheet = () => {
+    window.history.pushState({ themeSheetOpen: true }, "");
+    setIsThemeSheetOpen(true);
+  };
+
+  const closeThemeSheet = () => {
+    if (window.history.state?.themeSheetOpen) {
+      window.history.back();
+    }
+    setIsThemeSheetOpen(false);
+  };
+
   const themes: { id: AppTheme, name: string, icon: any, bg: string, accent: string }[] = [
     { id: 'light', name: 'Daylight', icon: Sun, bg: 'bg-white', accent: 'bg-primary' },
     { id: 'dark', name: 'Eclipse', icon: Moon, bg: 'bg-slate-900', accent: 'bg-primary' },
@@ -55,8 +78,7 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
           onClick={() => {
             onThemeChange(t.id);
             if (isMobile) {
-              // Add a small delay for the scale effect to be seen before closing
-              setTimeout(() => setIsThemeSheetOpen(false), 150);
+              setTimeout(closeThemeSheet, 150);
             }
           }}
           className={cn(
@@ -122,7 +144,7 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
                 
                 {isMobile ? (
                   <DropdownMenuItem 
-                    onSelect={() => setIsThemeSheetOpen(true)}
+                    onSelect={openThemeSheet}
                     className="rounded-2xl p-4 cursor-pointer flex items-center justify-between hover:bg-primary/5 focus:bg-primary/5 outline-none"
                   >
                     <div className="flex items-center gap-3">
@@ -177,13 +199,22 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
       </header>
 
       {/* Mobile Bottom Sheet for Themes */}
-      <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
-        <SheetContent side="bottom" className="theme-sheet glass-card border-none rounded-t-[3.5rem] p-8 pb-12 z-[10000]">
+      <Sheet open={isThemeSheetOpen} onOpenChange={(open) => !open && closeThemeSheet()}>
+        <SheetContent 
+          side="bottom" 
+          className="theme-sheet glass-card border-none rounded-t-[3.5rem] p-8 pb-12 z-[10000]"
+        >
           <div className="theme-sheet-handle" />
-          <SheetHeader className="mb-8">
-            <SheetTitle className="text-3xl font-bold font-headline text-center">Visual Identity</SheetTitle>
-            <SheetDescription className="text-center font-medium">Customize your environment for better discipline.</SheetDescription>
-          </SheetHeader>
+          <div className="flex items-center justify-between mb-8">
+            <Button variant="ghost" onClick={closeThemeSheet} className="p-0 h-auto hover:bg-transparent">
+              <ArrowLeft size={24} />
+            </Button>
+            <SheetTitle className="text-2xl font-bold font-headline text-center flex-1">Visual Identity</SheetTitle>
+            <SheetClose className="opacity-70 ring-offset-background transition-opacity hover:opacity-100">
+              <X className="h-6 w-6" />
+            </SheetClose>
+          </div>
+          <SheetDescription className="text-center font-medium mb-6">Customize your environment for better discipline.</SheetDescription>
           <ThemeCards />
         </SheetContent>
       </Sheet>

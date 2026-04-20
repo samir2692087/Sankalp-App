@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Header from '@/components/dashboard/Header';
 import StreakDisplay from '@/components/dashboard/StreakDisplay';
 import ActionCards from '@/components/dashboard/ActionCards';
@@ -28,6 +28,30 @@ export default function IronWillDashboard() {
   const [showUrgeModal, setShowUrgeModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  // Sync state with browser history for back button support
+  useEffect(() => {
+    const handlePopState = () => {
+      setShowRelapseModal(false);
+      setShowUrgeModal(false);
+      setShowExportModal(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleOpenModal = useCallback((setter: (v: boolean) => void) => {
+    window.history.pushState({ modalOpen: true }, "");
+    setter(true);
+  }, []);
+
+  const handleCloseModal = useCallback((setter: (v: boolean) => void) => {
+    if (window.history.state?.modalOpen) {
+      window.history.back();
+    }
+    setter(false);
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -89,7 +113,7 @@ export default function IronWillDashboard() {
     const newData = { ...data };
     newData.urges.push({ id: Math.random().toString(36), timestamp: Date.now(), intensity });
     updateState(newData);
-    setShowUrgeModal(false);
+    handleCloseModal(setShowUrgeModal);
     toast({ title: "Urge Controlled 💪", description: `Victory against a ${intensity} urge.` });
   };
 
@@ -99,7 +123,7 @@ export default function IronWillDashboard() {
     newData.lastRelapseTimestamp = Date.now();
     newData.currentStreak = 0;
     updateState(newData);
-    setShowRelapseModal(false);
+    handleCloseModal(setShowRelapseModal);
     toast({ variant: "destructive", title: "Relapse Logged", description: "Resilience is built through restart." });
   };
 
@@ -127,7 +151,7 @@ export default function IronWillDashboard() {
         onThemeChange={handleThemeChange}
         onReset={handleReset}
         onToggleFocus={() => updateState({ ...data, focusMode: !data.focusMode })}
-        onShowExport={() => setShowExportModal(true)}
+        onShowExport={() => handleOpenModal(setShowExportModal)}
       />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-4 flex flex-col items-center gap-12 overflow-x-hidden">
@@ -138,8 +162,8 @@ export default function IronWillDashboard() {
             <>
               <ActionCards 
                 onCheckIn={handleCheckIn} 
-                onUrge={() => setShowUrgeModal(true)} 
-                onRelapse={() => setShowRelapseModal(true)} 
+                onUrge={() => handleOpenModal(setShowUrgeModal)} 
+                onRelapse={() => handleOpenModal(setShowRelapseModal)} 
                 checkedInToday={checkedInToday}
               />
               <Analytics 
@@ -154,26 +178,26 @@ export default function IronWillDashboard() {
 
         <RelapseModal 
           isOpen={showRelapseModal} 
-          onClose={() => setShowRelapseModal(false)} 
+          onClose={() => handleCloseModal(setShowRelapseModal)} 
           onSubmit={handleRelapse} 
         />
 
         <UrgeModal 
           isOpen={showUrgeModal} 
-          onClose={() => setShowUrgeModal(false)} 
+          onClose={() => handleCloseModal(setShowUrgeModal)} 
           onSubmit={handleUrgeResisted} 
         />
 
         <ExportModal 
           isOpen={showExportModal}
-          onClose={() => setShowExportModal(false)}
+          onClose={() => handleCloseModal(setShowExportModal)}
           data={data}
         />
 
         <FAB 
           onCheckIn={handleCheckIn} 
-          onUrge={() => setShowUrgeModal(true)} 
-          onRelapse={() => setShowRelapseModal(true)} 
+          onUrge={() => handleOpenModal(setShowUrgeModal)} 
+          onRelapse={() => handleOpenModal(setShowRelapseModal)} 
           disabledCheckIn={checkedInToday}
         />
 

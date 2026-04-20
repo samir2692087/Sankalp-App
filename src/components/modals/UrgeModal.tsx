@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -11,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { UrgeIntensity } from '@/lib/types';
-import { ShieldAlert, ShieldCheck, Shield } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Shield, ArrowLeft, X } from 'lucide-react';
 
 interface UrgeModalProps {
   isOpen: boolean;
@@ -48,10 +49,17 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-card sm:max-w-[425px] rounded-[2rem] border-none shadow-2xl p-8">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold font-headline text-center">Incredible Self-Control!</DialogTitle>
-          <p className="text-center text-muted-foreground">Every victory counts. How strong was it?</p>
+      <DialogContent className="glass-card sm:max-w-[425px] rounded-[2rem] border-none shadow-2xl p-8 outline-none">
+        <DialogHeader className="relative">
+          <Button 
+            variant="ghost" 
+            onClick={onClose} 
+            className="absolute -left-2 top-0 p-0 h-auto hover:bg-transparent"
+          >
+            <ArrowLeft size={24} />
+          </Button>
+          <DialogTitle className="text-2xl font-bold font-headline text-center w-full">Incredible Self-Control!</DialogTitle>
+          <p className="text-center text-muted-foreground mt-2">Every victory counts. How strong was it?</p>
         </DialogHeader>
         <div className="py-12 flex flex-col items-center gap-8">
           <div className={`neu-inset p-8 rounded-full w-48 h-48 flex flex-col items-center justify-center gap-2 transition-colors duration-300 ${getIntensityColor()}`}>
