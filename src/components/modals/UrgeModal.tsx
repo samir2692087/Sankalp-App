@@ -51,21 +51,22 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-card sm:max-w-[480px] max-h-[90vh] rounded-[3.5rem] border border-white/10 shadow-[0_0_80px_rgba(37,99,235,0.25)] p-0 overflow-hidden outline-none flex flex-col">
-        <div className="bg-primary/20 p-8 text-center border-b border-white/10 relative overflow-hidden shrink-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20 animate-pulse" />
+      <DialogContent className="sm:max-w-[480px] max-h-[90vh] rounded-[3rem] border border-white/10 bg-[rgba(15,15,20,0.95)] backdrop-blur-xl p-0 overflow-hidden outline-none flex flex-col shadow-[0_0_80px_rgba(0,0,0,0.5)]">
+        {/* Header Section */}
+        <div className="bg-gradient-to-br from-purple-900/60 via-blue-900/40 to-black/20 p-8 text-center border-b border-white/5 relative overflow-hidden shrink-0 shadow-[0_10px_20px_rgba(0,0,0,0.4)]">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 animate-pulse pointer-events-none" />
           <Button 
             type="button"
             variant="ghost" 
             onClick={onClose} 
-            className="absolute left-6 top-8 p-0 h-auto hover:bg-transparent z-10"
+            className="absolute left-6 top-8 p-0 h-auto hover:bg-transparent z-10 text-white/70 hover:text-white transition-colors"
           >
-            <ArrowLeft size={28} className="text-white" />
+            <ArrowLeft size={28} />
           </Button>
           <motion.div 
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
-            className="w-16 h-16 bg-blue-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 shadow-2xl relative z-10"
+            className="w-16 h-16 bg-primary rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 shadow-2xl relative z-10 border border-white/20"
           >
             <Zap size={32} className="text-white fill-white animate-pulse" />
             <Sparkles className="absolute -top-2 -right-2 text-yellow-300 animate-spin-slow" size={20} />
@@ -74,30 +75,31 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
           <DialogDescription className="text-white/60 font-black uppercase tracking-[0.3em] text-[8px] relative z-10">Conflict Logged & Overcome</DialogDescription>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-10 space-y-12 no-scrollbar">
+        {/* Body Section */}
+        <div className="flex-1 overflow-y-auto bg-[#0b0b0f] p-10 space-y-12 no-scrollbar pb-32">
           <div className="flex flex-col items-center gap-8">
             <AnimatePresence mode="wait">
                 <motion.div 
-                key={intensity}
-                initial={{ scale: 0.8, opacity: 0, y: 10 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.8, opacity: 0, y: -10 }}
-                className={cn(
-                    "p-8 rounded-full w-44 h-44 flex flex-col items-center justify-center gap-2 transition-all duration-500 bg-white/5 border-4",
-                    getIntensityColor()
-                )}
+                  key={intensity}
+                  initial={{ scale: 0.8, opacity: 0, y: 10 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.8, opacity: 0, y: -10 }}
+                  className={cn(
+                      "p-8 rounded-full w-44 h-44 flex flex-col items-center justify-center gap-2 transition-all duration-500 bg-white/5 border-4",
+                      getIntensityColor()
+                  )}
                 >
-                <div className="drop-shadow-[0_0_15px_currentColor]">
-                    {getIntensityIcon()}
-                </div>
-                <span className="text-2xl font-bold font-headline mt-1 text-white">
-                    {intensity}
-                </span>
+                  <div className="drop-shadow-[0_0_15px_currentColor]">
+                      {getIntensityIcon()}
+                  </div>
+                  <span className="text-2xl font-bold font-headline mt-1 text-white">
+                      {intensity}
+                  </span>
                 </motion.div>
             </AnimatePresence>
             
             <div className="w-full space-y-8">
-              <div className="flex justify-between px-3 text-[10px] uppercase font-black tracking-[0.2em] text-white/50">
+              <div className="flex justify-between px-3 text-[10px] uppercase font-black tracking-[0.2em] text-white/80">
                 <span>Trifle</span>
                 <span>Conflict</span>
                 <span>Critical</span>
@@ -109,17 +111,20 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
                 step={1} 
                 className="py-6"
               />
+              <p className="text-center text-[10px] font-bold uppercase tracking-widest text-white/50">
+                Log intensity to calibrate recovery patterns
+              </p>
             </div>
           </div>
-          <div className="h-10" /> {/* Mobile safety spacer */}
         </div>
 
-        <DialogFooter className="p-10 pt-0 shrink-0">
+        {/* Footer Section */}
+        <DialogFooter className="p-8 pt-0 bg-[#0b0b0f] shrink-0 absolute bottom-0 left-0 w-full border-t border-white/5">
           <motion.button 
-            whileHover={{ scale: 1.05, shadow: "0 0 30px rgba(37,99,235,0.5)" }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02, shadow: "0 0 30px rgba(124,58,237,0.4)" }}
+            whileTap={{ scale: 0.96 }}
             type="button"
-            className="w-full h-18 rounded-[2rem] font-black uppercase tracking-widest bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 bg-[length:200%_auto] animate-gradient hover:bg-right transition-all text-white text-base shadow-2xl py-6"
+            className="w-full h-16 rounded-[1.5rem] font-black uppercase tracking-widest bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] hover:bg-right transition-all duration-500 text-white text-sm shadow-2xl flex items-center justify-center gap-2"
             onClick={() => onSubmit(intensity)}
           >
             Confirm Neural Fortification
