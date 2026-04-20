@@ -8,7 +8,9 @@ export const getStoredData = (): UserData => {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) return INITIAL_DATA;
   try {
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    // Merge with INITIAL_DATA to ensure all fields exist even if the backup is old
+    return { ...INITIAL_DATA, ...parsed };
   } catch (e) {
     return INITIAL_DATA;
   }
@@ -29,7 +31,7 @@ export const importData = (jsonStr: string): boolean => {
     const data = JSON.parse(jsonStr);
     // Basic validation
     if (typeof data.currentStreak === 'number' && Array.isArray(data.urges)) {
-      saveData(data);
+      saveData({ ...INITIAL_DATA, ...data });
       return true;
     }
     return false;

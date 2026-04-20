@@ -27,7 +27,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
   const [currentNote, setCurrentNote] = useState("");
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const checkInDates = data.checkIns.map(c => new Date(c.date));
+  const checkInDates = (data.checkIns || []).map(c => new Date(c.date));
   
   const handleDayClick = useCallback((day: Date) => {
     const dateStr = format(day, "yyyy-MM-dd");
@@ -37,7 +37,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
   const handleLongPressStart = (day: Date) => {
     longPressTimer.current = setTimeout(() => {
       const dateStr = format(day, "yyyy-MM-dd");
-      const existingNote = data.notes.find(n => n.date === dateStr);
+      const existingNote = (data.notes || []).find(n => n.date === dateStr);
       setSelectedDate(day);
       setCurrentNote(existingNote?.content || "");
       setNoteMode(true);
@@ -79,7 +79,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                   onDayClick={handleDayClick}
                   className="rounded-3xl border-none"
                   modifiers={{
-                    hasNote: (date) => data.notes.some(n => n.date === format(date, "yyyy-MM-dd"))
+                    hasNote: (date) => (data.notes || []).some(n => n.date === format(date, "yyyy-MM-dd"))
                   }}
                   modifiersStyles={{
                     hasNote: { borderBottom: '2px solid hsl(var(--primary))' }
@@ -94,7 +94,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                       >
                         <button {...props} className={`${props.className} relative`}>
                           {date.getDate()}
-                          {data.notes.some(n => n.date === format(date, "yyyy-MM-dd")) && (
+                          {(data.notes || []).some(n => n.date === format(date, "yyyy-MM-dd")) && (
                             <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-primary rounded-full" />
                           )}
                         </button>
