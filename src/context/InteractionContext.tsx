@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 
-type SystemMode = 'calm' | 'active' | 'focus' | 'risk';
+export type SystemMode = 'calm' | 'active' | 'focus' | 'risk';
 
 interface InteractionState {
   intensity: number; // 0 to 1
@@ -11,6 +11,7 @@ interface InteractionState {
   lastPulse: number;
   triggerPulse: (strength?: number) => void;
   setMode: (mode: SystemMode) => void;
+  recordInteraction: (type: string) => void;
 }
 
 const InteractionContext = createContext<InteractionState | undefined>(undefined);
@@ -19,6 +20,7 @@ export function InteractionProvider({ children }: { children: React.ReactNode })
   const [intensity, setIntensity] = useState(0);
   const [mode, setMode] = useState<SystemMode>('calm');
   const [lastPulse, setLastPulse] = useState(0);
+  const [interactionLog, setInteractionLog] = useState<{ type: string; timestamp: number }[]>([]);
   const decayRef = useRef<number | null>(null);
 
   const triggerPulse = useCallback((strength: number = 0.5) => {
@@ -26,10 +28,28 @@ export function InteractionProvider({ children }: { children: React.ReactNode })
     setLastPulse(Date.now());
   }, []);
 
+  const recordInteraction = useCallback((type: string) => {
+    const now = Date.now();
+    setInteractionLog(prev => [...prev.slice(-20), { type, timestamp: now }]);
+    triggerPulse(0.2);
+  }, [triggerPulse]);
+
+  // Adaptive Mode Controller
+  useEffect(() => {
+    const recentActions = interactionLog.filter(a => Date.now() - a.timestamp < 30000);
+    const urgeCount = recentActions.filter(a => a.type === 'urge').length;
+    const activityCount = recentActions.length;
+
+    if (urgeCount >= 2) setMode('risk');
+    else if (activityCount > 10) setMode('active');
+    else if (mode === 'risk' && urgeCount === 0) setMode('focus');
+    else if (activityCount < 3) setMode('calm');
+  }, [interactionLog, mode]);
+
   // Natural decay of intensity over time
   useEffect(() => {
     const decay = () => {
-      setIntensity(prev => Math.max(0, prev - 0.02));
+      setIntensity(prev => Math.max(0, prev - 0.015));
       decayRef.current = requestAnimationFrame(decay);
     };
     decayRef.current = requestAnimationFrame(decay);
@@ -39,7 +59,7 @@ export function InteractionProvider({ children }: { children: React.ReactNode })
   }, []);
 
   return (
-    <InteractionContext.Provider value={{ intensity, mode, lastPulse, triggerPulse, setMode }}>
+    <InteractionContext.Provider value={{ intensity, mode, lastPulse, triggerPulse, setMode, recordInteraction }}>
       {children}
     </InteractionContext.Provider>
   );

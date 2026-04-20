@@ -27,14 +27,16 @@ import {
 } from '@/lib/discipline-engine';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
-import { Globe } from 'lucide-react';
+import { Globe, AlertCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Magnetic from '@/components/interactions/Magnetic';
 import Tilt from '@/components/interactions/Tilt';
 import Parallax from '@/components/interactions/Parallax';
 import Proximity from '@/components/interactions/Proximity';
+import Draggable from '@/components/interactions/Draggable';
 import { useInteraction } from '@/context/InteractionContext';
 import { feedback } from '@/lib/feedback-engine';
+import { cn } from '@/lib/utils';
 
 const Scene3D = dynamic(() => import('@/components/background/Scene3D'), { 
   ssr: false,
@@ -46,7 +48,7 @@ const springConfig = { type: "spring", stiffness: 100, damping: 20 };
 export default function IronWillDashboard() {
   const router = useRouter();
   const { toast } = useToast();
-  const { triggerPulse, setMode, mode } = useInteraction();
+  const { triggerPulse, setMode, mode, recordInteraction } = useInteraction();
   const [data, setData] = useState<UserData>(INITIAL_DATA);
   const [showRelapseModal, setShowRelapseModal] = useState(false);
   const [showUrgeModal, setShowUrgeModal] = useState(false);
@@ -101,35 +103,31 @@ export default function IronWillDashboard() {
   const handleRelapseSubmit = (reason: string, time: string) => {
     feedback.warning();
     triggerPulse(0.8);
-    setMode('risk');
+    recordInteraction('relapse');
     const newRelapse = { id: Date.now().toString(), timestamp: Date.now(), reason, timeOfDay: time };
     const newData = { ...data, lastRelapseTimestamp: Date.now(), relapses: [newRelapse, ...data.relapses], streakFreezes: Math.max(0, data.streakFreezes - 1) };
     updateState(newData);
     handleCloseModal(setShowRelapseModal);
     toast({ title: "Neural Protocol Reset", description: "Day One. Stay focused." });
-    setTimeout(() => setMode('calm'), 5000);
   };
 
   const handleUrgeSubmit = (intensity: UrgeIntensity) => {
     feedback.success();
     triggerPulse(0.6);
-    setMode('active');
+    recordInteraction('urge');
     const newUrge = { id: Date.now().toString(), timestamp: Date.now(), intensity };
     const newData = { ...data, urges: [newUrge, ...data.urges] };
     updateState(newData);
     handleCloseModal(setShowUrgeModal);
     toast({ title: "Victory Confirmed", description: "You are mastering your mind." });
-    setTimeout(() => setMode('calm'), 3000);
   };
 
   const insights = useMemo(() => getBehavioralInsights(data), [data]);
   const challenge = useMemo(() => getDailyChallenge(data.currentStreak), [data.currentStreak]);
 
   useEffect(() => {
-    if (insights.riskLevel === 'CRITICAL') setMode('risk');
-    else if (data.focusMode) setMode('focus');
-    else setMode('calm');
-  }, [insights.riskLevel, data.focusMode, setMode]);
+    if (data.focusMode && mode !== 'risk') setMode('focus');
+  }, [data.focusMode, mode, setMode]);
 
   if (!mounted) return null;
 
@@ -141,7 +139,10 @@ export default function IronWillDashboard() {
         {isLoading && <LaunchScreen onComplete={() => setIsLoading(false)} />}
       </AnimatePresence>
 
-      <div className="min-h-screen bg-transparent relative flex flex-col selection:bg-primary/30 overflow-x-hidden no-scrollbar">
+      <div className={cn(
+        "min-h-screen relative flex flex-col selection:bg-primary/30 overflow-x-hidden no-scrollbar transition-all duration-1000",
+        mode === 'risk' ? 'bg-red-950/20' : 'bg-transparent'
+      )}>
         <Scene3D 
           streak={data.currentStreak} 
           theme={data.theme || 'dark'} 
@@ -149,7 +150,11 @@ export default function IronWillDashboard() {
           isBlurred={isAnySheetOpen || isLoading}
         />
         
-        <div className={`fixed inset-0 transition-all duration-1000 -z-[5] pointer-events-none ${isAnySheetOpen ? 'bg-black/60 backdrop-blur-md' : 'bg-black/20'}`} />
+        <div className={cn(
+          "fixed inset-0 transition-all duration-1000 -z-[5] pointer-events-none",
+          isAnySheetOpen ? 'bg-black/60 backdrop-blur-md' : 'bg-black/20',
+          mode === 'risk' && 'bg-red-950/30'
+        )} />
 
         {!isLoading && (
           <motion.div
@@ -164,6 +169,7 @@ export default function IronWillDashboard() {
               data={data}
               onThemeChange={(t) => {
                 feedback.tap();
+                recordInteraction('theme');
                 updateState({ ...data, theme: t });
               }}
               onReset={() => { 
@@ -172,6 +178,7 @@ export default function IronWillDashboard() {
               }}
               onToggleFocus={() => {
                 feedback.tap();
+                recordInteraction('focus_toggle');
                 updateState({ ...data, focusMode: !data.focusMode });
               }}
               onShowExport={() => handleOpenModal(setShowExportModal)}
@@ -185,24 +192,52 @@ export default function IronWillDashboard() {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ ...springConfig, delay: 0.2 }}
-              className="flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-8 py-8 pb-40"
+              className={cn(
+                "flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-8 py-8 pb-40 transition-all duration-700",
+                mode === 'focus' ? 'gap-4' : 'gap-8'
+              )}
             >
-              <Parallax offset={15}>
-                <StreakDisplay 
-                  current={data.currentStreak} 
-                  best={data.bestStreak} 
-                  focusMode={data.focusMode} 
-                  freezes={data.streakFreezes}
-                  onUseFreeze={() => {
-                    if (data.streakFreezes > 0) {
-                      feedback.success();
-                      triggerPulse(0.5);
-                      updateState({ ...data, streakFreezes: data.streakFreezes - 1 });
-                      toast({ title: "Freeze Activated", description: "Integrity preserved." });
-                    }
-                  }}
-                />
-              </Parallax>
+              <Draggable>
+                <Parallax offset={15}>
+                  <StreakDisplay 
+                    current={data.currentStreak} 
+                    best={data.bestStreak} 
+                    focusMode={data.focusMode} 
+                    freezes={data.streakFreezes}
+                    onUseFreeze={() => {
+                      if (data.streakFreezes > 0) {
+                        feedback.success();
+                        triggerPulse(0.5);
+                        recordInteraction('freeze');
+                        updateState({ ...data, streakFreezes: data.streakFreezes - 1 });
+                        toast({ title: "Freeze Activated", description: "Integrity preserved." });
+                      }
+                    }}
+                  />
+                </Parallax>
+              </Draggable>
+
+              {mode === 'risk' && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="p-6 rounded-[2rem] bg-red-500/10 border border-red-500/20 flex flex-col gap-4"
+                >
+                  <div className="flex items-center gap-3 text-red-500">
+                    <AlertCircle size={24} className="animate-pulse" />
+                    <h3 className="font-bold uppercase tracking-widest text-sm">Instability Detected</h3>
+                  </div>
+                  <p className="text-xs text-white/60 leading-relaxed font-medium">
+                    You've recorded multiple urges recently. Your neural resilience is under pressure. Switch to focus mode or use the emergency protocol.
+                  </p>
+                  <Button 
+                    onClick={() => handleOpenModal(setShowEmergencyModal)}
+                    className="w-full bg-red-500 hover:bg-red-600 text-white font-bold h-12 rounded-xl"
+                  >
+                    Deploy Emergency Protocol
+                  </Button>
+                </motion.div>
+              )}
 
               <Proximity range={400}>
                 <Magnetic strength={0.2}>
@@ -216,7 +251,10 @@ export default function IronWillDashboard() {
                         feedback.tap();
                         router.push('/browser');
                       }}
-                      className="h-20 rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex items-center justify-between px-8"
+                      className={cn(
+                        "h-20 rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex items-center justify-between px-8",
+                        mode === 'focus' && 'h-16'
+                      )}
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-primary/20 text-primary rounded-2xl flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-all">
@@ -227,10 +265,7 @@ export default function IronWillDashboard() {
                           <p className="text-white/20 text-[9px] uppercase font-black tracking-[0.2em]">Guardian Protected</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                        <span className="text-[9px] font-black uppercase text-green-500/50">Active</span>
-                      </div>
+                      <ArrowRight size={18} className="text-white/20 group-hover:text-primary transition-colors" />
                     </Button>
                   </motion.div>
                 </Magnetic>
@@ -242,6 +277,7 @@ export default function IronWillDashboard() {
                   if (!data.checkIns.some(c => c.date === today)) {
                     feedback.success();
                     triggerPulse(0.4);
+                    recordInteraction('checkin');
                     updateState({ ...data, checkIns: [{ date: today, timestamp: Date.now() }, ...data.checkIns] });
                     toast({ title: "Protocol Marked Clean", description: "Consistency is power." });
                   }
@@ -266,16 +302,18 @@ export default function IronWillDashboard() {
                 />
               </Tilt>
 
-              {!data.focusMode && (
+              {mode !== 'focus' && (
                 <Parallax offset={10}>
-                  <motion.div 
-                    whileHover={{ scale: 1.02, y: -10, rotateX: 2 }}
-                    transition={springConfig}
-                    className="glass-card p-8 rounded-[3rem] bg-card/20 border-white/5 perspective-1000"
-                  >
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 opacity-60">Neural Task</h4>
-                    <p className="text-lg font-bold leading-relaxed text-foreground/90">{challenge}</p>
-                  </motion.div>
+                  <Draggable>
+                    <motion.div 
+                      whileHover={{ scale: 1.02, y: -10, rotateX: 2 }}
+                      transition={springConfig}
+                      className="glass-card p-8 rounded-[3rem] bg-card/20 border-white/5 perspective-1000"
+                    >
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 opacity-60">Neural Task</h4>
+                      <p className="text-lg font-bold leading-relaxed text-foreground/90">{challenge}</p>
+                    </motion.div>
+                  </Draggable>
                 </Parallax>
               )}
             </motion.main>
