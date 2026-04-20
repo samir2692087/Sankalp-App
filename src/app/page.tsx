@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -13,6 +14,7 @@ import ExportModal from '@/components/modals/ExportModal';
 import InsightsSheet from '@/components/modals/InsightsSheet';
 import EmergencyModal from '@/components/modals/EmergencyModal';
 import CalendarSheet from '@/components/modals/CalendarSheet';
+import BrowserModal from '@/components/browser/BrowserModal';
 import FAB from '@/components/dashboard/FAB';
 import { UserData, INITIAL_DATA, AppTheme, UrgeIntensity } from '@/lib/types';
 import { getStoredData, saveData, clearData } from '@/lib/storage';
@@ -24,6 +26,8 @@ import {
 } from '@/lib/discipline-engine';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
+import { Globe } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 // Dynamically import the 3D scene with SSR disabled
 const Scene3D = dynamic(() => import('@/components/background/Scene3D'), { 
@@ -40,6 +44,7 @@ export default function IronWillDashboard() {
   const [showInsightsSheet, setShowInsightsSheet] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [showCalendarSheet, setShowCalendarSheet] = useState(false);
+  const [showBrowserModal, setShowBrowserModal] = useState(false);
   const [insightsTab, setInsightsTab] = useState('milestones');
   const [mounted, setMounted] = useState(false);
 
@@ -142,7 +147,7 @@ export default function IronWillDashboard() {
 
   if (!mounted) return null;
 
-  const isAnySheetOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal || showCalendarSheet;
+  const isAnySheetOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal || showCalendarSheet || showBrowserModal;
 
   return (
     <div className="min-h-screen bg-transparent relative flex flex-col selection:bg-primary/30 overflow-x-hidden no-scrollbar">
@@ -185,6 +190,27 @@ export default function IronWillDashboard() {
             }
           }}
         />
+
+        <div className="grid grid-cols-1 gap-4 w-full">
+           <Button 
+            onClick={() => handleOpenModal(setShowBrowserModal)}
+            className="h-16 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/10 transition-all group flex items-center justify-between px-8"
+           >
+             <div className="flex items-center gap-4">
+               <div className="w-10 h-10 bg-primary/20 text-primary rounded-xl flex items-center justify-center group-hover:shadow-[0_0_15px_rgba(124,58,237,0.4)] transition-all">
+                 <Globe size={20} />
+               </div>
+               <div className="text-left">
+                 <p className="text-white font-bold text-sm">Discipline Browser</p>
+                 <p className="text-white/40 text-[9px] uppercase font-black tracking-widest">AI Protected Session</p>
+               </div>
+             </div>
+             <div className="flex items-center gap-2">
+               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+               <span className="text-[9px] font-black uppercase text-green-500/70">Guardian Online</span>
+             </div>
+           </Button>
+        </div>
         
         <ActionCards 
           onCheckIn={() => {
@@ -244,6 +270,7 @@ export default function IronWillDashboard() {
       {showCalendarSheet && <CalendarSheet isOpen={showCalendarSheet} onClose={() => handleCloseModal(setShowCalendarSheet)} data={data} onToggleDate={() => {}} onSaveNote={() => {}} />}
       {showEmergencyModal && <EmergencyModal isOpen={showEmergencyModal} onClose={() => handleCloseModal(setShowEmergencyModal)} />}
       {showExportModal && <ExportModal isOpen={showExportModal} onClose={() => handleCloseModal(setShowExportModal)} data={data} onDataImport={() => {}} />}
+      {showBrowserModal && <BrowserModal isOpen={showBrowserModal} onClose={() => handleCloseModal(setShowBrowserModal)} streak={data.currentStreak} />}
     </div>
   );
 }
