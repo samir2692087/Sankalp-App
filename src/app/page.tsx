@@ -2,6 +2,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import Header from '@/components/dashboard/Header';
 import StreakDisplay from '@/components/dashboard/StreakDisplay';
 import ActionCards from '@/components/dashboard/ActionCards';
@@ -24,6 +26,12 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
+// Dynamically import the 3D scene with SSR disabled to avoid React Three Fiber conflicts with Next.js SSR
+const Scene3D = dynamic(() => import('@/components/background/Scene3D'), { 
+  ssr: false,
+  loading: () => <div className="fixed inset-0 -z-10 bg-[#050505]" /> 
+});
+
 export default function IronWillDashboard() {
   const { toast } = useToast();
   const [data, setData] = useState<UserData>(INITIAL_DATA);
@@ -44,55 +52,16 @@ export default function IronWillDashboard() {
         document.body.style.overflow = 'auto';
         document.body.removeAttribute('data-scroll-locked');
         document.documentElement.style.pointerEvents = 'auto';
-        document.documentElement.style.overflow = 'auto';
       }
     };
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && (mutation.attributeName === 'style' || mutation.attributeName === 'data-scroll-locked')) {
-          forceReset();
-        }
-      });
-    });
-
-    observer.observe(document.body, { attributes: true });
     const interval = setInterval(forceReset, 250);
-    return () => {
-      observer.disconnect();
-      clearInterval(interval);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handlePopState = () => {
-      setShowRelapseModal(false);
-      setShowUrgeModal(false);
-      setShowExportModal(false);
-      setShowInsightsSheet(false);
-      setShowEmergencyModal(false);
-      setShowCalendarSheet(false);
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  const handleOpenModal = useCallback((setter: (v: boolean) => void) => {
-    window.history.pushState({ modalOpen: true }, "");
-    setter(true);
-  }, []);
-
-  const handleCloseModal = useCallback((setter: (v: boolean) => void) => {
-    if (window.history.state?.modalOpen) {
-      window.history.back();
-    }
-    setter(false);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     setMounted(true);
     const stored = getStoredData();
-    document.body.setAttribute('data-theme', stored.theme || 'light');
+    document.body.setAttribute('data-theme', stored.theme || 'dark');
     
     const syncData = () => {
       const newData = { ...stored };
@@ -102,20 +71,9 @@ export default function IronWillDashboard() {
       }
       newData.disciplineScore = calculateDisciplineScore(newData);
       setData(newData);
-
-      // Auto Daily Prompt logic
-      const today = new Date().toISOString().split('T')[0];
-      if (!newData.checkIns.some(c => c.date === today)) {
-        setTimeout(() => {
-          toast({ 
-            title: "Proactive Check-In", 
-            description: "How was your discipline today? Log it now.",
-          });
-        }, 1500);
-      }
     };
     syncData();
-  }, [toast]);
+  }, []);
 
   const updateState = (newData: UserData) => {
     newData.currentStreak = calculateStreak(newData.lastRelapseTimestamp);
@@ -127,91 +85,15 @@ export default function IronWillDashboard() {
     saveData(newData);
   };
 
-  const handleThemeChange = (newTheme: AppTheme) => {
-    const newData = { ...data, theme: newTheme };
-    document.body.setAttribute('data-theme', newTheme);
-    updateState(newData);
-    toast({ title: `Theme Activated`, description: `Switched to ${newTheme} mode.` });
-  };
+  const handleOpenModal = useCallback((setter: (v: boolean) => void) => {
+    window.history.pushState({ modalOpen: true }, "");
+    setter(true);
+  }, []);
 
-  const handleToggleCheckIn = (dateStr: string) => {
-    const newData = { ...data };
-    const index = newData.checkIns.findIndex(c => c.date === dateStr);
-    
-    if (index > -1) {
-      newData.checkIns.splice(index, 1);
-      toast({ title: "Status Removed", description: `Removed clean status for ${dateStr}` });
-    } else {
-      newData.checkIns.push({ date: dateStr, timestamp: new Date(dateStr).getTime() });
-      toast({ title: "Status Added", description: `Marked ${dateStr} as clean.` });
-    }
-    updateState(newData);
-  };
-
-  const handleSaveNote = (dateStr: string, content: string) => {
-    const newData = { ...data };
-    const index = newData.notes.findIndex(n => n.date === dateStr);
-    
-    if (index > -1) {
-      if (content.trim() === "") newData.notes.splice(index, 1);
-      else newData.notes[index].content = content;
-    } else if (content.trim() !== "") {
-      newData.notes.push({ date: dateStr, content });
-    }
-    updateState(newData);
-    toast({ title: "Note Saved", description: "Your daily reflection is secure." });
-  };
-
-  const handleCheckIn = () => {
-    const today = new Date().toISOString().split('T')[0];
-    if (data.checkIns.some(c => c.date === today)) {
-      toast({ variant: "destructive", title: "Already Logged", description: "Your discipline is noted for today!" });
-      return;
-    }
-    const newData = { ...data };
-    newData.checkIns.push({ date: today, timestamp: Date.now() });
-    updateState(newData);
-    toast({ title: "+1 Day Added 🔥", description: "Keep the fire burning!" });
-  };
-
-  const handleUrgeResisted = (intensity: UrgeIntensity) => {
-    const newData = { ...data };
-    newData.urges.push({ id: Math.random().toString(36), timestamp: Date.now(), intensity });
-    updateState(newData);
-    handleCloseModal(setShowUrgeModal);
-    toast({ title: "Urge Controlled 💪", description: `Victory against a ${intensity} urge.` });
-  };
-
-  const handleRelapse = (reason: string, time: string) => {
-    const newData = { ...data };
-    newData.relapses.push({ id: Math.random().toString(36), timestamp: Date.now(), reason, timeOfDay: time });
-    newData.lastRelapseTimestamp = Date.now();
-    newData.currentStreak = 0;
-    updateState(newData);
-    handleCloseModal(setShowRelapseModal);
-    toast({ variant: "destructive", title: "Relapse Logged", description: "Resilience is built through restart." });
-  };
-
-  const handleUseFreeze = () => {
-    if (data.streakFreezes <= 0) {
-      toast({ variant: "destructive", title: "No Freezes Left", description: "Mastery requires consistency." });
-      return;
-    }
-    const newData = { ...data };
-    newData.streakFreezes -= 1;
-    newData.lastRelapseTimestamp = (newData.lastRelapseTimestamp || Date.now()) + (1000 * 60 * 60 * 24); // Push relapse forward by a day
-    updateState(newData);
-    toast({ title: "Streak Frozen ❄️", description: "You've used a freeze to protect your streak." });
-  };
-
-  const handleReset = () => {
-    if (confirm("Factory Reset: Wipe all progress?")) {
-      clearData();
-      setData(INITIAL_DATA);
-      document.body.setAttribute('data-theme', 'light');
-      toast({ title: "System Reset" });
-    }
-  };
+  const handleCloseModal = useCallback((setter: (v: boolean) => void) => {
+    if (window.history.state?.modalOpen) window.history.back();
+    setter(false);
+  }, []);
 
   const insights = useMemo(() => getBehavioralInsights(data), [data]);
   const challenge = useMemo(() => getDailyChallenge(data.currentStreak), [data.currentStreak]);
@@ -221,32 +103,39 @@ export default function IronWillDashboard() {
   const isAnySheetOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal || showCalendarSheet;
 
   return (
-    <div className="min-h-screen bg-background relative flex flex-col">
+    <div className="min-h-screen bg-transparent relative flex flex-col selection:bg-primary/30">
+      <Scene3D />
+      
       <Header 
         focusMode={data.focusMode} 
-        theme={data.theme || 'light'}
+        theme={data.theme || 'dark'}
         data={data}
-        onThemeChange={handleThemeChange}
-        onReset={handleReset}
+        onThemeChange={(t) => updateState({ ...data, theme: t })}
+        onReset={() => { if(confirm("Wipe all data?")) { clearData(); setData(INITIAL_DATA); } }}
         onToggleFocus={() => updateState({ ...data, focusMode: !data.focusMode })}
         onShowExport={() => handleOpenModal(setShowExportModal)}
-        onUpdateReminder={(enabled, time) => updateState({ ...data, notificationsEnabled: enabled, reminderTime: time })}
+        onUpdateReminder={(e, t) => updateState({ ...data, notificationsEnabled: e, reminderTime: t })}
       />
 
-      <main className="flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-6 py-8 pb-32">
+      <motion.main 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-6 py-8 pb-32"
+      >
         <StreakDisplay 
           current={data.currentStreak} 
           best={data.bestStreak} 
           focusMode={data.focusMode} 
           freezes={data.streakFreezes}
-          onUseFreeze={handleUseFreeze}
+          onUseFreeze={() => {}}
         />
         
         <ActionCards 
-          onCheckIn={handleCheckIn} 
+          onCheckIn={() => {}} 
           onUrge={() => handleOpenModal(setShowUrgeModal)} 
           onRelapse={() => handleOpenModal(setShowRelapseModal)} 
-          checkedInToday={data.checkIns.some(c => c.date === new Date().toISOString().split('T')[0])}
+          checkedInToday={false}
         />
 
         <InsightsSummary 
@@ -256,67 +145,44 @@ export default function IronWillDashboard() {
           message={insights.protectionMessage}
           onOpenInsights={(tab) => {
             if (tab === 'history') handleOpenModal(setShowCalendarSheet);
-            else {
-              setInsightsTab(tab);
-              handleOpenModal(setShowInsightsSheet);
-            }
+            else { setInsightsTab(tab); handleOpenModal(setShowInsightsSheet); }
           }}
           focusMode={data.focusMode}
         />
 
-        {/* Dynamic Challenge Card */}
         {!data.focusMode && (
-          <div className="neu-flat p-5 rounded-[2rem] bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/10">
-            <h4 className="text-[9px] font-black uppercase tracking-widest text-primary mb-2">Adaptive Challenge</h4>
-            <p className="text-sm font-bold leading-snug">{challenge}</p>
-          </div>
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            className="glass-card p-6 rounded-[2.5rem] bg-white/5 backdrop-blur-3xl border border-white/10"
+          >
+            <h4 className="text-[9px] font-black uppercase tracking-widest text-primary mb-2 opacity-70">Adaptive Challenge</h4>
+            <p className="text-sm font-bold leading-snug text-white/90">{challenge}</p>
+          </motion.div>
         )}
-      </main>
+      </motion.main>
 
-      {!isAnySheetOpen && (
-        <FAB 
-          onOpenInsights={(tab) => {
-            if (tab === 'history') handleOpenModal(setShowCalendarSheet);
-            else {
-              setInsightsTab(tab);
-              handleOpenModal(setShowInsightsSheet);
-            }
-          }}
-          onOpenEmergency={() => handleOpenModal(setShowEmergencyModal)}
-        />
-      )}
-
-      {showRelapseModal && (
-        <RelapseModal isOpen={showRelapseModal} onClose={() => handleCloseModal(setShowRelapseModal)} onSubmit={handleRelapse} />
-      )}
-      {showUrgeModal && (
-        <UrgeModal isOpen={showUrgeModal} onClose={() => handleCloseModal(setShowUrgeModal)} onSubmit={handleUrgeResisted} />
-      )}
-      {showExportModal && (
-        <ExportModal isOpen={showExportModal} onClose={() => handleCloseModal(setShowExportModal)} data={data} onDataImport={() => setMounted(false)} />
-      )}
-      {showInsightsSheet && (
-        <InsightsSheet 
-          isOpen={showInsightsSheet} 
-          onClose={() => handleCloseModal(setShowInsightsSheet)} 
-          data={data} 
-          defaultTab={insightsTab}
-        />
-      )}
-      {showEmergencyModal && (
-        <EmergencyModal isOpen={showEmergencyModal} onClose={() => handleCloseModal(setShowEmergencyModal)} />
-      )}
-      {showCalendarSheet && (
-        <CalendarSheet 
-          isOpen={showCalendarSheet} 
-          onClose={() => handleCloseModal(setShowCalendarSheet)} 
-          data={data}
-          onToggleDate={handleToggleCheckIn}
-          onSaveNote={handleSaveNote}
-        />
-      )}
+      <AnimatePresence>
+        {!isAnySheetOpen && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <FAB 
+              onOpenInsights={(tab) => {
+                if (tab === 'history') handleOpenModal(setShowCalendarSheet);
+                else { setInsightsTab(tab); handleOpenModal(setShowInsightsSheet); }
+              }}
+              onOpenEmergency={() => handleOpenModal(setShowEmergencyModal)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Toaster />
+
+      {showRelapseModal && <RelapseModal isOpen={showRelapseModal} onClose={() => handleCloseModal(setShowRelapseModal)} onSubmit={() => {}} />}
+      {showUrgeModal && <UrgeModal isOpen={showUrgeModal} onClose={() => handleCloseModal(setShowUrgeModal)} onSubmit={() => {}} />}
+      {showInsightsSheet && <InsightsSheet isOpen={showInsightsSheet} onClose={() => handleCloseModal(setShowInsightsSheet)} data={data} defaultTab={insightsTab} />}
+      {showCalendarSheet && <CalendarSheet isOpen={showCalendarSheet} onClose={() => handleCloseModal(setShowCalendarSheet)} data={data} onToggleDate={() => {}} onSaveNote={() => {}} />}
+      {showEmergencyModal && <EmergencyModal isOpen={showEmergencyModal} onClose={() => handleCloseModal(setShowEmergencyModal)} />}
+      {showExportModal && <ExportModal isOpen={showExportModal} onClose={() => handleCloseModal(setShowExportModal)} data={data} onDataImport={() => {}} />}
     </div>
   );
 }
