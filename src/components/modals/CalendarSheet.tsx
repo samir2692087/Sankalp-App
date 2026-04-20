@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { X, StickyNote, Save } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from '@/lib/utils';
 
 interface CalendarSheetProps {
   isOpen: boolean;
@@ -102,23 +103,30 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                       if (!date) return null;
 
                       return (
-                        <div 
-                          onPointerDown={() => handleLongPressStart(date)}
-                          onPointerUp={handleLongPressEnd}
-                          onPointerLeave={handleLongPressEnd}
-                          className="relative"
+                        <td 
+                          className={cn(props.className, "p-0 relative")} 
+                          role="presentation"
                         >
                           <button 
                             type="button"
-                            {...props} 
-                            className={`${props.className || ''} relative`}
+                            {...props}
+                            onPointerDown={() => handleLongPressStart(date)}
+                            onPointerUp={handleLongPressEnd}
+                            onPointerLeave={handleLongPressEnd}
+                            className={cn(
+                              "h-9 w-9 p-0 font-normal flex items-center justify-center rounded-md relative transition-colors",
+                              modifiers.selected && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                              modifiers.today && "bg-accent text-accent-foreground",
+                              modifiers.outside && "text-muted-foreground opacity-50",
+                              modifiers.hasNote && "border-b-2 border-primary"
+                            )}
                           >
                             {date.getDate()}
                             {(data?.notes || []).some(n => n.date === format(date, "yyyy-MM-dd")) && (
                               <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-primary rounded-full" />
                             )}
                           </button>
-                        </div>
+                        </td>
                       );
                     }
                   }}
