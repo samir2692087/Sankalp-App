@@ -221,7 +221,7 @@ export default function IronWillDashboard() {
   const isAnySheetOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal || showCalendarSheet;
 
   return (
-    <div className="h-screen bg-background relative overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-background relative flex flex-col">
       <Header 
         focusMode={data.focusMode} 
         theme={data.theme || 'light'}
@@ -233,7 +233,7 @@ export default function IronWillDashboard() {
         onUpdateReminder={(enabled, time) => updateState({ ...data, notificationsEnabled: enabled, reminderTime: time })}
       />
 
-      <main className="flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-4 justify-center pb-20 overflow-hidden">
+      <main className="flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-6 py-8 pb-32">
         <StreakDisplay 
           current={data.currentStreak} 
           best={data.bestStreak} 
