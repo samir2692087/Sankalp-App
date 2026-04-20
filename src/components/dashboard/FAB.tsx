@@ -15,16 +15,16 @@ export default function FAB({ onCheckIn, onUrge, onRelapse, disabledCheckIn }: F
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) {
-      const cleanup = () => {
+    const forceCleanup = () => {
+      if (!isOpen) {
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
-        document.documentElement.style.pointerEvents = 'auto';
-      };
-      cleanup();
-      const timer = setTimeout(cleanup, 300);
-      return () => clearTimeout(timer);
-    }
+        document.body.removeAttribute('data-scroll-locked');
+      }
+    };
+    forceCleanup();
+    const timer = setTimeout(forceCleanup, 300);
+    return () => clearTimeout(timer);
   }, [isOpen]);
 
   const closeMenu = () => {

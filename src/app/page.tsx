@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Header from '@/components/dashboard/Header';
 import StreakDisplay from '@/components/dashboard/StreakDisplay';
 import ActionCards from '@/components/dashboard/ActionCards';
@@ -28,32 +28,40 @@ export default function IronWillDashboard() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // CRITICAL INTERACTION CLEANUP ENGINE
+  // ULTIMATE INTERACTION CLEANUP ENGINE
   // This ensures that even if Radix/ShadCN components fail to clean up their 
   // focus traps or pointer-event locks, the page remains interactive.
   useEffect(() => {
     const isAnyModalOpen = showRelapseModal || showUrgeModal || showExportModal;
     
     if (!isAnyModalOpen) {
-      const cleanup = () => {
-        // Reset styles on body and html
+      const forceCleanup = () => {
+        // Reset styles on body and html to restore clickability
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
+        document.body.style.userSelect = 'auto';
         document.documentElement.style.pointerEvents = 'auto';
         document.documentElement.style.overflow = 'auto';
         
-        // Remove Radix-specific lock attributes if they persist
+        // Aggressively remove Radix-specific lock attributes
         document.body.removeAttribute('data-scroll-locked');
         document.documentElement.removeAttribute('data-scroll-locked');
+        
+        // Remove any lingering portal containers if they're empty
+        const portals = document.querySelectorAll('[data-radix-portal]');
+        portals.forEach(portal => {
+          if (portal.children.length === 0) portal.remove();
+        });
       };
 
-      // Execute immediately and then after a short delay to catch late-cleanup issues
-      cleanup();
-      const timer = setTimeout(cleanup, 100);
-      const timer2 = setTimeout(cleanup, 500);
+      // Execute immediately and then poll briefly to ensure late-cleanup components are caught
+      forceCleanup();
+      const interval = setInterval(forceCleanup, 100);
+      const timer = setTimeout(() => clearInterval(interval), 1000);
+      
       return () => {
+        clearInterval(interval);
         clearTimeout(timer);
-        clearTimeout(timer2);
       };
     }
   }, [showRelapseModal, showUrgeModal, showExportModal]);

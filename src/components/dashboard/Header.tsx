@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings, Download, Trash2, Palette, Sun, Moon, Sparkles, Terminal, Shield, Zap, ChevronRight, Check, ArrowLeft, X } from 'lucide-react';
 import {
   DropdownMenu,
@@ -9,9 +9,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -40,34 +37,35 @@ interface HeaderProps {
 export default function Header({ focusMode, theme, data, onThemeChange, onReset, onToggleFocus, onShowExport }: HeaderProps) {
   const isMobile = useIsMobile();
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // Robust interaction cleanup for the theme sheet
+  // Interaction safety cleanup
   useEffect(() => {
-    if (!isThemeSheetOpen) {
-      const cleanup = () => {
+    if (!isThemeSheetOpen && !isSettingsOpen) {
+      const resetUI = () => {
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
-        document.documentElement.style.pointerEvents = 'auto';
-        document.documentElement.style.overflow = 'auto';
+        document.body.removeAttribute('data-scroll-locked');
       };
-      
-      cleanup();
-      const timer = setTimeout(cleanup, 300);
+      resetUI();
+      const timer = setTimeout(resetUI, 300);
       return () => clearTimeout(timer);
     }
-  }, [isThemeSheetOpen]);
+  }, [isThemeSheetOpen, isSettingsOpen]);
 
   useEffect(() => {
     const handlePopState = () => {
       setIsThemeSheetOpen(false);
+      setIsSettingsOpen(false);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const openThemeSheet = () => {
+    setIsSettingsOpen(false); // Close dropdown first
     window.history.pushState({ themeSheetOpen: true }, "");
-    setIsThemeSheetOpen(true);
+    setTimeout(() => setIsThemeSheetOpen(true), 100);
   };
 
   const closeThemeSheet = () => {
@@ -134,15 +132,15 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
             <Shield className="text-primary-foreground" size={20} />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold font-headline leading-none">IronWill</h1>
+            <h1 className="text-xl sm:text-2xl font-bold font-headline leading-none text-foreground">IronWill</h1>
             <p className="text-[10px] uppercase tracking-[0.2em] font-black text-muted-foreground leading-none mt-1">Discipline Pro</p>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <DropdownMenu modal={true}>
+          <DropdownMenu open={isSettingsOpen} onOpenChange={setIsSettingsOpen} modal={true}>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="rounded-2xl p-2 neu-button h-10 sm:h-12 flex items-center gap-2 px-4 sm:px-5 group outline-none border-none">
+              <Button variant="ghost" className="rounded-2xl p-2 neu-button h-10 sm:h-12 flex items-center gap-2 px-4 sm:px-5 group outline-none border-none bg-card">
                 <Settings size={20} className="group-hover:rotate-90 transition-transform duration-500" />
                 <span className="hidden sm:inline font-bold uppercase text-xs tracking-widest">Settings</span>
               </Button>
@@ -157,7 +155,10 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
                 <DropdownMenuSeparator className="opacity-10" />
                 
                 <DropdownMenuItem 
-                  onSelect={openThemeSheet}
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    openThemeSheet();
+                  }}
                   className="rounded-2xl p-4 cursor-pointer flex items-center justify-between hover:bg-primary/5 focus:bg-primary/5 outline-none"
                 >
                   <div className="flex items-center gap-3">
@@ -167,12 +168,24 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
                   <ChevronRight size={16} className="opacity-50" />
                 </DropdownMenuItem>
 
-                <DropdownMenuItem onClick={onShowExport} className="rounded-2xl p-4 cursor-pointer flex items-center gap-3 hover:bg-primary/5 focus:bg-primary/5 outline-none">
+                <DropdownMenuItem 
+                  onSelect={() => {
+                    setIsSettingsOpen(false);
+                    onShowExport();
+                  }}
+                  className="rounded-2xl p-4 cursor-pointer flex items-center gap-3 hover:bg-primary/5 focus:bg-primary/5 outline-none"
+                >
                   <Download size={20} className="text-secondary" />
                   <span className="font-bold">Export Center</span>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem onClick={onToggleFocus} className="rounded-2xl p-4 cursor-pointer flex items-center justify-between hover:bg-primary/5 focus:bg-primary/5 outline-none">
+                <DropdownMenuItem 
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    onToggleFocus();
+                  }}
+                  className="rounded-2xl p-4 cursor-pointer flex items-center justify-between hover:bg-primary/5 focus:bg-primary/5 outline-none"
+                >
                   <div className="flex items-center gap-3">
                     <Zap size={20} className={focusMode ? 'text-primary' : ''} />
                     <span className="font-bold">Focus Mode</span>
@@ -184,7 +197,13 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
 
                 <DropdownMenuSeparator className="opacity-10" />
                 
-                <DropdownMenuItem onClick={onReset} className="rounded-2xl p-4 cursor-pointer flex items-center gap-3 text-red-500 hover:bg-red-500/10 focus:bg-red-500/10 outline-none">
+                <DropdownMenuItem 
+                  onSelect={() => {
+                    setIsSettingsOpen(false);
+                    onReset();
+                  }}
+                  className="rounded-2xl p-4 cursor-pointer flex items-center gap-3 text-red-500 hover:bg-red-500/10 focus:bg-red-500/10 outline-none"
+                >
                   <Trash2 size={20} />
                   <span className="font-bold uppercase text-xs tracking-widest">Hard Reset</span>
                 </DropdownMenuItem>
@@ -194,30 +213,32 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
         </div>
       </header>
 
-      <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
-        <SheetContent 
-          side={isMobile ? "bottom" : "right"} 
-          className={cn(
-            "theme-sheet glass-card border-none z-[10000] p-8 pb-12",
-            isMobile ? "rounded-t-[3.5rem]" : "rounded-l-[3.5rem] max-w-md"
-          )}
-        >
-          <div className="theme-sheet-handle" />
-          <div className="flex items-center justify-between mb-8">
-            <Button variant="ghost" onClick={closeThemeSheet} className="p-0 h-auto hover:bg-transparent">
-              <ArrowLeft size={24} />
-            </Button>
-            <SheetTitle className="text-2xl font-bold font-headline text-center flex-1">Visual Identity</SheetTitle>
-            <SheetClose asChild>
-              <Button variant="ghost" className="opacity-70 hover:opacity-100 p-0 h-auto">
-                <X className="h-6 w-6" />
+      {isThemeSheetOpen && (
+        <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
+          <SheetContent 
+            side={isMobile ? "bottom" : "right"} 
+            className={cn(
+              "theme-sheet glass-card border-none z-[10000] p-8 pb-12",
+              isMobile ? "rounded-t-[3.5rem]" : "rounded-l-[3.5rem] max-w-md"
+            )}
+          >
+            <div className="theme-sheet-handle" />
+            <div className="flex items-center justify-between mb-8">
+              <Button variant="ghost" onClick={closeThemeSheet} className="p-0 h-auto hover:bg-transparent">
+                <ArrowLeft size={24} />
               </Button>
-            </SheetClose>
-          </div>
-          <SheetDescription className="text-center font-medium mb-6">Customize your environment for better discipline.</SheetDescription>
-          <ThemeCards />
-        </SheetContent>
-      </Sheet>
+              <SheetTitle className="text-2xl font-bold font-headline text-center flex-1">Visual Identity</SheetTitle>
+              <SheetClose asChild>
+                <Button variant="ghost" className="opacity-70 hover:opacity-100 p-0 h-auto">
+                  <X className="h-6 w-6" />
+                </Button>
+              </SheetClose>
+            </div>
+            <SheetDescription className="text-center font-medium mb-6">Customize your environment for better discipline.</SheetDescription>
+            <ThemeCards />
+          </SheetContent>
+        </Sheet>
+      )}
     </>
   );
 }
