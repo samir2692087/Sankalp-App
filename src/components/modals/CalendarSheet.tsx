@@ -64,8 +64,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[70vh] rounded-t-[3.5rem] p-0 border-none glass-card outline-none overflow-hidden flex flex-col animate-in slide-in-from-bottom duration-500 ease-out">
-        {/* Accessible Titles (Visually Hidden) */}
+      <SheetContent side="bottom" className="h-[80vh] max-h-[80vh] rounded-t-[3.5rem] p-0 border-none glass-card outline-none flex flex-col animate-in slide-in-from-bottom duration-500 ease-out overflow-hidden">
         <div className="sr-only">
           <SheetTitle>Mastery Calendar</SheetTitle>
           <SheetDescription>Review your discipline history, toggle status, and add personal notes.</SheetDescription>
@@ -76,7 +75,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
         <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col items-center">
           {!noteMode ? (
             <div className="w-full max-w-sm flex flex-col items-center">
-              <div className="w-full flex justify-between items-center mb-8">
+              <div className="w-full flex justify-between items-center mb-6">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                     <CalendarIcon size={16} />
@@ -88,17 +87,18 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                 </Button>
               </div>
 
-              <div className="neu-flat p-4 rounded-[2.5rem] bg-card w-full border border-white/5">
+              <div className="neu-flat p-6 rounded-[2.5rem] bg-card w-full border border-white/5 flex flex-col items-center">
                 <Calendar 
                   mode="multiple" 
                   selected={checkInDates}
                   onDayClick={handleDayClick}
-                  className="p-0"
+                  className="p-0 w-full"
                   components={{
                     Day: (dayProps: any) => {
-                      const { date, displayMonth, modifiers, ...props } = dayProps;
-                      if (!date) return null;
-
+                      const { day, modifiers, ...props } = dayProps;
+                      if (!day?.date) return null;
+                      
+                      const date = day.date;
                       const dateStr = format(date, "yyyy-MM-dd");
                       const hasNote = (data?.notes || []).some(n => n.date === dateStr);
                       const isSelected = modifiers?.selected;
@@ -131,16 +131,13 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                 />
               </div>
               
-              <div className="mt-10 flex flex-col gap-3 w-full">
+              <div className="mt-8 flex flex-col gap-3 w-full">
                 <div className="flex items-center justify-center gap-6">
                   <div className="flex items-center gap-2 text-[10px] font-bold uppercase text-muted-foreground">
                     <div className="w-2.5 h-2.5 rounded-full bg-primary" /> Mark Clean
                   </div>
                   <div className="flex items-center gap-2 text-[10px] font-bold uppercase text-muted-foreground">
                     <div className="w-2.5 h-2.5 rounded-full border border-primary" /> Today
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] font-bold uppercase text-muted-foreground">
-                    <div className="w-2.5 h-2.5 bg-primary rounded-full ring-2 ring-primary/20 ring-offset-2 ring-offset-background" /> Has Note
                   </div>
                 </div>
                 <p className="text-[9px] text-center text-muted-foreground/60 uppercase font-black tracking-widest mt-2">
@@ -169,7 +166,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                 value={currentNote}
                 onChange={(e) => setCurrentNote(e.target.value)}
                 placeholder="How was your discipline today? Record any triggers, victories, or lessons learned..."
-                className="flex-1 neu-inset border-none rounded-[2rem] p-6 resize-none mb-8 text-sm focus-visible:ring-1 focus-visible:ring-primary/20 bg-background/50"
+                className="flex-1 neu-inset border-none rounded-[2rem] p-6 resize-none mb-8 text-sm focus-visible:ring-1 focus-visible:ring-primary/20 bg-background/50 min-h-[150px]"
               />
 
               <Button onClick={saveNote} className="w-full h-14 rounded-2xl bg-primary text-white font-bold gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
