@@ -1,5 +1,6 @@
 
 export type UrgeIntensity = 'Low' | 'Medium' | 'High';
+export type AppTheme = 'light' | 'dark' | 'purple' | 'amoled';
 
 export interface UrgeLog {
   id: string;
@@ -28,6 +29,7 @@ export interface UserData {
   checkIns: CheckInLog[];
   disciplineScore: number;
   focusMode: boolean;
+  theme: AppTheme;
 }
 
 export const INITIAL_DATA: UserData = {
@@ -39,4 +41,5 @@ export const INITIAL_DATA: UserData = {
   checkIns: [],
   disciplineScore: 0,
   focusMode: false,
+  theme: 'light',
 };

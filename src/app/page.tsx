@@ -8,7 +8,9 @@ import ActionCards from '@/components/dashboard/ActionCards';
 import Analytics from '@/components/dashboard/Analytics';
 import RelapseModal from '@/components/modals/RelapseModal';
 import UrgeModal from '@/components/modals/UrgeModal';
-import { UserData, INITIAL_DATA, UrgeIntensity } from '@/lib/types';
+import ExportModal from '@/components/modals/ExportModal';
+import FAB from '@/components/dashboard/FAB';
+import { UserData, INITIAL_DATA, UrgeIntensity, AppTheme } from '@/lib/types';
 import { getStoredData, saveData, clearData } from '@/lib/storage';
 import { 
   calculateStreak, 
@@ -17,20 +19,25 @@ import {
   getDailyChallenge 
 } from '@/lib/discipline-engine';
 import { useToast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 export default function IronWillDashboard() {
   const { toast } = useToast();
   const [data, setData] = useState<UserData>(INITIAL_DATA);
   const [showRelapseModal, setShowRelapseModal] = useState(false);
   const [showUrgeModal, setShowUrgeModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     const stored = getStoredData();
+    // Apply theme on load
+    document.body.setAttribute('data-theme', stored.theme || 'light');
+    
     // Sync current streak on load
     stored.currentStreak = calculateStreak(stored.lastRelapseTimestamp);
-    if (stored.currentStreak > stored.bestStreak) {
+    if (stored.currentStreak > (stored.bestStreak || 0)) {
       stored.bestStreak = stored.currentStreak;
     }
     stored.disciplineScore = calculateDisciplineScore(stored);
@@ -39,12 +46,19 @@ export default function IronWillDashboard() {
 
   const updateState = (newData: UserData) => {
     newData.currentStreak = calculateStreak(newData.lastRelapseTimestamp);
-    if (newData.currentStreak > newData.bestStreak) {
+    if (newData.currentStreak > (newData.bestStreak || 0)) {
       newData.bestStreak = newData.currentStreak;
     }
     newData.disciplineScore = calculateDisciplineScore(newData);
     setData(newData);
     saveData(newData);
+  };
+
+  const handleThemeChange = (newTheme: AppTheme) => {
+    const newData = { ...data, theme: newTheme };
+    document.body.setAttribute('data-theme', newTheme);
+    updateState(newData);
+    toast({ title: `Theme Updated`, description: `Switched to ${newTheme} mode.` });
   };
 
   const handleCheckIn = () => {
@@ -54,7 +68,7 @@ export default function IronWillDashboard() {
     const newData = { ...data };
     newData.checkIns.push({ date: today, timestamp: Date.now() });
     updateState(newData);
-    toast({ title: "Check-in successful!", description: "Another day of strength added." });
+    toast({ title: "+10 Discipline Points", description: "Consistency is key. Great job!" });
   };
 
   const handleUrgeResisted = (intensity: UrgeIntensity) => {
@@ -62,7 +76,7 @@ export default function IronWillDashboard() {
     newData.urges.push({ id: Math.random().toString(36), timestamp: Date.now(), intensity });
     updateState(newData);
     setShowUrgeModal(false);
-    toast({ title: "Battle Won!", description: `Intensity: ${intensity}. You are stronger than your urges.` });
+    toast({ title: "Victory Logged!", description: "Every urge resisted makes you stronger." });
   };
 
   const handleRelapse = (reason: string, time: string) => {
@@ -72,31 +86,15 @@ export default function IronWillDashboard() {
     newData.currentStreak = 0;
     updateState(newData);
     setShowRelapseModal(false);
-    toast({ variant: "destructive", title: "Journey Reset", description: "Learn from this and start again. You've got this." });
-  };
-
-  const toggleFocusMode = () => {
-    const newData = { ...data, focusMode: !data.focusMode };
-    updateState(newData);
-  };
-
-  const handleExport = () => {
-    const jsonStr = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `ironwill-backup-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    toast({ variant: "destructive", title: "Journey Reset", description: "Analyze the trigger, and start again stronger." });
   };
 
   const handleReset = () => {
-    if (confirm("Are you sure you want to reset ALL data? This cannot be undone.")) {
+    if (confirm("Factory Reset: Wipe all progress and settings?")) {
       clearData();
       setData(INITIAL_DATA);
-      toast({ title: "Data Cleared", description: "Everything has been reset to zero." });
+      document.body.setAttribute('data-theme', 'light');
+      toast({ title: "All Data Cleared", description: "You are starting from scratch." });
     }
   };
 
@@ -107,31 +105,34 @@ export default function IronWillDashboard() {
   const checkedInToday = data.checkIns.some(c => c.date === new Date().toISOString().split('T')[0]);
 
   return (
-    <main className="max-w-4xl mx-auto px-4 pb-20 pt-4 flex flex-col items-center gap-12">
+    <main className="max-w-4xl mx-auto px-4 pb-32 pt-4 flex flex-col items-center gap-12 min-h-screen">
       <Header 
         focusMode={data.focusMode} 
-        onToggleFocus={toggleFocusMode} 
-        onExport={handleExport}
+        theme={data.theme || 'light'}
+        onThemeChange={handleThemeChange}
+        onExport={() => setShowExportModal(true)}
         onReset={handleReset}
+        onToggleFocus={() => updateState({ ...data, focusMode: !data.focusMode })}
       />
 
       <div className="w-full space-y-12">
         <StreakDisplay current={data.currentStreak} best={data.bestStreak} />
 
-        <ActionCards 
-          onCheckIn={handleCheckIn} 
-          onUrge={() => setShowUrgeModal(true)} 
-          onRelapse={() => setShowRelapseModal(true)} 
-          checkedInToday={checkedInToday}
-        />
-
         {!data.focusMode && (
-          <Analytics 
-            score={data.disciplineScore} 
-            trigger={mostCommonTrigger} 
-            window={highRiskWindow}
-            challenge={challenge}
-          />
+          <>
+            <ActionCards 
+              onCheckIn={handleCheckIn} 
+              onUrge={() => setShowUrgeModal(true)} 
+              onRelapse={() => setShowRelapseModal(true)} 
+              checkedInToday={checkedInToday}
+            />
+            <Analytics 
+              score={data.disciplineScore} 
+              trigger={mostCommonTrigger} 
+              window={highRiskWindow}
+              challenge={challenge}
+            />
+          </>
         )}
       </div>
 
@@ -146,6 +147,21 @@ export default function IronWillDashboard() {
         onClose={() => setShowUrgeModal(false)} 
         onSubmit={handleUrgeResisted} 
       />
+
+      <ExportModal 
+        isOpen={showExportModal} 
+        onClose={() => setShowExportModal(false)} 
+        data={data} 
+      />
+
+      <FAB 
+        onCheckIn={handleCheckIn} 
+        onUrge={() => setShowUrgeModal(true)} 
+        onRelapse={() => setShowRelapseModal(true)} 
+        disabledCheckIn={checkedInToday}
+      />
+
+      <Toaster />
     </main>
   );
 }

@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -24,36 +25,91 @@
     --input: 247 14% 85%;
     --ring: 262 58% 38%;
     --radius: 1.5rem;
+    --neu-shadow-1: #d1d1d6;
+    --neu-shadow-2: #ffffff;
+  }
+
+  [data-theme="dark"] {
+    --background: 222 47% 11%;
+    --foreground: 213 31% 91%;
+    --card: 222 47% 14%;
+    --card-foreground: 213 31% 91%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 213 31% 91%;
+    --primary: 262 70% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 20%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 222 47% 18%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 262 70% 60%;
+    --accent-foreground: 0 0% 100%;
+    --border: 222 47% 20%;
+    --input: 222 47% 20%;
+    --ring: 262 70% 60%;
+    --neu-shadow-1: #0a0a0c;
+    --neu-shadow-2: #1e212a;
+  }
+
+  [data-theme="purple"] {
+    --background: 270 50% 10%;
+    --foreground: 270 50% 95%;
+    --card: 270 50% 15%;
+    --card-foreground: 270 50% 95%;
+    --primary: 280 80% 60%;
+    --secondary: 260 60% 30%;
+    --accent: 280 80% 60%;
+    --neu-shadow-1: #1a0a2a;
+    --neu-shadow-2: #3a1a5a;
+    --border: 270 50% 20%;
+  }
+
+  [data-theme="amoled"] {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 15%;
+    --accent: 0 0% 100%;
+    --neu-shadow-1: #000000;
+    --neu-shadow-2: #111111;
+    --border: 0 0% 10%;
   }
 }
 
 @layer components {
   .neu-flat {
-    background: hsl(var(--background));
-    box-shadow: 8px 8px 16px #d1d1d6, -8px -8px 16px #ffffff;
+    background: hsl(var(--card));
+    box-shadow: 8px 8px 16px var(--neu-shadow-1), -8px -8px 16px var(--neu-shadow-2);
   }
   
   .neu-inset {
     background: hsl(var(--background));
-    box-shadow: inset 4px 4px 8px #d1d1d6, inset -4px -4px 8px #ffffff;
+    box-shadow: inset 4px 4px 8px var(--neu-shadow-1), inset -4px -4px 8px var(--neu-shadow-2);
   }
 
   .neu-button {
-    background: hsl(var(--background));
-    box-shadow: 5px 5px 10px #d1d1d6, -5px -5px 10px #ffffff;
-    transition: all 0.2s ease;
+    background: hsl(var(--card));
+    box-shadow: 5px 5px 10px var(--neu-shadow-1), -5px -5px 10px var(--neu-shadow-2);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .neu-button:active {
-    box-shadow: inset 3px 3px 6px #d1d1d6, inset -3px -3px 6px #ffffff;
-    transform: scale(0.98);
+    box-shadow: inset 3px 3px 6px var(--neu-shadow-1), inset -3px -3px 6px var(--neu-shadow-2);
+    transform: scale(0.96);
   }
 
   .glass-card {
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(var(--card), 0.6);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .streak-glow {
+    text-shadow: 0 0 20px hsla(var(--primary), 0.5);
   }
 }
 
@@ -62,7 +118,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
