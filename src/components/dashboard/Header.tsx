@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Settings, Download, Trash2, Palette, Sun, Moon, Sparkles, Terminal, Shield, Zap, ChevronRight, Check, ArrowLeft, X } from 'lucide-react';
+import { Settings, Download, Trash2, Palette, Sun, Moon, Sparkles, Terminal, Shield, Zap, ChevronRight, Check, ArrowLeft, X, Bell } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { AppTheme, UserData } from '@/lib/types';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import ReminderModal from '@/components/modals/ReminderModal';
 
 interface HeaderProps {
   focusMode: boolean;
@@ -32,16 +34,26 @@ interface HeaderProps {
   onReset: () => void;
   onToggleFocus: () => void;
   onShowExport: () => void;
+  onUpdateReminder: (enabled: boolean, time: string) => void;
 }
 
-export default function Header({ focusMode, theme, data, onThemeChange, onReset, onToggleFocus, onShowExport }: HeaderProps) {
+export default function Header({ 
+  focusMode, 
+  theme, 
+  data, 
+  onThemeChange, 
+  onReset, 
+  onToggleFocus, 
+  onShowExport,
+  onUpdateReminder
+}: HeaderProps) {
   const isMobile = useIsMobile();
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
+  const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // Interaction safety cleanup
   useEffect(() => {
-    if (!isThemeSheetOpen && !isSettingsOpen) {
+    if (!isThemeSheetOpen && !isSettingsOpen && !isReminderOpen) {
       const resetUI = () => {
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
@@ -51,28 +63,28 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
       const timer = setTimeout(resetUI, 300);
       return () => clearTimeout(timer);
     }
-  }, [isThemeSheetOpen, isSettingsOpen]);
+  }, [isThemeSheetOpen, isSettingsOpen, isReminderOpen]);
 
   useEffect(() => {
     const handlePopState = () => {
       setIsThemeSheetOpen(false);
       setIsSettingsOpen(false);
+      setIsReminderOpen(false);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const openThemeSheet = () => {
-    setIsSettingsOpen(false); // Close dropdown first
+    setIsSettingsOpen(false);
     window.history.pushState({ themeSheetOpen: true }, "");
     setTimeout(() => setIsThemeSheetOpen(true), 100);
   };
 
-  const closeThemeSheet = () => {
-    if (window.history.state?.themeSheetOpen) {
-      window.history.back();
-    }
-    setIsThemeSheetOpen(false);
+  const openReminderModal = () => {
+    setIsSettingsOpen(false);
+    window.history.pushState({ reminderOpen: true }, "");
+    setTimeout(() => setIsReminderOpen(true), 100);
   };
 
   const themes: { id: AppTheme, name: string, icon: any, bg: string, accent: string }[] = [
@@ -90,7 +102,10 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
           onClick={() => {
             onThemeChange(t.id);
             if (isMobile) {
-              setTimeout(closeThemeSheet, 150);
+              setTimeout(() => {
+                if (window.history.state?.themeSheetOpen) window.history.back();
+                setIsThemeSheetOpen(false);
+              }, 150);
             }
           }}
           className={cn(
@@ -111,7 +126,6 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
               </div>
             )}
           </div>
-          
           <div>
             <span className="font-bold block text-base tracking-tight">{t.name}</span>
             <div className="flex gap-1.5 mt-2">
@@ -155,10 +169,7 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
                 <DropdownMenuSeparator className="opacity-10" />
                 
                 <DropdownMenuItem 
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    openThemeSheet();
-                  }}
+                  onSelect={(e) => { e.preventDefault(); openThemeSheet(); }}
                   className="rounded-2xl p-4 cursor-pointer flex items-center justify-between hover:bg-primary/5 focus:bg-primary/5 outline-none"
                 >
                   <div className="flex items-center gap-3">
@@ -169,10 +180,15 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
                 </DropdownMenuItem>
 
                 <DropdownMenuItem 
-                  onSelect={() => {
-                    setIsSettingsOpen(false);
-                    onShowExport();
-                  }}
+                  onSelect={(e) => { e.preventDefault(); openReminderModal(); }}
+                  className="rounded-2xl p-4 cursor-pointer flex items-center gap-3 hover:bg-primary/5 focus:bg-primary/5 outline-none"
+                >
+                  <Bell size={20} className="text-primary" />
+                  <span className="font-bold">Daily Reminder</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem 
+                  onSelect={() => { setIsSettingsOpen(false); onShowExport(); }}
                   className="rounded-2xl p-4 cursor-pointer flex items-center gap-3 hover:bg-primary/5 focus:bg-primary/5 outline-none"
                 >
                   <Download size={20} className="text-secondary" />
@@ -180,10 +196,7 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
                 </DropdownMenuItem>
 
                 <DropdownMenuItem 
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    onToggleFocus();
-                  }}
+                  onSelect={(e) => { e.preventDefault(); onToggleFocus(); }}
                   className="rounded-2xl p-4 cursor-pointer flex items-center justify-between hover:bg-primary/5 focus:bg-primary/5 outline-none"
                 >
                   <div className="flex items-center gap-3">
@@ -198,10 +211,7 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
                 <DropdownMenuSeparator className="opacity-10" />
                 
                 <DropdownMenuItem 
-                  onSelect={() => {
-                    setIsSettingsOpen(false);
-                    onReset();
-                  }}
+                  onSelect={() => { setIsSettingsOpen(false); onReset(); }}
                   className="rounded-2xl p-4 cursor-pointer flex items-center gap-3 text-red-500 hover:bg-red-500/10 focus:bg-red-500/10 outline-none"
                 >
                   <Trash2 size={20} />
@@ -214,17 +224,20 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
       </header>
 
       {isThemeSheetOpen && (
-        <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
+        <Sheet open={isThemeSheetOpen} onOpenChange={(v) => {
+          if (!v && window.history.state?.themeSheetOpen) window.history.back();
+          setIsThemeSheetOpen(v);
+        }}>
           <SheetContent 
             side={isMobile ? "bottom" : "right"} 
             className={cn(
-              "theme-sheet glass-card border-none z-[10000] p-8 pb-12",
+              "theme-sheet glass-card border-none z-[10000] p-8 pb-12 outline-none",
               isMobile ? "rounded-t-[3.5rem]" : "rounded-l-[3.5rem] max-w-md"
             )}
           >
             <div className="theme-sheet-handle" />
             <div className="flex items-center justify-between mb-8">
-              <Button variant="ghost" onClick={closeThemeSheet} className="p-0 h-auto hover:bg-transparent">
+              <Button variant="ghost" onClick={() => { if (window.history.state?.themeSheetOpen) window.history.back(); setIsThemeSheetOpen(false); }} className="p-0 h-auto hover:bg-transparent">
                 <ArrowLeft size={24} />
               </Button>
               <SheetTitle className="text-2xl font-bold font-headline text-center flex-1">Visual Identity</SheetTitle>
@@ -238,6 +251,16 @@ export default function Header({ focusMode, theme, data, onThemeChange, onReset,
             <ThemeCards />
           </SheetContent>
         </Sheet>
+      )}
+
+      {isReminderOpen && (
+        <ReminderModal 
+          isOpen={isReminderOpen}
+          onClose={() => { if (window.history.state?.reminderOpen) window.history.back(); setIsReminderOpen(false); }}
+          enabled={data.notificationsEnabled}
+          time={data.reminderTime}
+          onUpdate={onUpdateReminder}
+        />
       )}
     </>
   );

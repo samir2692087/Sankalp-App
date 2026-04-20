@@ -30,6 +30,9 @@ export interface UserData {
   disciplineScore: number;
   focusMode: boolean;
   theme: AppTheme;
+  notificationsEnabled: boolean;
+  reminderTime: string; // HH:mm format
+  lastNotificationDate: string | null; // YYYY-MM-DD to prevent duplicate alerts
 }
 
 export const INITIAL_DATA: UserData = {
@@ -42,4 +45,7 @@ export const INITIAL_DATA: UserData = {
   disciplineScore: 0,
   focusMode: false,
   theme: 'light',
+  notificationsEnabled: false,
+  reminderTime: '09:00',
+  lastNotificationDate: null,
 };

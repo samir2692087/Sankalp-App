@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -28,33 +29,26 @@ export default function IronWillDashboard() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // ULTIMATE INTERACTION CLEANUP ENGINE
-  // This ensures that even if Radix/ShadCN components fail to clean up their 
-  // focus traps or pointer-event locks, the page remains interactive.
+  // Interaction Cleanup Engine
   useEffect(() => {
     const isAnyModalOpen = showRelapseModal || showUrgeModal || showExportModal;
     
     if (!isAnyModalOpen) {
       const forceCleanup = () => {
-        // Reset styles on body and html to restore clickability
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
         document.body.style.userSelect = 'auto';
         document.documentElement.style.pointerEvents = 'auto';
         document.documentElement.style.overflow = 'auto';
-        
-        // Aggressively remove Radix-specific lock attributes
         document.body.removeAttribute('data-scroll-locked');
         document.documentElement.removeAttribute('data-scroll-locked');
         
-        // Remove any lingering portal containers if they're empty
         const portals = document.querySelectorAll('[data-radix-portal]');
         portals.forEach(portal => {
           if (portal.children.length === 0) portal.remove();
         });
       };
 
-      // Execute immediately and then poll briefly to ensure late-cleanup components are caught
       forceCleanup();
       const interval = setInterval(forceCleanup, 100);
       const timer = setTimeout(() => clearInterval(interval), 1000);
@@ -88,6 +82,33 @@ export default function IronWillDashboard() {
     }
     setter(false);
   }, []);
+
+  // Notification Engine
+  useEffect(() => {
+    if (!mounted || !data.notificationsEnabled) return;
+
+    const checkNotification = () => {
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const currentTimeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+      if (currentTimeStr === data.reminderTime && data.lastNotificationDate !== today) {
+        if (Notification.permission === 'granted') {
+          new Notification("IronWill Daily Protocol", {
+            body: "Time for your daily discipline check-in. Stay strong!",
+            icon: "/shield-icon.png", // Assuming existence or fallback
+          });
+          
+          const newData = { ...data, lastNotificationDate: today };
+          setData(newData);
+          saveData(newData);
+        }
+      }
+    };
+
+    const interval = setInterval(checkNotification, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [mounted, data.notificationsEnabled, data.reminderTime, data.lastNotificationDate]);
 
   useEffect(() => {
     setMounted(true);
@@ -163,6 +184,12 @@ export default function IronWillDashboard() {
     toast({ variant: "destructive", title: "Relapse Logged", description: "Resilience is built through restart." });
   };
 
+  const handleUpdateReminder = (enabled: boolean, time: string) => {
+    const newData = { ...data, notificationsEnabled: enabled, reminderTime: time };
+    updateState(newData);
+    toast({ title: "Protocol Updated", description: enabled ? `Reminder set for ${time}` : "Reminders disabled" });
+  };
+
   const handleReset = () => {
     if (confirm("Factory Reset: Wipe all progress and settings?")) {
       clearData();
@@ -188,6 +215,7 @@ export default function IronWillDashboard() {
         onReset={handleReset}
         onToggleFocus={() => updateState({ ...data, focusMode: !data.focusMode })}
         onShowExport={() => handleOpenModal(setShowExportModal)}
+        onUpdateReminder={handleUpdateReminder}
       />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 pt-4 flex flex-col items-center gap-12">
