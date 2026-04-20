@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Settings, Download, Trash2, Palette, Sun, Moon, Sparkles, Terminal, Shield, Zap, Bell, ArrowLeft, Check } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Settings, Download, Trash2, Palette, Sun, Moon, Sparkles, Terminal, Shield, Zap, Bell, ArrowLeft, Check, X as CloseIcon } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,19 +50,24 @@ export default function Header({
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // Interaction Recovery logic for Header specific triggers
-  useEffect(() => {
-    if (!isThemeSheetOpen && !isSettingsOpen && !isReminderOpen) {
-      const cleanup = () => {
+  // Global Interaction Cleanup Trigger
+  const runGlobalCleanup = useCallback(() => {
+    setTimeout(() => {
+      const activeOverlays = document.querySelectorAll('[role="dialog"], [data-state="open"]');
+      if (activeOverlays.length === 0) {
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
         document.body.removeAttribute('data-scroll-locked');
-      };
-      cleanup();
-      const t = setTimeout(cleanup, 300);
-      return () => clearTimeout(t);
+        document.documentElement.style.pointerEvents = 'auto';
+      }
+    }, 100);
+  }, []);
+
+  useEffect(() => {
+    if (!isThemeSheetOpen && !isSettingsOpen && !isReminderOpen) {
+      runGlobalCleanup();
     }
-  }, [isThemeSheetOpen, isSettingsOpen, isReminderOpen]);
+  }, [isThemeSheetOpen, isSettingsOpen, isReminderOpen, runGlobalCleanup]);
 
   const themes: { id: AppTheme, name: string, icon: any, bg: string, accent: string }[] = [
     { id: 'light', name: 'Daylight', icon: Sun, bg: 'bg-white', accent: 'bg-primary' },
@@ -109,7 +114,10 @@ export default function Header({
           <h1 className="text-xl font-bold font-headline leading-none text-foreground">IronWill</h1>
         </div>
 
-        <DropdownMenu open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+        <DropdownMenu open={isSettingsOpen} onOpenChange={(open) => {
+          setIsSettingsOpen(open);
+          if (!open) runGlobalCleanup();
+        }}>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="rounded-xl p-2 h-10 w-10 neu-button border-none bg-card flex items-center justify-center outline-none">
               <Settings size={20} />
@@ -144,7 +152,10 @@ export default function Header({
         </DropdownMenu>
       </header>
 
-      <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
+      <Sheet open={isThemeSheetOpen} onOpenChange={(open) => {
+        setIsThemeSheetOpen(open);
+        if (!open) runGlobalCleanup();
+      }}>
         <SheetContent side="bottom" className="rounded-t-[3.5rem] glass-card border-none p-8 pb-12 outline-none">
           <div className="theme-sheet-handle" />
           <SheetHeader className="mb-8 relative">
@@ -157,13 +168,29 @@ export default function Header({
             </Button>
             <SheetTitle className="text-2xl font-bold font-headline text-center">Visual Identity</SheetTitle>
             <SheetDescription className="text-center font-medium">Choose your focus environment.</SheetDescription>
+            <Button 
+              variant="ghost" 
+              onClick={() => setIsThemeSheetOpen(false)} 
+              className="absolute right-0 top-0 p-0 h-auto hover:bg-transparent"
+            >
+              <CloseIcon size={24} />
+            </Button>
           </SheetHeader>
           <ThemeCards />
         </SheetContent>
       </Sheet>
 
       {isReminderOpen && (
-        <ReminderModal isOpen={isReminderOpen} onClose={() => setIsReminderOpen(false)} enabled={data.notificationsEnabled} time={data.reminderTime} onUpdate={onUpdateReminder} />
+        <ReminderModal 
+          isOpen={isReminderOpen} 
+          onClose={() => {
+            setIsReminderOpen(false);
+            runGlobalCleanup();
+          }} 
+          enabled={data.notificationsEnabled} 
+          time={data.reminderTime} 
+          onUpdate={onUpdateReminder} 
+        />
       )}
     </>
   );

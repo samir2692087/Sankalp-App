@@ -32,38 +32,41 @@ export default function IronWillDashboard() {
   const [insightsTab, setInsightsTab] = useState('milestones');
   const [mounted, setMounted] = useState(false);
 
-  // GLOBAL INTERACTION CLEANUP ENGINE
-  // This ensures that no invisible layers or scroll-locks remain after closing any UI component
+  // NUCLEAR INTERACTION RECOVERY ENGINE
+  // This watches the document body for any leftover interaction-blocking attributes
+  // and forcefully clears them whenever no visible modal is detected.
   useEffect(() => {
-    const isAnyPageModalOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal;
-    
-    // We also monitor for Radix/ShadCN internal attributes that block interactions
-    const forceCleanup = () => {
-      // Only cleanup if we are sure no major modal managed by this page is active
-      if (!isAnyPageModalOpen) {
-        const targets = [document.body, document.documentElement];
-        targets.forEach(el => {
-          el.style.pointerEvents = 'auto';
-          el.style.overflow = 'auto';
-          el.removeAttribute('data-scroll-locked');
-          el.style.removeProperty('pointer-events');
-          el.style.removeProperty('overflow');
-        });
+    const forceReset = () => {
+      // If no dialogs or sheets are active in the DOM, we must restore interaction
+      const activeOverlays = document.querySelectorAll('[role="dialog"], [data-state="open"], .fixed.inset-0');
+      if (activeOverlays.length === 0) {
+        document.body.style.pointerEvents = 'auto';
+        document.body.style.overflow = 'auto';
+        document.body.removeAttribute('data-scroll-locked');
+        document.documentElement.style.pointerEvents = 'auto';
+        document.documentElement.style.overflow = 'auto';
       }
     };
 
-    // Immediate cleanup
-    forceCleanup();
+    // 1. Mutation Observer to catch Radix UI style changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && (mutation.attributeName === 'style' || mutation.attributeName === 'data-scroll-locked')) {
+          forceReset();
+        }
+      });
+    });
 
-    // Fallback cleanup with intervals to catch late-firing animation transitions
-    const interval = setInterval(forceCleanup, 300);
-    const timeout = setTimeout(() => clearInterval(interval), 2000);
+    observer.observe(document.body, { attributes: true });
+
+    // 2. Periodic poll as a fail-safe
+    const interval = setInterval(forceReset, 250);
 
     return () => {
+      observer.disconnect();
       clearInterval(interval);
-      clearTimeout(timeout);
     };
-  }, [showRelapseModal, showUrgeModal, showExportModal, showInsightsSheet, showEmergencyModal]);
+  }, []);
 
   useEffect(() => {
     const handlePopState = () => {

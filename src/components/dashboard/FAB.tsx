@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Plus, Target, BarChart3, Trophy, Calendar, ShieldAlert, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from '@/lib/utils';
@@ -14,12 +14,18 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Interaction Cleanup logic specifically for FAB's manual backdrop
+  const cleanupInteractions = useCallback(() => {
+    document.body.style.pointerEvents = 'auto';
+    document.body.style.overflow = 'auto';
+    document.body.removeAttribute('data-scroll-locked');
+    document.documentElement.style.pointerEvents = 'auto';
+  }, []);
+
   useEffect(() => {
     if (!isOpen) {
-      document.body.style.pointerEvents = 'auto';
-      document.body.style.overflow = 'auto';
+      cleanupInteractions();
     }
-  }, [isOpen]);
+  }, [isOpen, cleanupInteractions]);
 
   const navItems = [
     { label: 'Milestones', icon: Target, tab: 'milestones', color: 'bg-primary' },
@@ -29,12 +35,22 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
     { label: 'Emergency', icon: ShieldAlert, tab: 'emergency', color: 'bg-red-500', isEmergency: true },
   ];
 
+  const handleAction = (item: any) => {
+    if (item.isEmergency) onOpenEmergency();
+    else onOpenInsights(item.tab);
+    setIsOpen(false);
+    cleanupInteractions();
+  };
+
   return (
     <>
       {isOpen && (
         <div 
           className="fixed inset-0 bg-background/60 backdrop-blur-xl z-[60] animate-in fade-in duration-300"
-          onClick={() => setIsOpen(false)}
+          onClick={() => {
+            setIsOpen(false);
+            cleanupInteractions();
+          }}
         />
       )}
       
@@ -42,11 +58,7 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
         {isOpen && (
           <div className="flex flex-col gap-3 mb-2 animate-in slide-in-from-bottom-6 fade-in duration-300">
             {navItems.map((item) => (
-              <div key={item.label} className="flex items-center gap-4 group cursor-pointer" onClick={() => {
-                if (item.isEmergency) onOpenEmergency();
-                else onOpenInsights(item.tab);
-                setIsOpen(false);
-              }}>
+              <div key={item.label} className="flex items-center gap-4 group cursor-pointer" onClick={() => handleAction(item)}>
                 <span className="bg-card text-foreground px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl neu-flat transition-transform group-hover:scale-105">
                   {item.label}
                 </span>
@@ -64,7 +76,10 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
         )}
         
         <Button 
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            if (isOpen) cleanupInteractions();
+            setIsOpen(!isOpen);
+          }}
           className={cn(
             "w-16 h-16 rounded-[2rem] shadow-2xl transition-all duration-500",
             isOpen ? "bg-muted text-foreground rotate-90 scale-90" : "bg-primary text-white hover:scale-105 active:scale-95 shadow-primary/40"
