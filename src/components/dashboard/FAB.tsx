@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -16,37 +15,57 @@ export default function FAB({ onCheckIn, onUrge, onRelapse, disabledCheckIn }: F
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-4">
+    <>
       {isOpen && (
-        <div className="flex flex-col gap-3 animate-in slide-in-from-bottom-4 fade-in duration-200">
-          <Button 
-            onClick={() => { onCheckIn(); setIsOpen(false); }}
-            disabled={disabledCheckIn}
-            className="rounded-full shadow-lg bg-green-500 hover:bg-green-600 flex items-center gap-2 h-12 px-4 text-white"
-          >
-            <CheckCircle2 size={20} /> <span className="font-bold">Check-In</span>
-          </Button>
-          <Button 
-            onClick={() => { onUrge(); setIsOpen(false); }}
-            className="rounded-full shadow-lg bg-blue-500 hover:bg-blue-600 flex items-center gap-2 h-12 px-4 text-white"
-          >
-            <ShieldCheck size={20} /> <span className="font-bold">Urge</span>
-          </Button>
-          <Button 
-            onClick={() => { onRelapse(); setIsOpen(false); }}
-            className="rounded-full shadow-lg bg-red-500 hover:bg-red-600 flex items-center gap-2 h-12 px-4 text-white"
-          >
-            <AlertTriangle size={20} /> <span className="font-bold">Relapse</span>
-          </Button>
-        </div>
+        <div 
+          className="fixed inset-0 bg-background/40 backdrop-blur-md z-40 animate-in fade-in duration-300"
+          onClick={() => setIsOpen(false)}
+        />
       )}
       
-      <Button 
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-16 h-16 rounded-full shadow-2xl transition-all duration-300 ${isOpen ? 'bg-muted text-foreground rotate-90' : 'bg-primary text-white'}`}
-      >
-        {isOpen ? <X size={32} /> : <Plus size={32} />}
-      </Button>
-    </div>
+      <div className="fixed bottom-10 right-10 z-50 flex flex-col items-end gap-5">
+        {isOpen && (
+          <div className="flex flex-col gap-4 animate-in slide-in-from-bottom-6 fade-in duration-300">
+            <div className="flex items-center gap-4">
+              <span className="bg-card text-foreground px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl neu-flat">Mark Clean</span>
+              <Button 
+                onClick={() => { onCheckIn(); setIsOpen(false); }}
+                disabled={disabledCheckIn}
+                className={`w-14 h-14 rounded-2xl shadow-2xl bg-green-500 hover:bg-green-600 text-white flex items-center justify-center transition-all ${disabledCheckIn ? 'opacity-40 grayscale' : 'hover:scale-110 active:scale-95'}`}
+              >
+                <CheckCircle2 size={24} />
+              </Button>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <span className="bg-card text-foreground px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl neu-flat">Won Battle</span>
+              <Button 
+                onClick={() => { onUrge(); setIsOpen(false); }}
+                className="w-14 h-14 rounded-2xl shadow-2xl bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center hover:scale-110 active:scale-95"
+              >
+                <ShieldCheck size={24} />
+              </Button>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <span className="bg-card text-foreground px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl neu-flat">I Failed</span>
+              <Button 
+                onClick={() => { onRelapse(); setIsOpen(false); }}
+                className="w-14 h-14 rounded-2xl shadow-2xl bg-red-500 hover:bg-red-600 text-white flex items-center justify-center hover:scale-110 active:scale-95"
+              >
+                <AlertTriangle size={24} />
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        <Button 
+          onClick={() => setIsOpen(!isOpen)}
+          className={`w-20 h-20 rounded-[2rem] shadow-2xl transition-all duration-500 ${isOpen ? 'bg-muted text-foreground rotate-90 scale-90' : 'bg-primary text-white hover:scale-105 active:scale-95 shadow-primary/40'}`}
+        >
+          {isOpen ? <X size={36} /> : <Plus size={36} />}
+        </Button>
+      </div>
+    </>
   );
 }
