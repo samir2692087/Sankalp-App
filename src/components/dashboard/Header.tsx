@@ -1,16 +1,35 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { Settings, Download, Trash2, Palette, Sun, Moon, Sparkles, Terminal, Shield, Zap, Bell, ArrowLeft, Check, X as CloseIcon } from 'lucide-react';
+import { 
+  Settings, 
+  Download, 
+  Trash2, 
+  Palette, 
+  Sun, 
+  Moon, 
+  Sparkles, 
+  Terminal, 
+  Shield, 
+  Zap, 
+  Bell, 
+  ArrowLeft, 
+  Check, 
+  X as CloseIcon,
+  Layout,
+  Database,
+  Eye,
+  Activity
+} from 'lucide-react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuPortal,
-} from "@/components/ui/dropdown-menu";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Sheet,
   SheetContent,
@@ -23,6 +42,7 @@ import { AppTheme, UserData } from '@/lib/types';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import ReminderModal from '@/components/modals/ReminderModal';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface HeaderProps {
   focusMode: boolean;
@@ -100,7 +120,7 @@ export default function Header({
           <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg", t.bg)}>
             <t.icon size={18} className={t.id === 'light' ? 'text-orange-400' : 'text-white'} />
           </div>
-          <span className="heading-strong text-[10px] uppercase tracking-widest">{t.name}</span>
+          <span className="text-white font-bold text-[10px] uppercase tracking-widest">{t.name}</span>
         </button>
       ))}
     </div>
@@ -115,54 +135,124 @@ export default function Header({
             <Shield className="text-primary-foreground" size={18} />
           </div>
           <div className="flex flex-col">
-            <h1 className="heading-strong text-xl leading-none">IronWill</h1>
-            <span className="label-dim text-[8px] opacity-70">Neural Mastery</span>
+            <h1 className="text-white font-bold text-xl leading-none">IronWill</h1>
+            <span className="text-white/50 font-bold uppercase tracking-widest text-[8px]">Neural Mastery</span>
           </div>
         </div>
 
-        <DropdownMenu open={isSettingsOpen} onOpenChange={(open) => {
+        <Dialog open={isSettingsOpen} onOpenChange={(open) => {
           setIsSettingsOpen(open);
           if (!open) runGlobalCleanup();
         }}>
-          <DropdownMenuTrigger asChild>
-            <Button type="button" variant="ghost" className="rounded-xl p-2 h-10 w-10 neu-button border-none bg-white/5 flex items-center justify-center outline-none">
+          <DialogTrigger asChild>
+            <Button type="button" variant="ghost" className="rounded-xl p-2 h-10 w-10 bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center">
               <Settings size={20} className="text-white" />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuPortal>
-            <DropdownMenuContent align="end" className="glass-card rounded-[2rem] border-white/10 shadow-2xl p-2 min-w-[240px] z-[9999]">
-              <DropdownMenuLabel className="label-dim p-3 text-center">Settings Protocol</DropdownMenuLabel>
-              <DropdownMenuSeparator className="opacity-10" />
-              
-              <DropdownMenuItem onSelect={() => setIsThemeSheetOpen(true)} className="rounded-xl p-3 gap-3 cursor-pointer hover:bg-white/10 transition-colors">
-                <Palette size={18} className="text-primary" /> <span className="heading-strong text-sm font-medium">Visual Identity</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setIsReminderOpen(true)} className="rounded-xl p-3 gap-3 cursor-pointer hover:bg-white/10 transition-colors">
-                <Bell size={18} className="text-secondary" /> <span className="heading-strong text-sm font-medium">Neural Alerts</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={onShowExport} className="rounded-xl p-3 gap-3 cursor-pointer hover:bg-white/10 transition-colors">
-                <Download size={18} className="text-white/60" /> <span className="heading-strong text-sm font-medium">Archive Matrix</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={onToggleFocus} className="rounded-xl p-3 justify-between cursor-pointer hover:bg-white/10 transition-colors">
-                <div className="flex items-center gap-3"><Zap size={18} className="text-yellow-400" /> <span className="heading-strong text-sm font-medium">Focus Flow</span></div>
-                <div className={cn("w-8 h-4 rounded-full p-1 transition-all", focusMode ? 'bg-primary' : 'bg-white/20')}>
-                  <div className={cn("w-2 h-2 rounded-full bg-white transition-all", focusMode ? 'translate-x-4' : 'translate-x-0')} />
+          </DialogTrigger>
+          <DialogContent className="max-w-[420px] rounded-[2.5rem] bg-[rgba(20,20,25,0.95)] backdrop-blur-[10px] border border-white/10 p-0 overflow-hidden outline-none shadow-[0_20px_40px_rgba(0,0,0,0.6)] animate-in zoom-in-95 fade-in duration-200 pointer-events-auto">
+            <div className="bg-white/5 p-8 text-center border-b border-white/5 relative shrink-0">
+              <DialogTitle className="text-2xl font-bold text-white font-headline">Neural Protocols</DialogTitle>
+              <DialogDescription className="text-white/40 font-black uppercase tracking-[0.2em] text-[9px] mt-1">Control Center Matrix</DialogDescription>
+            </div>
+
+            <div className="p-6 space-y-3">
+              {/* Option: Visual Identity */}
+              <motion.button 
+                whileHover={{ backgroundColor: "rgba(255,255,255,0.05)", x: 4 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => { setIsThemeSheetOpen(true); setIsSettingsOpen(false); }}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl transition-all group text-left"
+              >
+                <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all">
+                  <Palette size={20} />
                 </div>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="opacity-10" />
-              <DropdownMenuItem onSelect={onReset} className="rounded-xl p-3 gap-3 cursor-pointer text-red-400 hover:bg-red-500/15">
-                <Trash2 size={18} /> <span className="label-dim text-red-400">Purge Mastery Data</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenuPortal>
-        </DropdownMenu>
+                <div className="flex-1">
+                  <p className="text-white font-bold text-sm">Visual Identity</p>
+                  <p className="text-white/40 text-[10px] uppercase font-black">Calibrate neural themes</p>
+                </div>
+              </motion.button>
+
+              {/* Option: Alerts */}
+              <motion.button 
+                whileHover={{ backgroundColor: "rgba(255,255,255,0.05)", x: 4 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => { setIsReminderOpen(true); setIsSettingsOpen(false); }}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl transition-all group text-left"
+              >
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all">
+                  <Bell size={20} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-white font-bold text-sm">Neural Alerts</p>
+                  <p className="text-white/40 text-[10px] uppercase font-black">Reminder synchronization</p>
+                </div>
+              </motion.button>
+
+              {/* Option: Archive */}
+              <motion.button 
+                whileHover={{ backgroundColor: "rgba(255,255,255,0.05)", x: 4 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => { onShowExport(); setIsSettingsOpen(false); }}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl transition-all group text-left"
+              >
+                <div className="w-12 h-12 rounded-xl bg-slate-500/10 flex items-center justify-center text-slate-400 group-hover:shadow-[0_0_15px_rgba(148,163,184,0.3)] transition-all">
+                  <Database size={20} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-white font-bold text-sm">Archive Matrix</p>
+                  <p className="text-white/40 text-[10px] uppercase font-black">Backup & Restore logs</p>
+                </div>
+              </motion.button>
+
+              {/* Option: Focus Flow */}
+              <motion.button 
+                whileHover={{ backgroundColor: "rgba(255,255,255,0.05)", x: 4 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => { onToggleFocus(); setIsSettingsOpen(false); }}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl transition-all group text-left"
+              >
+                <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-400 group-hover:shadow-[0_0_15px_rgba(234,179,8,0.3)] transition-all">
+                  <Zap size={20} />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-white font-bold text-sm">Focus Flow</p>
+                    <div className={cn("w-8 h-4 rounded-full p-1 transition-all", focusMode ? 'bg-primary' : 'bg-white/20')}>
+                      <div className={cn("w-2 h-2 rounded-full bg-white transition-all", focusMode ? 'translate-x-4' : 'translate-x-0')} />
+                    </div>
+                  </div>
+                  <p className="text-white/40 text-[10px] uppercase font-black">Minimalist interface active</p>
+                </div>
+              </motion.button>
+
+              <div className="h-px bg-white/5 my-2" />
+
+              {/* Option: Purge */}
+              <motion.button 
+                whileHover={{ backgroundColor: "rgba(239,68,68,0.1)", borderColor: "rgba(239,68,68,0.3)", x: 4 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => { onReset(); setIsSettingsOpen(false); }}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl transition-all border border-transparent text-left group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400 group-hover:shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all">
+                  <Trash2 size={20} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-red-400 font-bold text-sm">Purge Mastery Data</p>
+                  <p className="text-red-400/50 text-[10px] uppercase font-black">Irreversible data reset</p>
+                </div>
+              </motion.button>
+            </div>
+            <div className="h-6" />
+          </DialogContent>
+        </Dialog>
       </header>
 
       <Sheet open={isThemeSheetOpen} onOpenChange={(open) => {
         setIsThemeSheetOpen(open);
         if (!open) runGlobalCleanup();
       }}>
-        <SheetContent side="bottom" className="rounded-t-[3.5rem] glass-card border-white/10 p-8 pb-12 outline-none">
+        <SheetContent side="bottom" className="rounded-t-[3.5rem] bg-[rgba(20,20,25,0.98)] backdrop-blur-xl border-white/10 p-8 pb-12 outline-none">
           <SheetHeader className="mb-8 relative">
             <Button 
               type="button"
@@ -172,8 +262,8 @@ export default function Header({
             >
               <ArrowLeft size={24} className="text-white" />
             </Button>
-            <SheetTitle className="heading-strong text-2xl text-center">Neural Identity</SheetTitle>
-            <SheetDescription className="subtext-muted text-center text-xs">Calibrate your neural focus environment.</SheetDescription>
+            <SheetTitle className="text-white font-bold text-2xl text-center font-headline">Neural Identity</SheetTitle>
+            <SheetDescription className="text-white/40 font-black uppercase tracking-[0.2em] text-[9px] text-center mt-1">Calibrate your focus environment</SheetDescription>
             <Button 
               type="button"
               variant="ghost" 
@@ -202,3 +292,4 @@ export default function Header({
     </>
   );
 }
+
