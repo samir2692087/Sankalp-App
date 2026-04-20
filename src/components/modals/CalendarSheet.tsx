@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useCallback, useRef, useMemo } from 'react';
@@ -77,7 +76,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[90vh] max-h-[90vh] rounded-t-[4rem] p-0 border border-white/10 glass-card shadow-[0_-20px_80px_rgba(0,0,0,0.5)] outline-none flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-500 ease-out">
+      <SheetContent side="bottom" className="h-[90vh] max-h-[90vh] rounded-t-[4rem] p-0 border border-white/10 glass-card outline-none flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-500 ease-out">
         <div className="sr-only">
           <SheetTitle>Behavioral Hub</SheetTitle>
           <SheetDescription>Real-time mastery tracking and reflection.</SheetDescription>
@@ -101,16 +100,16 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                       <LayoutGrid size={24} />
                     </div>
                     <div className="flex flex-col">
-                      <h2 className="font-black font-headline text-xl text-white tracking-tight">Behavioral Hub</h2>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Neural History Protocol</span>
+                      <h2 className="heading-strong text-xl">Behavioral Hub</h2>
+                      <span className="label-dim">Neural History Protocol</span>
                     </div>
                   </div>
                   <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full h-11 w-11 bg-white/5 hover:bg-white/10 active:scale-90 transition-all border border-white/5">
-                    <X size={20} className="text-white/60" />
+                    <X size={20} className="text-white/100" />
                   </Button>
                 </div>
 
-                <div className="neu-flat p-8 rounded-[3rem] bg-white/[0.03] w-full max-w-sm border border-white/10 flex flex-col items-center shadow-2xl relative overflow-hidden backdrop-blur-3xl">
+                <div className="glass-card p-8 rounded-[3rem] w-full max-w-sm flex flex-col items-center relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                   
                   <Calendar 
@@ -125,8 +124,8 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                     classNames={{
                       month: "space-y-6 w-full",
                       caption: "flex justify-center pt-1 relative items-center mb-8",
-                      caption_label: "text-base font-black font-headline uppercase tracking-[0.2em] text-white",
-                      head_cell: "text-white/30 font-black text-[10px] uppercase tracking-widest text-center pb-4",
+                      caption_label: "heading-strong text-base uppercase tracking-[0.2em]",
+                      head_cell: "label-dim text-center pb-4",
                     }}
                     components={{
                       Day: (dayProps: any) => {
@@ -153,20 +152,18 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                               onPointerLeave={handleLongPressEnd}
                               className={cn(
                                 "h-10 w-10 p-0 text-[12px] font-black flex items-center justify-center rounded-[1rem] relative transition-all duration-300",
-                                isClean ? "bg-gradient-to-br from-green-400 to-green-600 text-white shadow-[0_0_20px_rgba(34,197,94,0.4)]" : 
-                                isRelapse ? "bg-gradient-to-br from-red-500 to-red-700 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]" : 
+                                isClean ? "bg-gradient-to-br from-green-400 to-green-600 text-white shadow-[0_0_20px_rgba(34,197,94,0.4)] scale-110" : 
+                                isRelapse ? "bg-gradient-to-br from-red-500 to-red-700 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)] scale-110" : 
                                 "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white",
-                                urgeCount > 0 && !isClean && !isRelapse && "bg-amber-500/20 text-amber-500 border border-amber-500/30",
-                                urgeCount > 2 && !isClean && !isRelapse && "bg-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.4)]",
                                 isToday && !isClean && !isRelapse && "border-2 border-primary text-primary",
                                 modifiers?.outside && "opacity-5",
                                 hasNote && "after:absolute after:bottom-1 after:w-1.5 after:h-1.5 after:bg-purple-400 after:rounded-full after:shadow-[0_0_5px_rgba(168,85,247,0.8)]"
                               )}
                             >
                               {date.getDate()}
-                              {urgeCount > 0 && (
+                              {urgeCount > 0 && !isRelapse && (
                                   <div className={cn(
-                                      "absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full border border-black/40 flex items-center justify-center text-[8px] font-black",
+                                      "absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full border border-black/40 flex items-center justify-center text-[8px] font-black shadow-lg",
                                       urgeCount > 2 ? "bg-red-500 text-white" : "bg-amber-500 text-white"
                                   )}>
                                       {urgeCount}
@@ -190,12 +187,12 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
               >
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-[1.2rem] bg-purple-500/20 flex items-center justify-center text-purple-400 shadow-[inset_0_0_10px_rgba(168,85,247,0.3)] border border-purple-500/20">
+                    <div className="w-12 h-12 rounded-[1.2rem] bg-purple-500/20 flex items-center justify-center text-purple-400 border border-purple-500/20">
                       <StickyNote size={24} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-black uppercase text-purple-400 tracking-[0.2em] mb-0.5">Neural Reflection</span>
-                      <span className="font-black font-headline text-xl text-white">{selectedDate ? format(selectedDate, "MMM do, yyyy") : ''}</span>
+                      <span className="label-dim text-purple-400 mb-0.5">Neural Reflection</span>
+                      <span className="heading-strong text-xl">{selectedDate ? format(selectedDate, "MMM do, yyyy") : ''}</span>
                     </div>
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => setNoteMode(false)} className="rounded-full h-10 w-10 bg-white/5">
@@ -207,7 +204,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                   value={currentNote}
                   onChange={(e) => setCurrentNote(e.target.value)}
                   placeholder="Record triggers, neural victories, or key lessons learned today..."
-                  className="flex-1 bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 resize-none mb-8 text-base focus-visible:ring-1 focus-visible:ring-purple-500/40 text-white/90 leading-relaxed shadow-inner"
+                  className="flex-1 bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 resize-none mb-8 text-base focus-visible:ring-1 focus-visible:ring-purple-500/40 text-white/90 leading-relaxed"
                 />
 
                 <div className="flex gap-4 mb-32">
@@ -218,7 +215,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                       onSaveNote(format(selectedDate!, "yyyy-MM-dd"), "");
                       setNoteMode(false);
                     }} 
-                    className="h-16 rounded-[1.5rem] px-6 text-red-400 hover:bg-red-500/10 border border-white/5"
+                    className="h-16 rounded-[1.5rem] px-6 text-red-400 hover:bg-red-500/10 border border-white/5 active:scale-95 transition-all"
                   >
                     <Trash2 size={24} />
                   </Button>
@@ -231,30 +228,21 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
           </AnimatePresence>
         </div>
 
-        {/* Sticky Legend & Instructions Footer */}
         {!noteMode && (
           <div className="sticky bottom-0 left-0 w-full bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-xl px-8 pb-12 pt-6 border-t border-white/10 flex flex-col gap-6 z-20">
             <div className="grid grid-cols-3 gap-4 w-full">
-              <div className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-green-500/5 border border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]">
+              <div className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-green-500/10 border border-green-500/30 shadow-[0_5px_15px_rgba(34,197,94,0.2)]">
                 <ShieldCheck size={16} className="text-green-400" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-green-400/80">Clean</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-green-400/100">Clean</span>
               </div>
-              <div className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-red-500/5 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+              <div className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-red-500/10 border border-red-500/30 shadow-[0_5px_15px_rgba(239,68,68,0.2)]">
                 <AlertCircle size={16} className="text-red-400" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-red-400/80">Relapse</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-red-400/100">Relapse</span>
               </div>
-              <div className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-amber-500/5 border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+              <div className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-amber-500/10 border border-amber-500/30 shadow-[0_5px_15px_rgba(245,158,11,0.2)]">
                 <Zap size={16} className="text-amber-400" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-amber-400/80">Intensity</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-amber-400/100">Intensity</span>
               </div>
-            </div>
-            <div className="flex items-center gap-4 p-5 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
-              <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
-                <StickyNote size={14} />
-              </div>
-              <p className="text-[10px] text-white/50 font-medium leading-relaxed">
-                <span className="text-white font-black">Pro Tip:</span> Long-press any date to create a neural reflection log.
-              </p>
             </div>
           </div>
         )}

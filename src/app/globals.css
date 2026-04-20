@@ -42,48 +42,45 @@
     --muted: 222 47% 10%;
     --muted-foreground: 215 20% 75%;
   }
-
-  [data-theme="amoled"] {
-    --background: 0 0% 0%;
-    --card: 0 0% 2%;
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 0%;
-    --glow: rgba(255, 255, 255, 0.6);
-    --border: 0 0% 12%;
-  }
-
-  [data-theme="purple"] {
-    --background: 270 60% 3%;
-    --card: 270 60% 6%;
-    --primary: 280 90% 70%;
-    --glow: hsla(280, 90%, 70%, 0.6);
-  }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-card/15 backdrop-blur-3xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
+    @apply bg-white/5 backdrop-blur-[12px] border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.3),inset_0_1px_rgba(255,255,255,0.05)];
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .glass-card:hover {
+    @apply -translate-y-1 border-white/20;
   }
 
   .streak-glow {
     text-shadow: 0 0 15px var(--glow), 0 0 30px var(--glow);
   }
 
-  .success-glow {
-    text-shadow: 0 0 15px var(--success-glow);
+  .heading-strong {
+    @apply text-white font-bold tracking-tight;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   }
 
-  .danger-glow {
-    text-shadow: 0 0 15px var(--danger-glow);
+  .subtext-muted {
+    @apply text-white/70 font-medium;
+  }
+
+  .label-dim {
+    @apply text-white/50 font-bold uppercase tracking-widest text-[10px];
   }
 
   .neu-button {
-    @apply bg-white/10 backdrop-blur-xl border border-white/20 text-foreground transition-all duration-300 shadow-lg;
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 text-foreground transition-all duration-300 shadow-lg flex items-center justify-center;
+  }
+
+  .neu-button:hover {
+    @apply scale-105 bg-white/10 border-white/20;
   }
 
   .neu-button:active {
-    @apply scale-90 bg-white/20;
+    @apply scale-95;
   }
 
   .safe-padding-bottom {
@@ -94,10 +91,6 @@
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  
-  .text-shadow-strong {
-    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-  }
 }
 
 @layer base {

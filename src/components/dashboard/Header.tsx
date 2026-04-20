@@ -88,8 +88,8 @@ export default function Header({
             if (isMobile) setIsThemeSheetOpen(false);
           }}
           className={cn(
-            "theme-card p-4 rounded-3xl flex flex-col gap-3 text-left border-2 relative overflow-hidden",
-            theme === t.id ? 'active border-primary bg-primary/5' : 'border-transparent bg-muted/30'
+            "theme-card p-4 rounded-3xl flex flex-col gap-3 text-left border-2 relative overflow-hidden transition-all duration-300",
+            theme === t.id ? 'active border-primary bg-primary/20 scale-105 shadow-[0_0_20px_rgba(124,58,237,0.3)]' : 'border-transparent bg-white/5'
           )}
         >
           {theme === t.id && (
@@ -100,7 +100,7 @@ export default function Header({
           <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg", t.bg)}>
             <t.icon size={18} className={t.id === 'light' ? 'text-orange-400' : 'text-white'} />
           </div>
-          <span className="font-bold text-xs uppercase tracking-widest">{t.name}</span>
+          <span className="heading-strong text-[10px] uppercase tracking-widest">{t.name}</span>
         </button>
       ))}
     </div>
@@ -108,12 +108,16 @@ export default function Header({
 
   return (
     <>
-      <header className="w-full flex items-center justify-between p-6 sticky top-0 z-[50] backdrop-blur-md shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 group cursor-pointer transition-transform hover:scale-110 active:scale-95">
+      <header className="w-full flex items-center justify-between p-6 sticky top-0 z-[50] shrink-0">
+        <div className="absolute inset-0 bg-background/30 backdrop-blur-xl border-b border-white/5 pointer-events-none -z-10" />
+        <div className="flex items-center gap-3 group cursor-pointer">
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-transform group-hover:scale-110 active:scale-95">
             <Shield className="text-primary-foreground" size={18} />
           </div>
-          <h1 className="text-xl font-bold font-headline leading-none text-foreground">IronWill</h1>
+          <div className="flex flex-col">
+            <h1 className="heading-strong text-xl leading-none">IronWill</h1>
+            <span className="label-dim text-[8px] opacity-70">Neural Mastery</span>
+          </div>
         </div>
 
         <DropdownMenu open={isSettingsOpen} onOpenChange={(open) => {
@@ -121,33 +125,33 @@ export default function Header({
           if (!open) runGlobalCleanup();
         }}>
           <DropdownMenuTrigger asChild>
-            <Button type="button" variant="ghost" className="rounded-xl p-2 h-10 w-10 neu-button border-none bg-card flex items-center justify-center outline-none">
-              <Settings size={20} />
+            <Button type="button" variant="ghost" className="rounded-xl p-2 h-10 w-10 neu-button border-none bg-white/5 flex items-center justify-center outline-none">
+              <Settings size={20} className="text-white" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuPortal>
-            <DropdownMenuContent align="end" className="glass-card rounded-[2rem] border-none shadow-2xl p-2 min-w-[240px] z-[9999]">
-              <DropdownMenuLabel className="font-headline p-3 text-center text-[10px] uppercase tracking-widest opacity-50">Settings</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="glass-card rounded-[2rem] border-white/10 shadow-2xl p-2 min-w-[240px] z-[9999]">
+              <DropdownMenuLabel className="label-dim p-3 text-center">Settings Protocol</DropdownMenuLabel>
               <DropdownMenuSeparator className="opacity-10" />
               
-              <DropdownMenuItem onSelect={() => setIsThemeSheetOpen(true)} className="rounded-xl p-3 gap-3 cursor-pointer">
-                <Palette size={18} /> <span className="font-bold text-sm">Themes</span>
+              <DropdownMenuItem onSelect={() => setIsThemeSheetOpen(true)} className="rounded-xl p-3 gap-3 cursor-pointer hover:bg-white/10 transition-colors">
+                <Palette size={18} className="text-primary" /> <span className="heading-strong text-sm font-medium">Visual Identity</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setIsReminderOpen(true)} className="rounded-xl p-3 gap-3 cursor-pointer">
-                <Bell size={18} /> <span className="font-bold text-sm">Reminders</span>
+              <DropdownMenuItem onSelect={() => setIsReminderOpen(true)} className="rounded-xl p-3 gap-3 cursor-pointer hover:bg-white/10 transition-colors">
+                <Bell size={18} className="text-secondary" /> <span className="heading-strong text-sm font-medium">Neural Alerts</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={onShowExport} className="rounded-xl p-3 gap-3 cursor-pointer">
-                <Download size={18} /> <span className="font-bold text-sm">Export Data</span>
+              <DropdownMenuItem onSelect={onShowExport} className="rounded-xl p-3 gap-3 cursor-pointer hover:bg-white/10 transition-colors">
+                <Download size={18} className="text-white/60" /> <span className="heading-strong text-sm font-medium">Archive Matrix</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={onToggleFocus} className="rounded-xl p-3 justify-between cursor-pointer">
-                <div className="flex items-center gap-3"><Zap size={18} /> <span className="font-bold text-sm">Focus Mode</span></div>
-                <div className={cn("w-8 h-4 rounded-full p-1 transition-all", focusMode ? 'bg-primary' : 'bg-muted')}>
+              <DropdownMenuItem onSelect={onToggleFocus} className="rounded-xl p-3 justify-between cursor-pointer hover:bg-white/10 transition-colors">
+                <div className="flex items-center gap-3"><Zap size={18} className="text-yellow-400" /> <span className="heading-strong text-sm font-medium">Focus Flow</span></div>
+                <div className={cn("w-8 h-4 rounded-full p-1 transition-all", focusMode ? 'bg-primary' : 'bg-white/20')}>
                   <div className={cn("w-2 h-2 rounded-full bg-white transition-all", focusMode ? 'translate-x-4' : 'translate-x-0')} />
                 </div>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="opacity-10" />
-              <DropdownMenuItem onSelect={onReset} className="rounded-xl p-3 gap-3 cursor-pointer text-red-500 hover:bg-red-500/10">
-                <Trash2 size={18} /> <span className="font-bold text-xs uppercase tracking-widest">Wipe Data</span>
+              <DropdownMenuItem onSelect={onReset} className="rounded-xl p-3 gap-3 cursor-pointer text-red-400 hover:bg-red-500/15">
+                <Trash2 size={18} /> <span className="label-dim text-red-400">Purge Mastery Data</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenuPortal>
@@ -158,7 +162,7 @@ export default function Header({
         setIsThemeSheetOpen(open);
         if (!open) runGlobalCleanup();
       }}>
-        <SheetContent side="bottom" className="rounded-t-[3.5rem] glass-card border-none p-8 pb-12 outline-none">
+        <SheetContent side="bottom" className="rounded-t-[3.5rem] glass-card border-white/10 p-8 pb-12 outline-none">
           <SheetHeader className="mb-8 relative">
             <Button 
               type="button"
@@ -166,17 +170,17 @@ export default function Header({
               onClick={() => setIsThemeSheetOpen(false)} 
               className="absolute left-0 top-0 p-0 h-auto hover:bg-transparent"
             >
-              <ArrowLeft size={24} />
+              <ArrowLeft size={24} className="text-white" />
             </Button>
-            <SheetTitle className="text-2xl font-bold font-headline text-center">Visual Identity</SheetTitle>
-            <SheetDescription className="text-center font-medium">Choose your focus environment.</SheetDescription>
+            <SheetTitle className="heading-strong text-2xl text-center">Neural Identity</SheetTitle>
+            <SheetDescription className="subtext-muted text-center text-xs">Calibrate your neural focus environment.</SheetDescription>
             <Button 
               type="button"
               variant="ghost" 
               onClick={() => setIsThemeSheetOpen(false)} 
               className="absolute right-0 top-0 p-0 h-auto hover:bg-transparent"
             >
-              <CloseIcon size={24} />
+              <CloseIcon size={24} className="text-white" />
             </Button>
           </SheetHeader>
           <ThemeCards />

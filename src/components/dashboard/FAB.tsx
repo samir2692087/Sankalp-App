@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -51,13 +50,13 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-2xl z-[60] cursor-pointer"
+            className="fixed inset-0 bg-black/50 backdrop-blur-2xl z-[60] cursor-pointer"
             onClick={() => {
               setIsOpen(false);
               cleanupInteractions();
             }}
           >
-             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 pointer-events-none" />
+             <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-secondary/15 pointer-events-none" />
              <div className="absolute bottom-40 right-40 w-80 h-80 bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
           </motion.div>
         )}
@@ -94,7 +93,7 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
                   <motion.span 
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="bg-white/10 backdrop-blur-xl text-white px-5 py-2.5 rounded-[1.2rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="bg-white/10 backdrop-blur-xl heading-strong px-5 py-2.5 rounded-[1.2rem] text-[10px] uppercase tracking-[0.2em] shadow-2xl border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     {item.label}
                   </motion.span>
@@ -102,12 +101,12 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
                     animate={{ y: [0, -4, 0] }}
                     transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
                     className={cn(
-                      "w-14 h-14 rounded-[1.5rem] shadow-2xl text-white flex items-center justify-center transition-all border border-white/20 bg-gradient-to-br",
+                      "w-14 h-14 rounded-[1.5rem] shadow-2xl text-white flex items-center justify-center transition-all border border-white/30 bg-gradient-to-br",
                       item.color,
                       item.glow
                     )}
                   >
-                    <item.icon size={24} />
+                    <item.icon size={24} className="drop-shadow-lg" />
                   </motion.div>
                 </motion.div>
               ))}
@@ -118,12 +117,13 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
         <motion.button 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.92 }}
+          type="button"
           onClick={() => {
             if (isOpen) cleanupInteractions();
             setIsOpen(!isOpen);
           }}
           className={cn(
-            "w-20 h-20 rounded-[2.5rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] transition-all duration-500 flex items-center justify-center relative border border-white/20",
+            "w-20 h-20 rounded-[2.5rem] shadow-[0_15px_40px_rgba(0,0,0,0.5)] transition-all duration-500 flex items-center justify-center relative border border-white/20",
             isOpen ? "bg-white/10 text-white backdrop-blur-xl rotate-90" : "bg-primary text-white shadow-primary/40"
           )}
         >
