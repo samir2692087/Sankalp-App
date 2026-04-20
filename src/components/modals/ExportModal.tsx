@@ -15,6 +15,7 @@ import { exportToCSV, exportToText, exportToPDF } from "@/lib/export-utils";
 import { importData } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from 'framer-motion';
+import { cn } from "@/lib/utils";
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -67,23 +68,24 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-card sm:max-w-[550px] rounded-[3.5rem] border border-white/10 shadow-[0_0_60px_rgba(124,58,237,0.15)] p-0 overflow-hidden outline-none">
-        <div className="bg-primary/10 p-10 text-center border-b border-white/5 relative">
+      <DialogContent className="glass-card sm:max-w-[550px] max-h-[90vh] rounded-[3.5rem] border border-white/10 shadow-[0_0_60px_rgba(124,58,237,0.15)] p-0 overflow-hidden outline-none flex flex-col">
+        <div className="bg-primary/10 p-8 text-center border-b border-white/5 relative shrink-0">
           <Button 
+            type="button"
             variant="ghost" 
             onClick={onClose} 
-            className="absolute left-6 top-10 p-0 h-auto hover:bg-transparent hidden sm:flex"
+            className="absolute left-6 top-8 p-0 h-auto hover:bg-transparent hidden sm:flex"
           >
             <ArrowLeft size={24} />
           </Button>
-          <div className="w-16 h-16 bg-primary/20 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Share2 size={32} />
+          <div className="w-14 h-14 bg-primary/20 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Share2 size={28} />
           </div>
-          <DialogTitle className="text-3xl font-bold font-headline">Archive Center</DialogTitle>
-          <DialogDescription className="text-muted-foreground/60 font-medium uppercase tracking-[0.2em] text-[9px] mt-1">Neural Data Management</DialogDescription>
+          <DialogTitle className="text-2xl font-bold font-headline">Archive Center</DialogTitle>
+          <DialogDescription className="text-muted-foreground/60 font-medium uppercase tracking-[0.2em] text-[8px] mt-1">Neural Data Management</DialogDescription>
         </div>
         
-        <div className="p-8 sm:p-10 space-y-10">
+        <div className="flex-1 overflow-y-auto p-8 sm:p-10 space-y-10 no-scrollbar">
           <div className="grid grid-cols-2 gap-4">
             {stats.map((s, idx) => (
               <div key={idx} className="bg-white/5 border border-white/5 p-5 rounded-3xl flex items-center gap-4">
@@ -111,11 +113,12 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
                   key={item.label}
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
+                  type="button"
                   onClick={item.action} 
-                  className="h-28 flex flex-col items-center justify-center gap-3 rounded-[2rem] bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group"
+                  className="h-24 flex flex-col items-center justify-center gap-2 rounded-[2rem] bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group"
                 >
-                  <item.icon className={cn("size-7 transition-transform group-hover:scale-110", item.color)} />
-                  <span className="font-bold text-xs uppercase tracking-tighter">{item.label}</span>
+                  <item.icon className={cn("size-6 transition-transform group-hover:scale-110", item.color)} />
+                  <span className="font-bold text-[10px] uppercase tracking-tighter">{item.label}</span>
                 </motion.button>
               ))}
             </div>
@@ -130,6 +133,7 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
               onChange={handleJSONImport}
             />
             <Button 
+              type="button"
               variant="ghost" 
               onClick={() => fileInputRef.current?.click()}
               className="w-full h-16 rounded-2xl border border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-all flex items-center justify-center gap-4 font-bold text-muted-foreground/80 hover:text-primary"
@@ -138,6 +142,7 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
               Restore Mastery Logs
             </Button>
           </div>
+          <div className="h-10" /> {/* Mobile safety spacer */}
         </div>
       </DialogContent>
     </Dialog>
