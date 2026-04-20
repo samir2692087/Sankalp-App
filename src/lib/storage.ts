@@ -5,23 +5,31 @@ const STORAGE_KEY = 'ironwill_v1_data';
 
 /**
  * Deep merges stored data with INITIAL_DATA to ensure all arrays and fields are present.
+ * Uses explicit checks for array types to prevent corrupted data from crashing the app.
  */
 const migrateData = (parsed: any): UserData => {
+  if (!parsed || typeof parsed !== 'object') return INITIAL_DATA;
+  
   return {
     ...INITIAL_DATA,
     ...parsed,
-    urges: Array.isArray(parsed?.urges) ? parsed.urges : INITIAL_DATA.urges,
-    relapses: Array.isArray(parsed?.relapses) ? parsed.relapses : INITIAL_DATA.relapses,
-    checkIns: Array.isArray(parsed?.checkIns) ? parsed.checkIns : INITIAL_DATA.checkIns,
-    notes: Array.isArray(parsed?.notes) ? parsed.notes : INITIAL_DATA.notes,
-    browserHistory: Array.isArray(parsed?.browserHistory) ? parsed.browserHistory : INITIAL_DATA.browserHistory,
+    urges: Array.isArray(parsed?.urges) ? parsed.urges : [],
+    relapses: Array.isArray(parsed?.relapses) ? parsed.relapses : [],
+    checkIns: Array.isArray(parsed?.checkIns) ? parsed.checkIns : [],
+    notes: Array.isArray(parsed?.notes) ? parsed.notes : [],
+    browserHistory: Array.isArray(parsed?.browserHistory) ? parsed.browserHistory : [],
+    currentStreak: typeof parsed?.currentStreak === 'number' ? parsed.currentStreak : 0,
+    bestStreak: typeof parsed?.bestStreak === 'number' ? parsed.bestStreak : 0,
+    disciplineScore: typeof parsed?.disciplineScore === 'number' ? parsed.disciplineScore : 0,
+    streakFreezes: typeof parsed?.streakFreezes === 'number' ? parsed.streakFreezes : 3,
   };
 };
 
 export const getStoredData = (): UserData => {
   if (typeof window === 'undefined') return INITIAL_DATA;
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) return INITIAL_DATA;
+  if (!stored || stored === 'undefined' || stored === 'null') return INITIAL_DATA;
+  
   try {
     const parsed = JSON.parse(stored);
     return migrateData(parsed);
@@ -33,7 +41,11 @@ export const getStoredData = (): UserData => {
 
 export const saveData = (data: UserData) => {
   if (typeof window === 'undefined' || !data) return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.error("Failed to save data to localStorage", e);
+  }
 };
 
 export const clearData = () => {
@@ -44,7 +56,7 @@ export const clearData = () => {
 export const importData = (jsonStr: string): boolean => {
   try {
     const data = JSON.parse(jsonStr);
-    if (data && (typeof data.currentStreak === 'number' || Array.isArray(data.urges))) {
+    if (data && typeof data === 'object') {
       saveData(migrateData(data));
       return true;
     }

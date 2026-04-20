@@ -3,15 +3,19 @@ import { UserData, RelapseLog, UrgeLog, CheckInLog } from './types';
 
 export function calculateStreak(lastRelapseTimestamp: number | null): number {
   if (!lastRelapseTimestamp) return 0;
-  const diff = Date.now() - lastRelapseTimestamp;
-  return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+  try {
+    const diff = Date.now() - lastRelapseTimestamp;
+    return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+  } catch (e) {
+    return 0;
+  }
 }
 
 export function calculateDisciplineScore(data: UserData): number {
   if (!data) return 0;
-  const urges = data.urges || [];
-  const relapses = data.relapses || [];
-  const checkIns = data.checkIns || [];
+  const urges = Array.isArray(data.urges) ? data.urges : [];
+  const relapses = Array.isArray(data.relapses) ? data.relapses : [];
+  const checkIns = Array.isArray(data.checkIns) ? data.checkIns : [];
   
   const currentStreak = data.currentStreak || 0;
   const streakFactor = Math.min(currentStreak * 2, 50);
@@ -24,8 +28,8 @@ export function calculateDisciplineScore(data: UserData): number {
 }
 
 export function getBehavioralInsights(data: UserData) {
-  const relapses = data?.relapses || [];
-  const urges = data?.urges || [];
+  const relapses = Array.isArray(data?.relapses) ? data.relapses : [];
+  const urges = Array.isArray(data?.urges) ? data.urges : [];
   
   const reasons = relapses.map(r => r?.reason || "Unknown").filter(Boolean);
   const mostCommonTrigger = reasons.length > 0 
@@ -61,9 +65,9 @@ export function getBehavioralInsights(data: UserData) {
 }
 
 export function getWeeklyData(data: UserData) {
-  const urges = data?.urges || [];
-  const relapses = data?.relapses || [];
-  const checkIns = data?.checkIns || [];
+  const urges = Array.isArray(data?.urges) ? data.urges : [];
+  const relapses = Array.isArray(data?.relapses) ? data.relapses : [];
+  const checkIns = Array.isArray(data?.checkIns) ? data.checkIns : [];
   
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
@@ -98,16 +102,19 @@ export function getWeeklyData(data: UserData) {
 }
 
 export function getAchievements(streak: number, score: number) {
+  const s = streak || 0;
+  const sc = score || 0;
   return [
-    { id: '1', name: 'Initiate', desc: 'First 24 hours clean', unlocked: (streak || 0) >= 1 },
-    { id: '2', name: 'Warrior', desc: '7 Day Streak reached', unlocked: (streak || 0) >= 7 },
-    { id: '3', name: 'Steel Mind', desc: '30 Day Mastery', unlocked: (streak || 0) >= 30 },
-    { id: '4', name: 'Iron Will', desc: '90 Day Ascension', unlocked: (streak || 0) >= 90 },
-    { id: '5', name: 'Fortress', desc: 'Maintain Score > 90', unlocked: (score || 0) >= 90 },
+    { id: '1', name: 'Initiate', desc: 'First 24 hours clean', unlocked: s >= 1 },
+    { id: '2', name: 'Warrior', desc: '7 Day Streak reached', unlocked: s >= 7 },
+    { id: '3', name: 'Steel Mind', desc: '30 Day Mastery', unlocked: s >= 30 },
+    { id: '4', name: 'Iron Will', desc: '90 Day Ascension', unlocked: s >= 90 },
+    { id: '5', name: 'Fortress', desc: 'Maintain Score > 90', unlocked: sc >= 90 },
   ];
 }
 
 export function getDailyChallenge(streak: number) {
+  const s = streak || 0;
   const lowStreak = [
     "Identify one trigger and remove it.",
     "Do 10 pushups when an urge hits.",
@@ -127,7 +134,7 @@ export function getDailyChallenge(streak: number) {
     "Reflect on your 90-day transformation."
   ];
 
-  const pool = (streak || 0) >= 90 ? highStreak : (streak || 0) >= 30 ? midStreak : lowStreak;
+  const pool = s >= 90 ? highStreak : s >= 30 ? midStreak : lowStreak;
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
   return pool[Math.max(0, dayOfYear % pool.length)];
 }
