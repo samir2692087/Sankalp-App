@@ -1,4 +1,3 @@
-
 "use client";
 
 import { TrendingUp, Clock, Zap, Target, Star } from 'lucide-react';
