@@ -27,17 +27,19 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
   const [currentNote, setCurrentNote] = useState("");
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const checkInDates = (data.checkIns || []).map(c => new Date(c.date));
+  const checkInDates = (data?.checkIns || []).map(c => new Date(c.date));
   
   const handleDayClick = useCallback((day: Date) => {
+    if (!day) return;
     const dateStr = format(day, "yyyy-MM-dd");
     onToggleDate(dateStr);
   }, [onToggleDate]);
 
   const handleLongPressStart = (day: Date) => {
+    if (!day) return;
     longPressTimer.current = setTimeout(() => {
       const dateStr = format(day, "yyyy-MM-dd");
-      const existingNote = (data.notes || []).find(n => n.date === dateStr);
+      const existingNote = (data?.notes || []).find(n => n.date === dateStr);
       setSelectedDate(day);
       setCurrentNote(existingNote?.content || "");
       setNoteMode(true);
@@ -47,6 +49,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
   const handleLongPressEnd = () => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
     }
   };
 
@@ -79,27 +82,37 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                   onDayClick={handleDayClick}
                   className="rounded-3xl border-none"
                   modifiers={{
-                    hasNote: (date) => (data.notes || []).some(n => n.date === format(date, "yyyy-MM-dd"))
+                    hasNote: (date) => !!date && (data?.notes || []).some(n => n.date === format(date, "yyyy-MM-dd"))
                   }}
                   modifiersStyles={{
                     hasNote: { borderBottom: '2px solid hsl(var(--primary))' }
                   }}
                   components={{
-                    Day: ({ date, ...props }) => (
-                      <div 
-                        onPointerDown={() => handleLongPressStart(date)}
-                        onPointerUp={handleLongPressEnd}
-                        onPointerLeave={handleLongPressEnd}
-                        className="relative"
-                      >
-                        <button {...props} className={`${props.className} relative`}>
-                          {date.getDate()}
-                          {(data.notes || []).some(n => n.date === format(date, "yyyy-MM-dd")) && (
-                            <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-primary rounded-full" />
-                          )}
-                        </button>
-                      </div>
-                    )
+                    Day: (dayProps: any) => {
+                      const { day, modifiers, ...props } = dayProps;
+                      const date = day?.date;
+                      if (!date) return null;
+
+                      return (
+                        <div 
+                          onPointerDown={() => handleLongPressStart(date)}
+                          onPointerUp={handleLongPressEnd}
+                          onPointerLeave={handleLongPressEnd}
+                          className="relative"
+                        >
+                          <button 
+                            type="button"
+                            {...props} 
+                            className={`${props.className || ''} relative`}
+                          >
+                            {date.getDate()}
+                            {(data?.notes || []).some(n => n.date === format(date, "yyyy-MM-dd")) && (
+                              <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-primary rounded-full" />
+                            )}
+                          </button>
+                        </div>
+                      );
+                    }
                   }}
                 />
               </div>
@@ -113,7 +126,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <StickyNote className="text-primary" size={20} />
-                  <span className="font-bold font-headline">{format(selectedDate!, "MMMM do, yyyy")}</span>
+                  <span className="font-bold font-headline">{selectedDate ? format(selectedDate, "MMMM do, yyyy") : ''}</span>
                 </div>
                 <Button variant="ghost" size="icon" onClick={() => setNoteMode(false)}>
                   <X size={20} />
