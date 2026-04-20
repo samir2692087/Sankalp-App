@@ -82,7 +82,10 @@ export default function Scene3D() {
 
   return (
     <div className="fixed inset-0 -z-10 bg-[#050505]">
-      <Canvas camera={{ position: [0, 0, 5], fov: 75 }} gl={{ antialias: true, alpha: true }}>
+      <Canvas 
+        camera={{ position: [0, 0, 5], fov: 75 }} 
+        gl={{ antialias: true, alpha: true }}
+      >
         <Scene />
       </Canvas>
     </div>
