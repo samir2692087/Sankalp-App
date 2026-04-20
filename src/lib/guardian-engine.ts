@@ -34,7 +34,7 @@ export interface GuardianRiskAssessment {
 
 /**
  * Assesses content safety entirely locally based on keywords and domains.
- * This version allows full browsing but applies "Neural Stabilizers" (blurs).
+ * This version allows full browsing but applies non-intrusive "Neural Stabilizers" (blurs).
  */
 export function assessContentSafety(input: string, streak: number = 0): GuardianRiskAssessment {
   const normalized = input.toLowerCase().trim();
@@ -44,7 +44,7 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
   if (isBlacklisted) {
     return {
       status: 'BLOCKED',
-      reason: "Neural Protocol Violation: Blacklisted environment intercepted.",
+      reason: "Neural Protocol Violation: Blacklisted environment detected. Soft-fog stabilizers active.",
       riskScore: 100,
       isBlurRequired: true
     };
@@ -55,7 +55,7 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
   if (explicitMatch) {
     return {
       status: 'BLOCKED',
-      reason: `Neural Breach: Explicit content intent detected ("${explicitMatch}").`,
+      reason: `Neural Breach: Explicit content intent detected ("${explicitMatch}"). Fog stabilizers active.`,
       riskScore: 100,
       isBlurRequired: true
     };
@@ -68,7 +68,7 @@ export function assessContentSafety(input: string, streak: number = 0): Guardian
       status: 'WARN',
       reason: "High Distraction Potential: Neural stabilizers active to preserve focus.",
       riskScore: 60,
-      isBlurRequired: streak < 7 // Apply blur to distractions if streak is low
+      isBlurRequired: streak < 7 // Apply subtle blur to distractions if streak is low
     };
   }
 
@@ -106,7 +106,7 @@ export function formatBrowserInput(input: string): string {
     return normalized.startsWith('http') ? normalized : `https://${normalized}`;
   }
 
-  // Treat as search query
+  // Treat as search query with SafeSearch active
   return `https://www.google.com/search?q=${encodeURIComponent(normalized)}&safe=active`;
 }
 

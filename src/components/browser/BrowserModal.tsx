@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Globe, 
@@ -20,7 +20,8 @@ import {
   GraduationCap,
   Youtube,
   SearchCode,
-  FileText
+  FileText,
+  Zap
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,21 +69,16 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
     // Guardian Content Assessment
     const assessment = assessContentSafety(finalUrl, streak);
 
-    if (assessment.status === 'BLOCKED') {
-      setSafetyStatus('BLOCKED');
-      setGuardianScore(0);
-      setBlockReason(assessment.reason);
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-      setIsLoading(false);
-      return;
-    }
-
-    // Update Stability State
+    // Update Stability State - NO FULL SCREEN BLOCKING
     setSafetyStatus(assessment.status);
     setGuardianScore(100 - assessment.riskScore);
-    setIsBlurActive(assessment.isBlurRequired);
+    setIsBlurActive(assessment.isBlurRequired || assessment.status === 'BLOCKED');
     setBlockReason(assessment.reason);
+
+    if (assessment.status === 'BLOCKED') {
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+    }
 
     setUrl(finalUrl);
     setInputUrl(finalUrl);
@@ -239,7 +235,7 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
           </div>
         </div>
 
-        {/* Viewport with Neural Stabilizers */}
+        {/* Viewport with Non-Intrusive Stabilizers */}
         <div className="flex-1 relative bg-white overflow-hidden flex flex-col">
           {/* Environment Scan Progress Bar */}
           <div className="absolute top-0 left-0 w-full h-[2px] bg-transparent z-[60] overflow-hidden">
@@ -255,85 +251,63 @@ export default function BrowserModal({ isOpen, onClose, streak }: BrowserModalPr
              </AnimatePresence>
           </div>
 
-          <AnimatePresence mode="wait">
-            {safetyStatus === 'BLOCKED' ? (
-              <motion.div 
-                key="blocked"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.02 }}
-                className="flex-1 bg-[#07070a] flex flex-col items-center justify-center p-8 text-center"
-              >
-                <div className="w-24 h-24 bg-red-500/10 rounded-[2rem] flex items-center justify-center text-red-500 mb-8 border border-red-500/20 shadow-[0_0_50px_rgba(239,68,68,0.2)]">
-                  <ShieldAlert size={48} className="animate-pulse" />
-                </div>
-                <h2 className="text-3xl font-bold text-white mb-4 font-headline tracking-tight">Neural Protocol Violation</h2>
-                <p className="text-white/50 max-w-md mb-10 leading-relaxed font-medium text-base">
-                  {blockReason || "The Guardian has intercepted this environment to preserve your neural mastery streak. You chose discipline over distraction."}
-                </p>
-                <div className="flex flex-col gap-3 w-full max-w-xs">
-                  <Button 
-                    type="button"
-                    onClick={() => { setSafetyStatus('SAFE'); navigateTo('https://www.google.com'); }}
-                    className="h-14 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-widest"
-                  >
-                    Return to Safe Zone
-                  </Button>
-                  <Button 
-                    type="button"
-                    variant="ghost" 
-                    onClick={onClose}
-                    className="h-14 rounded-xl text-white/30 hover:text-white hover:bg-white/5"
-                  >
-                    Terminate Session
-                  </Button>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div 
-                key="viewport"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex-1 relative"
-              >
-                {/* Real Viewport Content */}
-                <iframe 
-                  src={url} 
-                  className={cn(
-                    "w-full h-full border-none transition-all duration-1000 bg-white",
-                    isBlurActive && "blur-[12px] grayscale-[0.3] pointer-events-none"
-                  )}
-                  title="Discipline Browser Viewport"
-                />
-                
-                {/* Holographic Warning Overlay for Risk Warnings */}
-                {isBlurActive && (
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex flex-col items-center justify-center p-12 text-center z-50">
-                    <motion.div 
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="bg-[#0b0b0f]/90 backdrop-blur-xl border border-amber-500/30 p-10 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-6 max-w-sm"
-                    >
-                       <div className="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center">
-                         <AlertTriangle size={32} />
-                       </div>
-                       <div>
-                         <h3 className="text-xl font-bold text-white mb-2 font-headline">Neural Fog Active</h3>
-                         <p className="text-sm text-white/50 leading-relaxed">{blockReason || "This environment is flagged as a high distraction risk. Stabilization protocols are active."}</p>
-                       </div>
-                       <Button 
-                        type="button"
-                        onClick={() => navigateTo('https://www.wikipedia.org')}
-                        className="w-full h-12 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold"
-                       >
-                         Redirect to Knowledge Hub
-                       </Button>
-                    </motion.div>
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <div className="flex-1 relative">
+            {/* Real Viewport Content - ALWAYS VISIBLE */}
+            <iframe 
+              src={url} 
+              className={cn(
+                "w-full h-full border-none transition-all duration-1000 bg-white",
+                isBlurActive && "blur-[8px] grayscale-[0.2]"
+              )}
+              title="Discipline Browser Viewport"
+            />
+            
+            {/* Non-Blocking Floating Notification for Risk Warnings */}
+            <AnimatePresence>
+              {safetyStatus !== 'SAFE' && (
+                <motion.div 
+                  initial={{ x: 300, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: 300, opacity: 0 }}
+                  className="absolute top-6 right-6 z-[60] w-72 p-5 bg-[#0b0b0f]/90 backdrop-blur-2xl border border-amber-500/20 rounded-[1.5rem] shadow-2xl flex flex-col gap-4"
+                >
+                   <div className="flex items-start gap-4">
+                     <div className={cn(
+                       "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                       safetyStatus === 'BLOCKED' ? "bg-red-500/10 text-red-500" : "bg-amber-500/10 text-amber-500"
+                     )}>
+                       {safetyStatus === 'BLOCKED' ? <ShieldAlert size={20} /> : <AlertTriangle size={20} />}
+                     </div>
+                     <div className="flex-1">
+                       <h4 className="text-xs font-bold text-white mb-1">Neural Fog Active</h4>
+                       <p className="text-[10px] text-white/50 leading-relaxed font-medium">
+                         {blockReason || "This environment is flagged as a high distraction risk. Stabilization protocols are active."}
+                       </p>
+                     </div>
+                   </div>
+                   <div className="flex items-center gap-2">
+                     <Button 
+                      type="button"
+                      size="sm"
+                      onClick={() => navigateTo('https://www.wikipedia.org')}
+                      className="flex-1 h-9 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px]"
+                     >
+                       Knowledge Hub
+                     </Button>
+                     <Button 
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsBlurActive(false)}
+                      className="h-9 rounded-lg text-white/40 hover:text-white hover:bg-white/5 text-[10px]"
+                     >
+                       Ignore
+                     </Button>
+                   </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Browser Footer HUD */}
