@@ -16,8 +16,7 @@ import {
   ResponsiveContainer, 
   Cell 
 } from 'recharts';
-import { Calendar } from "@/components/ui/calendar";
-import { Target, BarChart3, Trophy, Calendar as CalendarIcon, ArrowLeft } from 'lucide-react';
+import { Target, BarChart3, Trophy, ArrowLeft } from 'lucide-react';
 import { UserData } from "@/lib/types";
 import { getWeeklyData, getAchievements } from "@/lib/discipline-engine";
 import { cn } from "@/lib/utils";
@@ -33,7 +32,6 @@ interface InsightsSheetProps {
 export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'milestones' }: InsightsSheetProps) {
   const weeklyData = getWeeklyData(data);
   const achievements = getAchievements(data.currentStreak, data.disciplineScore);
-  const checkInDates = data.checkIns.map(c => new Date(c.date));
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -55,7 +53,6 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
             <TabsTrigger value="milestones" className="flex-1 rounded-xl gap-2 font-bold text-xs uppercase tracking-widest"><Target size={14}/> Milestones</TabsTrigger>
             <TabsTrigger value="weekly" className="flex-1 rounded-xl gap-2 font-bold text-xs uppercase tracking-widest"><BarChart3 size={14}/> Pulse</TabsTrigger>
             <TabsTrigger value="achievements" className="flex-1 rounded-xl gap-2 font-bold text-xs uppercase tracking-widest"><Trophy size={14}/> Trophy</TabsTrigger>
-            <TabsTrigger value="history" className="flex-1 rounded-xl gap-2 font-bold text-xs uppercase tracking-widest"><CalendarIcon size={14}/> History</TabsTrigger>
           </TabsList>
 
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
@@ -118,16 +115,6 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
                     <span className="text-[8px] font-black uppercase tracking-tighter leading-tight">{ach.name}</span>
                   </div>
                 ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="history" className="mt-0 outline-none flex justify-center">
-              <div className="neu-flat p-4 rounded-[2.5rem]">
-                <Calendar 
-                  mode="multiple" 
-                  selected={checkInDates} 
-                  className="rounded-3xl pointer-events-none" 
-                />
               </div>
             </TabsContent>
           </div>
