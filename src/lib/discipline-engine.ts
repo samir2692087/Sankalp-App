@@ -9,10 +9,11 @@ export function calculateStreak(lastRelapseTimestamp: number | null): number {
 
 export function calculateDisciplineScore(data: UserData): number {
   const streakFactor = Math.min(data.currentStreak * 2, 50);
-  const urgeFactor = Math.min(data.urges.length * 2, 30);
-  const relapsePenalty = Math.min(data.relapses.length * 10, 80);
+  const urgeFactor = Math.min(data.urges.length * 3, 40);
+  const checkInFactor = Math.min(data.checkIns.length * 0.5, 20);
+  const relapsePenalty = Math.min(data.relapses.length * 15, 90);
   
-  const rawScore = 50 + streakFactor + urgeFactor - relapsePenalty;
+  const rawScore = 40 + streakFactor + urgeFactor + checkInFactor - relapsePenalty;
   return Math.max(0, Math.min(100, Math.round(rawScore)));
 }
 
@@ -29,16 +30,24 @@ export function getBehavioralInsights(data: UserData) {
     ? times.reduce((a, b, i, arr) => 
         (arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b)
       )
-    : "Morning Protocol Active";
+    : "N/A";
 
   const totalBattles = data.urges.length + data.relapses.length;
   const winRate = totalBattles > 0 ? Math.round((data.urges.length / totalBattles) * 100) : 100;
+
+  // Streak Protection: Risk Detection
+  const recentUrges = data.urges.filter(u => Date.now() - u.timestamp < 1000 * 60 * 60 * 48).length;
+  const riskLevel = recentUrges >= 3 ? 'CRITICAL' : recentUrges >= 1 ? 'ELEVATED' : 'STABLE';
 
   return { 
     mostCommonTrigger, 
     highRiskWindow,
     winRate,
-    resilienceLevel: winRate > 80 ? 'Fortress' : winRate > 50 ? 'Steel' : 'Vulnerable'
+    resilienceLevel: winRate > 85 ? 'Fortress' : winRate > 60 ? 'Steel' : 'Vulnerable',
+    riskLevel,
+    protectionMessage: riskLevel === 'CRITICAL' ? "High relapse risk detected. Deploy Emergency Protocol." :
+                       riskLevel === 'ELEVATED' ? "Pattern of urges noted. Stay vigilant." :
+                       "Neural paths stabilizing. Keep focus."
   };
 }
 
@@ -63,21 +72,31 @@ export function getAchievements(streak: number, score: number) {
     { id: '2', name: 'Warrior', desc: '7 Day Streak reached', unlocked: streak >= 7 },
     { id: '3', name: 'Steel Mind', desc: '30 Day Mastery', unlocked: streak >= 30 },
     { id: '4', name: 'Iron Will', desc: '90 Day Ascension', unlocked: streak >= 90 },
-    { id: '5', name: 'Elite Status', desc: 'Score over 80', unlocked: score >= 80 },
+    { id: '5', name: 'Fortress', desc: 'Maintain Score > 90', unlocked: score >= 90 },
   ];
 }
 
-export function getDailyChallenge() {
-  const challenges = [
-    "Do 20 pushups right now.",
-    "Drink a full glass of water.",
-    "Meditate for 5 minutes.",
-    "Read 5 pages of a book.",
-    "Take a cold shower.",
-    "Clean your workspace for 10 minutes.",
-    "Go for a 15-minute walk.",
-    "Write down 3 things you're grateful for."
+export function getDailyChallenge(streak: number) {
+  const lowStreak = [
+    "Identify one trigger and remove it.",
+    "Do 10 pushups when an urge hits.",
+    "Drink a glass of cold water now.",
+    "Write 1 goal for tomorrow."
   ];
+  const midStreak = [
+    "Meditate for 10 minutes.",
+    "Take a 2-minute cold shower shower.",
+    "No social media for 2 hours.",
+    "Read 10 pages of self-improvement."
+  ];
+  const highStreak = [
+    "Complete a 24-hour dopamine fast.",
+    "Run 3 miles for mental clarity.",
+    "Mentor someone else in discipline.",
+    "Reflect on your 90-day transformation."
+  ];
+
+  const pool = streak >= 90 ? highStreak : streak >= 30 ? midStreak : lowStreak;
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-  return challenges[dayOfYear % challenges.length];
+  return pool[dayOfYear % pool.length];
 }

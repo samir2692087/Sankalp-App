@@ -25,14 +25,6 @@ export interface DayNote {
   content: string;
 }
 
-export interface Badge {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  unlocked: boolean;
-}
-
 export interface UserData {
   bestStreak: number;
   currentStreak: number;
@@ -47,6 +39,8 @@ export interface UserData {
   notificationsEnabled: boolean;
   reminderTime: string; // HH:mm format
   lastNotificationDate: string | null;
+  streakFreezes: number;
+  maxFreezes: number;
 }
 
 export const INITIAL_DATA: UserData = {
@@ -63,4 +57,6 @@ export const INITIAL_DATA: UserData = {
   notificationsEnabled: false,
   reminderTime: '09:00',
   lastNotificationDate: null,
+  streakFreezes: 3,
+  maxFreezes: 3,
 };

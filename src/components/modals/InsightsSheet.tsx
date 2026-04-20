@@ -1,3 +1,4 @@
+
 "use client";
 
 import { 
@@ -14,9 +15,12 @@ import {
   XAxis, 
   Tooltip, 
   ResponsiveContainer, 
-  Cell 
+  Cell,
+  LineChart,
+  Line,
+  YAxis
 } from 'recharts';
-import { Target, BarChart3, Trophy, ArrowLeft } from 'lucide-react';
+import { Target, BarChart3, Trophy, ArrowLeft, TrendingUp } from 'lucide-react';
 import { UserData } from "@/lib/types";
 import { getWeeklyData, getAchievements } from "@/lib/discipline-engine";
 import { cn } from "@/lib/utils";
@@ -33,6 +37,14 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
   const weeklyData = getWeeklyData(data);
   const achievements = getAchievements(data.currentStreak, data.disciplineScore);
 
+  // Progress Timeline Data
+  const timelineData = useMemo(() => {
+    return weeklyData.map(d => ({
+      name: d.name,
+      score: Math.max(0, 100 - (d.relapses * 20) + (d.checkins * 5))
+    }));
+  }, [weeklyData]);
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="bottom" className="h-[90vh] rounded-t-[3rem] p-0 border-none glass-card outline-none overflow-hidden flex flex-col">
@@ -43,16 +55,16 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
             <Button variant="ghost" onClick={onClose} className="p-0 h-auto hover:bg-transparent">
               <ArrowLeft size={24} />
             </Button>
-            <SheetTitle className="text-2xl font-bold font-headline">Discipline Insights</SheetTitle>
+            <SheetTitle className="text-2xl font-bold font-headline">Intelligence Report</SheetTitle>
           </div>
-          <SheetDescription>Detailed analysis of your growth journey.</SheetDescription>
+          <SheetDescription>Behavioral patterns and discipline trajectories.</SheetDescription>
         </SheetHeader>
 
         <Tabs defaultValue={defaultTab} className="flex-1 flex flex-col px-6 pb-4 overflow-hidden">
           <TabsList className="w-full bg-muted/30 p-1.5 rounded-2xl h-14 mb-6 shrink-0">
-            <TabsTrigger value="milestones" className="flex-1 rounded-xl gap-2 font-bold text-xs uppercase tracking-widest"><Target size={14}/> Milestones</TabsTrigger>
-            <TabsTrigger value="weekly" className="flex-1 rounded-xl gap-2 font-bold text-xs uppercase tracking-widest"><BarChart3 size={14}/> Pulse</TabsTrigger>
-            <TabsTrigger value="achievements" className="flex-1 rounded-xl gap-2 font-bold text-xs uppercase tracking-widest"><Trophy size={14}/> Trophy</TabsTrigger>
+            <TabsTrigger value="milestones" className="flex-1 rounded-xl gap-2 font-bold text-xs uppercase tracking-widest"><Target size={14}/> Goals</TabsTrigger>
+            <TabsTrigger value="weekly" className="flex-1 rounded-xl gap-2 font-bold text-xs uppercase tracking-widest"><TrendingUp size={14}/> Timeline</TabsTrigger>
+            <TabsTrigger value="achievements" className="flex-1 rounded-xl gap-2 font-bold text-xs uppercase tracking-widest"><Trophy size={14}/> Mastery</TabsTrigger>
           </TabsList>
 
           <div className="flex-1 overflow-y-auto pb-24 no-scrollbar">
@@ -61,7 +73,7 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
                 {[7, 30, 90, 365].map((goal) => {
                   const progress = Math.min((data.currentStreak / goal) * 100, 100);
                   return (
-                    <div key={goal} className="neu-flat p-6 rounded-3xl flex flex-col gap-4">
+                    <div key={goal} className="neu-flat p-6 rounded-3xl flex flex-col gap-4 transition-all hover:scale-[1.02]">
                       <div className="flex justify-between items-center">
                         <span className="font-bold font-headline text-lg">{goal} Day Protocol</span>
                         <span className={cn("text-xs font-black px-3 py-1 rounded-full uppercase", progress === 100 ? "bg-green-100 text-green-600" : "bg-primary/10 text-primary")}>
@@ -78,28 +90,33 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
             </TabsContent>
 
             <TabsContent value="weekly" className="mt-0 outline-none space-y-6">
-              <div className="neu-flat p-8 rounded-3xl h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={weeklyData}>
+              <div className="neu-flat p-8 rounded-3xl h-64 bg-card">
+                <h4 className="text-[10px] font-black uppercase text-muted-foreground mb-4">Neural Resilience Curve</h4>
+                <ResponsiveContainer width="100%" height="80%">
+                  <LineChart data={timelineData}>
                     <XAxis dataKey="name" hide />
-                    <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '1rem', border: 'none', fontSize: '12px' }} />
-                    <Bar dataKey="urges" radius={[4, 4, 0, 0]}>
-                      {weeklyData.map((_, i) => <Cell key={i} fill="hsl(var(--primary))" fillOpacity={0.6} />)}
-                    </Bar>
-                    <Bar dataKey="relapses" radius={[4, 4, 0, 0]}>
-                      {weeklyData.map((_, i) => <Cell key={i} fill="hsl(var(--destructive))" fillOpacity={0.6} />)}
-                    </Bar>
-                  </BarChart>
+                    <YAxis hide domain={[0, 100]} />
+                    <Tooltip cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1 }} contentStyle={{ borderRadius: '1rem', border: 'none' }} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="score" 
+                      stroke="hsl(var(--primary))" 
+                      strokeWidth={4} 
+                      dot={{ r: 4, fill: 'hsl(var(--primary))' }} 
+                      activeDot={{ r: 8 }}
+                    />
+                  </LineChart>
                 </ResponsiveContainer>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
-                <div className="neu-inset p-4 rounded-2xl text-center">
+                <div className="neu-inset p-5 rounded-[2rem] text-center bg-background/40">
                   <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">Total Battles</p>
-                  <p className="text-xl font-bold">{data.urges.length + data.relapses.length}</p>
+                  <p className="text-2xl font-bold font-headline">{data.urges.length + data.relapses.length}</p>
                 </div>
-                <div className="neu-inset p-4 rounded-2xl text-center">
+                <div className="neu-inset p-5 rounded-[2rem] text-center bg-background/40">
                   <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">Victory Rate</p>
-                  <p className="text-xl font-bold">{Math.round((data.urges.length / (data.urges.length + data.relapses.length || 1)) * 100)}%</p>
+                  <p className="text-2xl font-bold font-headline text-primary">{Math.round((data.urges.length / (data.urges.length + data.relapses.length || 1)) * 100)}%</p>
                 </div>
               </div>
             </TabsContent>
@@ -108,11 +125,11 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
               <div className="grid grid-cols-3 gap-4">
                 {achievements.map((ach) => (
                   <div key={ach.id} className={cn(
-                    "aspect-square rounded-[2rem] flex flex-col items-center justify-center text-center p-4 transition-all",
-                    ach.unlocked ? "neu-flat bg-yellow-50 text-yellow-600" : "bg-muted text-muted-foreground/30 grayscale"
+                    "aspect-square rounded-[2.5rem] flex flex-col items-center justify-center text-center p-4 transition-all duration-500",
+                    ach.unlocked ? "neu-flat bg-yellow-50 text-yellow-600 scale-100" : "bg-muted text-muted-foreground/30 grayscale scale-95 opacity-50"
                   )}>
-                    <Trophy size={24} className="mb-2" />
-                    <span className="text-[8px] font-black uppercase tracking-tighter leading-tight">{ach.name}</span>
+                    <Trophy size={28} className={cn("mb-2", ach.unlocked && "animate-bounce")} />
+                    <span className="text-[9px] font-black uppercase tracking-tighter leading-tight">{ach.name}</span>
                   </div>
                 ))}
               </div>
@@ -123,3 +140,5 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
     </Sheet>
   );
 }
+
+import { useMemo } from 'react';

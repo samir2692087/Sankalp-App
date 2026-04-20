@@ -1,20 +1,37 @@
+
 "use client";
 
-import { TrendingUp, ShieldCheck, ChevronRight, Zap } from 'lucide-react';
+import { TrendingUp, ShieldCheck, ChevronRight, Zap, AlertTriangle } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
 import { cn } from '@/lib/utils';
 
 interface InsightsSummaryProps {
   score: number;
   resilience: string;
+  riskLevel: string;
+  message: string;
   onOpenInsights: (tab: string) => void;
   focusMode: boolean;
 }
 
-export default function InsightsSummary({ score, resilience, onOpenInsights, focusMode }: InsightsSummaryProps) {
+export default function InsightsSummary({ 
+  score, 
+  resilience, 
+  riskLevel, 
+  message, 
+  onOpenInsights, 
+  focusMode 
+}: InsightsSummaryProps) {
+  const isHighRisk = riskLevel === 'CRITICAL' || riskLevel === 'ELEVATED';
+
   return (
-    <div className="neu-flat p-6 rounded-[2rem] flex flex-col gap-4 w-full animate-fade-in-up [animation-delay:200ms] cursor-pointer group" onClick={() => onOpenInsights('milestones')}>
+    <div 
+      className={cn(
+        "neu-flat p-6 rounded-[2rem] flex flex-col gap-4 w-full animate-fade-in-up [animation-delay:200ms] cursor-pointer group transition-all",
+        isHighRisk && riskLevel === 'CRITICAL' ? "border-2 border-red-500/20 bg-red-500/5" : "border border-transparent"
+      )} 
+      onClick={() => onOpenInsights('milestones')}
+    >
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-0.5">
           <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
@@ -44,6 +61,18 @@ export default function InsightsSummary({ score, resilience, onOpenInsights, foc
           <span className={cn(focusMode && "blur-sm")}>{score}% Integrity</span>
         </div>
       </div>
+
+      {!focusMode && (
+        <div className={cn(
+          "mt-2 p-3 rounded-2xl flex items-center gap-3 animate-in fade-in duration-500",
+          riskLevel === 'CRITICAL' ? "bg-red-500 text-white shadow-lg shadow-red-500/20" :
+          riskLevel === 'ELEVATED' ? "bg-amber-100 text-amber-700 border border-amber-200" :
+          "bg-green-50 text-green-700 border border-green-100"
+        )}>
+          {isHighRisk ? <AlertTriangle size={16} /> : <ShieldCheck size={16} />}
+          <p className="text-[10px] font-bold uppercase tracking-tight leading-tight">{message}</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useCallback, useRef, useMemo } from 'react';
@@ -11,7 +12,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { UserData } from "@/lib/types";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { X, StickyNote, Save, Calendar as CalendarIcon, ShieldCheck, AlertCircle, Info, Trash2 } from 'lucide-react';
+import { X, StickyNote, Save, Calendar as CalendarIcon, ShieldCheck, AlertCircle, Info, Trash2, Zap } from 'lucide-react';
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from '@/lib/utils';
 
@@ -33,6 +34,16 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
   const relapseDates = useMemo(() => (data?.relapses || []).map(r => new Date(r.timestamp)), [data?.relapses]);
   const noteDates = useMemo(() => (data?.notes || []).map(n => new Date(n.date)), [data?.notes]);
   
+  // Heatmap intensity for urges
+  const urgeHeatmap = useMemo(() => {
+    const map: Record<string, number> = {};
+    (data?.urges || []).forEach(u => {
+      const date = format(new Date(u.timestamp), "yyyy-MM-dd");
+      map[date] = (map[date] || 0) + 1;
+    });
+    return map;
+  }, [data?.urges]);
+
   const handleDayClick = useCallback((day: Date) => {
     if (!day) return;
     const dateStr = format(day, "yyyy-MM-dd");
@@ -66,10 +77,10 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] rounded-t-[3.5rem] p-0 border-none glass-card outline-none flex flex-col animate-in slide-in-from-bottom duration-500 ease-out shadow-[0_-20px_50px_rgba(0,0,0,0.1)]">
+      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] rounded-t-[3.5rem] p-0 border-none glass-card outline-none flex flex-col animate-in slide-in-from-bottom duration-500 ease-out">
         <div className="sr-only">
           <SheetTitle>Mastery Hub</SheetTitle>
-          <SheetDescription>Interactive discipline tracking with multi-status visualization.</SheetDescription>
+          <SheetDescription>Behavioral heatmap and discipline timeline.</SheetDescription>
         </div>
 
         <div className="w-12 h-1 bg-muted rounded-full mx-auto mt-3 shrink-0 opacity-40" />
@@ -80,9 +91,9 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
               <div className="w-full flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                    <CalendarIcon size={20} />
+                    <Zap size={20} />
                   </div>
-                  <h2 className="font-bold font-headline text-lg text-foreground tracking-tight">Mastery Hub</h2>
+                  <h2 className="font-bold font-headline text-lg text-foreground tracking-tight">Behavioral Hub</h2>
                 </div>
                 <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full h-9 w-9 hover:bg-primary/5 active:scale-90 transition-all">
                   <X size={18} />
@@ -113,10 +124,12 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                       if (!day?.date) return null;
                       
                       const date = day.date;
+                      const dateStr = format(date, "yyyy-MM-dd");
                       const isClean = modifiers?.selected;
                       const isRelapse = modifiers?.relapse;
                       const hasNote = modifiers?.hasNote;
                       const isToday = modifiers?.today;
+                      const urgeCount = urgeHeatmap[dateStr] || 0;
 
                       return (
                         <td className="p-0 relative flex-1" role="presentation">
@@ -132,14 +145,21 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                               isClean ? "bg-green-500 text-white shadow-md shadow-green-500/20" : 
                               isRelapse ? "bg-red-500 text-white shadow-md shadow-red-500/20" : 
                               "hover:bg-primary/5",
+                              urgeCount > 0 && !isClean && !isRelapse && "bg-amber-100 text-amber-700",
+                              urgeCount > 2 && !isClean && !isRelapse && "bg-amber-500 text-white",
                               isToday && !isClean && !isRelapse && "border-2 border-primary text-primary",
                               modifiers?.outside && "opacity-10",
                               hasNote && "after:absolute after:bottom-1 after:w-1 after:h-1 after:bg-purple-500 after:rounded-full"
                             )}
                           >
                             {date.getDate()}
-                            {hasNote && (isClean || isRelapse) && (
-                              <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-purple-500 rounded-full border-2 border-card" />
+                            {urgeCount > 0 && (
+                                <div className={cn(
+                                    "absolute -top-1 -left-1 w-2.5 h-2.5 rounded-full border border-white flex items-center justify-center text-[6px]",
+                                    urgeCount > 2 ? "bg-red-500 text-white" : "bg-amber-500 text-white"
+                                )}>
+                                    {urgeCount}
+                                </div>
                             )}
                           </button>
                         </td>
@@ -158,16 +178,16 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                   <AlertCircle size={12} className="text-red-500" />
                   <span className="text-[8px] font-black uppercase text-red-600/60">Relapse</span>
                 </div>
-                <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-2xl bg-purple-500/5 border border-purple-500/10">
-                  <StickyNote size={12} className="text-purple-500" />
-                  <span className="text-[8px] font-black uppercase text-purple-600/60">Note</span>
+                <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-2xl bg-amber-500/5 border border-amber-500/10">
+                  < zap size={12} className="text-amber-500" />
+                  <span className="text-[8px] font-black uppercase text-amber-600/60">Heatmap</span>
                 </div>
               </div>
 
               <div className="mt-6 flex items-center gap-3 p-3 rounded-2xl bg-muted/20 border border-white/5 w-full">
                 <Info size={12} className="text-muted-foreground shrink-0" />
                 <p className="text-[9px] text-muted-foreground/80 font-medium leading-tight">
-                  Tap for Clean. Long press for Reflections & Notes.
+                  Intelligent Heatmap: Darker Amber = More Battles Resisted.
                 </p>
               </div>
             </div>
@@ -200,7 +220,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                   variant="ghost" 
                   onClick={() => {
                     setCurrentNote("");
-                    onSaveNote(format(selectedDate!, "yyyy-MM-0d"), "");
+                    onSaveNote(format(selectedDate!, "yyyy-MM-dd"), "");
                     setNoteMode(false);
                   }} 
                   className="h-14 rounded-2xl px-4 text-red-500 hover:bg-red-500/10"

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Header from '@/components/dashboard/Header';
 import StreakDisplay from '@/components/dashboard/StreakDisplay';
 import ActionCards from '@/components/dashboard/ActionCards';
@@ -18,7 +18,8 @@ import { getStoredData, saveData, clearData } from '@/lib/storage';
 import { 
   calculateStreak, 
   calculateDisciplineScore, 
-  getBehavioralInsights 
+  getBehavioralInsights,
+  getDailyChallenge
 } from '@/lib/discipline-engine';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
@@ -101,9 +102,20 @@ export default function IronWillDashboard() {
       }
       newData.disciplineScore = calculateDisciplineScore(newData);
       setData(newData);
+
+      // Auto Daily Prompt logic
+      const today = new Date().toISOString().split('T')[0];
+      if (!newData.checkIns.some(c => c.date === today)) {
+        setTimeout(() => {
+          toast({ 
+            title: "Proactive Check-In", 
+            description: "How was your discipline today? Log it now.",
+          });
+        }, 1500);
+      }
     };
     syncData();
-  }, []);
+  }, [toast]);
 
   const updateState = (newData: UserData) => {
     newData.currentStreak = calculateStreak(newData.lastRelapseTimestamp);
@@ -180,6 +192,18 @@ export default function IronWillDashboard() {
     toast({ variant: "destructive", title: "Relapse Logged", description: "Resilience is built through restart." });
   };
 
+  const handleUseFreeze = () => {
+    if (data.streakFreezes <= 0) {
+      toast({ variant: "destructive", title: "No Freezes Left", description: "Mastery requires consistency." });
+      return;
+    }
+    const newData = { ...data };
+    newData.streakFreezes -= 1;
+    newData.lastRelapseTimestamp = (newData.lastRelapseTimestamp || Date.now()) + (1000 * 60 * 60 * 24); // Push relapse forward by a day
+    updateState(newData);
+    toast({ title: "Streak Frozen ❄️", description: "You've used a freeze to protect your streak." });
+  };
+
   const handleReset = () => {
     if (confirm("Factory Reset: Wipe all progress?")) {
       clearData();
@@ -189,9 +213,11 @@ export default function IronWillDashboard() {
     }
   };
 
+  const insights = useMemo(() => getBehavioralInsights(data), [data]);
+  const challenge = useMemo(() => getDailyChallenge(data.currentStreak), [data.currentStreak]);
+
   if (!mounted) return null;
 
-  const insights = getBehavioralInsights(data);
   const isAnySheetOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal || showCalendarSheet;
 
   return (
@@ -207,8 +233,14 @@ export default function IronWillDashboard() {
         onUpdateReminder={(enabled, time) => updateState({ ...data, notificationsEnabled: enabled, reminderTime: time })}
       />
 
-      <main className="flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-6 justify-center pb-20 overflow-hidden">
-        <StreakDisplay current={data.currentStreak} best={data.bestStreak} focusMode={data.focusMode} />
+      <main className="flex-1 max-w-lg mx-auto w-full px-6 flex flex-col gap-4 justify-center pb-20 overflow-hidden">
+        <StreakDisplay 
+          current={data.currentStreak} 
+          best={data.bestStreak} 
+          focusMode={data.focusMode} 
+          freezes={data.streakFreezes}
+          onUseFreeze={handleUseFreeze}
+        />
         
         <ActionCards 
           onCheckIn={handleCheckIn} 
@@ -220,6 +252,8 @@ export default function IronWillDashboard() {
         <InsightsSummary 
           score={data.disciplineScore} 
           resilience={insights.resilienceLevel}
+          riskLevel={insights.riskLevel}
+          message={insights.protectionMessage}
           onOpenInsights={(tab) => {
             if (tab === 'history') handleOpenModal(setShowCalendarSheet);
             else {
@@ -229,6 +263,14 @@ export default function IronWillDashboard() {
           }}
           focusMode={data.focusMode}
         />
+
+        {/* Dynamic Challenge Card */}
+        {!data.focusMode && (
+          <div className="neu-flat p-5 rounded-[2rem] bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/10">
+            <h4 className="text-[9px] font-black uppercase tracking-widest text-primary mb-2">Adaptive Challenge</h4>
+            <p className="text-sm font-bold leading-snug">{challenge}</p>
+          </div>
+        )}
       </main>
 
       {!isAnySheetOpen && (
