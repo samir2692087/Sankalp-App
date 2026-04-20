@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, ShieldCheck, AlertTriangle, Zap } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -15,46 +15,43 @@ export default function ActionCards({ onCheckIn, onUrge, onRelapse, checkedInTod
   return (
     <div className="grid grid-cols-3 gap-4 w-full">
       <motion.button 
-        whileHover={{ scale: 1.08, y: -8, backgroundColor: "rgba(34, 197, 94, 0.1)" }}
-        whileTap={{ scale: 0.92 }}
-        type="button"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={onCheckIn}
         disabled={checkedInToday}
         className={cn(
-          "glass-card group p-6 rounded-[2.5rem] flex flex-col items-center text-center gap-3 transition-all",
-          checkedInToday ? 'opacity-30 grayscale pointer-events-none' : 'border-white/20 shadow-lg'
+          "glass-card p-6 rounded-[2rem] flex flex-col items-center gap-3",
+          checkedInToday ? 'opacity-20 pointer-events-none' : 'hover:border-green-500/30'
         )}
       >
-        <div className="p-4 rounded-[1.5rem] bg-green-500/20 text-green-400 group-hover:bg-green-500 group-hover:text-white transition-all shadow-xl group-hover:shadow-green-500/40">
-          <CheckCircle2 size={28} />
+        <div className="w-14 h-14 rounded-2xl bg-green-500/10 text-green-400 flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.1)]">
+          <CheckCircle2 size={24} />
         </div>
-        <span className="font-black text-[11px] uppercase tracking-tighter text-white group-hover:text-green-400">Mark Clean</span>
+        <span className="text-white font-bold text-[10px] uppercase tracking-widest">Mark Clean</span>
       </motion.button>
 
       <motion.button 
-        whileHover={{ scale: 1.08, y: -8, backgroundColor: "rgba(59, 130, 246, 0.1)" }}
-        whileTap={{ scale: 0.92 }}
-        type="button"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={onUrge}
-        className="glass-card group p-6 rounded-[2.5rem] flex flex-col items-center text-center gap-3 border-white/20 shadow-xl hover:shadow-blue-500/20"
+        className="glass-card p-6 rounded-[2rem] flex flex-col items-center gap-3 hover:border-blue-500/30"
       >
-        <div className="p-4 rounded-[1.5rem] bg-blue-500/20 text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-all shadow-xl group-hover:shadow-blue-500/40">
-          <ShieldCheck size={28} />
+        <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.1)]">
+          <ShieldCheck size={24} />
         </div>
-        <span className="font-black text-[11px] uppercase tracking-tighter text-white group-hover:text-blue-400">Conflict Won</span>
+        <span className="text-white font-bold text-[10px] uppercase tracking-widest">Victory</span>
       </motion.button>
 
       <motion.button 
-        whileHover={{ scale: 1.08, y: -8, backgroundColor: "rgba(239, 68, 68, 0.1)" }}
-        whileTap={{ scale: 0.92 }}
-        type="button"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={onRelapse}
-        className="glass-card group p-6 rounded-[2.5rem] flex flex-col items-center text-center gap-3 border-white/20 shadow-xl hover:shadow-red-500/20"
+        className="glass-card p-6 rounded-[2rem] flex flex-col items-center gap-3 hover:border-red-500/30"
       >
-        <div className="p-4 rounded-[1.5rem] bg-red-500/20 text-red-500 group-hover:bg-red-500 group-hover:text-white transition-all shadow-xl group-hover:shadow-red-500/40">
-          <AlertTriangle size={28} />
+        <div className="w-14 h-14 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+          <AlertTriangle size={24} />
         </div>
-        <span className="font-black text-[11px] uppercase tracking-tighter text-white group-hover:text-red-400">Relapsed</span>
+        <span className="text-white font-bold text-[10px] uppercase tracking-widest">Reset</span>
       </motion.button>
     </div>
   );
