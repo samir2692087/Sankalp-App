@@ -66,7 +66,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[75vh] max-h-[75vh] rounded-t-[3.5rem] p-0 border-none glass-card outline-none flex flex-col animate-in slide-in-from-bottom duration-500 ease-out overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.1)]">
+      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] rounded-t-[3.5rem] p-0 border-none glass-card outline-none flex flex-col animate-in slide-in-from-bottom duration-500 ease-out shadow-[0_-20px_50px_rgba(0,0,0,0.1)]">
         <div className="sr-only">
           <SheetTitle>Mastery Hub</SheetTitle>
           <SheetDescription>Interactive discipline tracking with multi-status visualization.</SheetDescription>
@@ -74,7 +74,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
 
         <div className="w-12 h-1 bg-muted rounded-full mx-auto mt-3 shrink-0 opacity-40" />
         
-        <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col items-center">
+        <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24 flex flex-col items-center no-scrollbar">
           {!noteMode ? (
             <div className="w-full max-w-sm flex flex-col items-center">
               <div className="w-full flex justify-between items-center mb-6">

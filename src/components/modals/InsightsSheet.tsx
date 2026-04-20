@@ -48,15 +48,15 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
           <SheetDescription>Detailed analysis of your growth journey.</SheetDescription>
         </SheetHeader>
 
-        <Tabs defaultValue={defaultTab} className="flex-1 flex flex-col px-6 pb-8">
+        <Tabs defaultValue={defaultTab} className="flex-1 flex flex-col px-6 pb-4 overflow-hidden">
           <TabsList className="w-full bg-muted/30 p-1.5 rounded-2xl h-14 mb-6 shrink-0">
             <TabsTrigger value="milestones" className="flex-1 rounded-xl gap-2 font-bold text-xs uppercase tracking-widest"><Target size={14}/> Milestones</TabsTrigger>
             <TabsTrigger value="weekly" className="flex-1 rounded-xl gap-2 font-bold text-xs uppercase tracking-widest"><BarChart3 size={14}/> Pulse</TabsTrigger>
             <TabsTrigger value="achievements" className="flex-1 rounded-xl gap-2 font-bold text-xs uppercase tracking-widest"><Trophy size={14}/> Trophy</TabsTrigger>
           </TabsList>
 
-          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            <TabsContent value="milestones" className="mt-0 outline-none">
+          <div className="flex-1 overflow-y-auto pb-24 no-scrollbar">
+            <TabsContent value="milestones" className="mt-0 outline-none space-y-4">
               <div className="grid grid-cols-1 gap-4">
                 {[7, 30, 90, 365].map((goal) => {
                   const progress = Math.min((data.currentStreak / goal) * 100, 100);
@@ -77,8 +77,8 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
               </div>
             </TabsContent>
 
-            <TabsContent value="weekly" className="mt-0 outline-none">
-              <div className="neu-flat p-8 rounded-3xl h-64 mb-6">
+            <TabsContent value="weekly" className="mt-0 outline-none space-y-6">
+              <div className="neu-flat p-8 rounded-3xl h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={weeklyData}>
                     <XAxis dataKey="name" hide />

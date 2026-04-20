@@ -38,8 +38,8 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[450px] rounded-[3.5rem] border-none glass-card p-0 overflow-hidden outline-none">
-        <div className="bg-red-500/10 p-10 text-center border-b border-white/5 relative">
+      <DialogContent className="max-w-[450px] max-h-[90vh] rounded-[3.5rem] border-none glass-card p-0 overflow-hidden outline-none flex flex-col">
+        <div className="bg-red-500/10 p-10 text-center border-b border-white/5 relative shrink-0">
           <Button variant="ghost" onClick={onClose} className="absolute left-6 top-10 p-0 h-auto hover:bg-transparent">
             <ArrowLeft size={24} />
           </Button>
@@ -50,7 +50,7 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
           <DialogDescription className="font-medium text-red-500/80 uppercase tracking-widest text-[10px]">Neural Pattern Interruption</DialogDescription>
         </div>
 
-        <div className="p-8 space-y-8">
+        <div className="p-8 space-y-8 overflow-y-auto no-scrollbar pb-24">
           <div className="neu-inset p-8 rounded-[2.5rem] flex flex-col items-center gap-4 text-center">
             <div className="flex items-center gap-3 text-red-500 font-black text-4xl font-headline">
               <Timer size={32} /> {Math.floor(seconds / 60)}:{(seconds % 60).toString().padStart(2, '0')}
