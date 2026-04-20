@@ -15,52 +15,56 @@ interface StreakDisplayProps {
 export default function StreakDisplay({ current, best, focusMode, freezes, onUseFreeze }: StreakDisplayProps) {
   return (
     <motion.div 
-      initial={{ scale: 0.95, opacity: 0 }}
+      initial={{ scale: 0.9, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
       className="flex flex-col gap-4 w-full"
     >
       <motion.div 
-        whileHover={{ scale: 1.02, rotate: 0.5 }}
-        className="glass-card p-10 rounded-[4rem] flex flex-col items-center justify-center relative overflow-hidden group transition-all"
+        whileHover={{ scale: 1.03, y: -5 }}
+        className="glass-card p-12 rounded-[4.5rem] flex flex-col items-center justify-center relative overflow-hidden group transition-all"
       >
-        <div className="absolute -top-6 -right-6 p-8 opacity-5 group-hover:opacity-15 transition-opacity duration-700">
-          <Flame size={180} className="text-primary fill-primary" />
+        <div className="absolute -top-10 -right-10 p-12 opacity-5 group-hover:opacity-20 transition-all duration-1000 group-hover:rotate-12">
+          <Flame size={220} className="text-primary fill-primary animate-pulse" />
         </div>
         
-        <span className="text-muted-foreground font-black uppercase tracking-[0.3em] text-[10px] mb-4 opacity-70">Neural Mastery Streak</span>
-        <div className="flex items-baseline gap-3 mb-4">
-          <h2 className={cn(
-            "font-headline text-8xl font-bold text-primary streak-glow transition-all duration-1000",
-            focusMode && "blur-3xl select-none"
-          )}>
+        <span className="text-white font-black uppercase tracking-[0.4em] text-[11px] mb-6 opacity-90 text-shadow-strong">Neural Mastery Level</span>
+        <div className="flex items-baseline gap-4 mb-6">
+          <motion.h2 
+            key={current}
+            initial={{ scale: 0.8, filter: "blur(10px)" }}
+            animate={{ scale: 1, filter: "blur(0px)" }}
+            className={cn(
+              "font-headline text-9xl font-bold text-white streak-glow transition-all duration-1000",
+              focusMode && "blur-3xl select-none"
+            )}>
             {current}
-          </h2>
-          <span className="text-xl font-bold text-primary/40 uppercase tracking-widest">Days</span>
+          </motion.h2>
+          <span className="text-2xl font-black text-white/50 uppercase tracking-widest text-shadow-strong">Days</span>
         </div>
         
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-8">
           <motion.div 
-            whileHover={{ scale: 1.1 }}
-            className="flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-2xl border border-white/5"
+            whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.1)" }}
+            className="flex items-center gap-3 px-6 py-2.5 bg-white/5 rounded-2xl border border-white/10 shadow-xl"
           >
-            <Trophy size={14} className="text-yellow-500" />
-            <span className="text-[10px] font-black uppercase text-foreground/70">Best: {best}</span>
+            <Trophy size={16} className="text-yellow-400 drop-shadow-glow" />
+            <span className="text-[11px] font-black uppercase text-white">Record: {best}</span>
           </motion.div>
 
           {!focusMode && (
             <motion.button 
-              whileHover={{ scale: 1.1 }}
+              whileHover={{ scale: 1.1, backgroundColor: "rgba(59, 130, 246, 0.2)" }}
               whileTap={{ scale: 0.9 }}
               type="button"
               onClick={onUseFreeze}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-2xl transition-all border",
-                freezes > 0 ? "bg-blue-500/10 text-blue-400 border-blue-500/20" : "bg-muted/10 text-muted-foreground border-transparent opacity-40"
+                "flex items-center gap-3 px-6 py-2.5 rounded-2xl transition-all border shadow-xl",
+                freezes > 0 ? "bg-blue-500/20 text-white border-blue-400/30" : "bg-muted/10 text-muted-foreground border-transparent opacity-40 pointer-events-none"
               )}
             >
-              <Snowflake size={14} className={cn(freezes > 0 && "animate-pulse")} />
-              <span className="text-[10px] font-black uppercase tracking-tight">{freezes} Protocol Freezes</span>
+              <Snowflake size={16} className={cn(freezes > 0 && "animate-spin-slow")} />
+              <span className="text-[11px] font-black uppercase tracking-tight">{freezes} Protocol Freezes</span>
             </motion.button>
           )}
         </div>
