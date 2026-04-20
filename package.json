@@ -72,6 +72,7 @@
   },
   "overrides": {
     "react": "$react",
-    "react-dom": "$react-dom"
+    "react-dom": "$react-dom",
+    "react-reconciler": "0.31.0"
   }
 }

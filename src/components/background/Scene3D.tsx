@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Points, PointMaterial } from '@react-three/drei';
 import * as THREE from 'three';
@@ -18,7 +18,9 @@ function NeuralNodes() {
   }, []);
 
   const ref = useRef<THREE.Points>(null!);
+  
   useFrame((state) => {
+    if (!ref.current) return;
     const time = state.clock.getElapsedTime();
     ref.current.rotation.y = time * 0.05;
     ref.current.rotation.x = time * 0.02;
@@ -70,9 +72,17 @@ function Scene() {
 }
 
 export default function Scene3D() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <div className="fixed inset-0 -z-10 bg-[#050505]" />;
+
   return (
     <div className="fixed inset-0 -z-10 bg-[#050505]">
-      <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+      <Canvas camera={{ position: [0, 0, 5], fov: 75 }} gl={{ antialias: true, alpha: true }}>
         <Scene />
       </Canvas>
     </div>
