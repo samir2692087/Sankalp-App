@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useRef, useMemo, useEffect, useState, Suspense } from 'react';
@@ -69,7 +68,7 @@ function EnergyCore({ intensity, mode }: { intensity: number, mode: string }) {
           opacity={0.9}
         />
       </mesh>
- group>
+    </group>
   );
 }
 
