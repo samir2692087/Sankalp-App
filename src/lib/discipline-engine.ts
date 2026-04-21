@@ -81,9 +81,10 @@ export function getBehavioralInsights(data: UserData) {
 }
 
 export function getWeeklyData(data: UserData) {
-  const urges = Array.isArray(data?.urges) ? data.urges : [];
-  const relapses = Array.isArray(data?.relapses) ? data.relapses : [];
-  const checkIns = Array.isArray(data?.checkIns) ? data.checkIns : [];
+  if (!data) return [];
+  const urges = Array.isArray(data.urges) ? data.urges : [];
+  const relapses = Array.isArray(data.relapses) ? data.relapses : [];
+  const checkIns = Array.isArray(data.checkIns) ? data.checkIns : [];
   
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
