@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRef } from 'react';
@@ -77,7 +78,7 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
             type="button"
             variant="ghost" 
             onClick={onClose} 
-            className="absolute left-6 top-8 p-0 h-auto hover:bg-transparent hidden sm:flex"
+            className="absolute left-6 top-8 p-0 h-auto hover:bg-transparent flex items-center justify-center"
           >
             <ArrowLeft size={24} />
           </Button>

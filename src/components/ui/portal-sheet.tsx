@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { X, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -86,12 +86,8 @@ export default function PortalSheet({
           <div className="w-14 h-1.5 bg-white/10 rounded-full" />
         </div>
 
-        {/* Header Section */}
-        <div className="px-8 pt-4 pb-4 shrink-0 flex items-center justify-between border-b border-white/5">
-          <div className="flex-1 min-w-0">
-            {title && <h2 className="text-2xl font-bold text-white tracking-tight truncate">{title}</h2>}
-            {description && <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/30 mt-1 truncate">{description}</p>}
-          </div>
+        {/* Header Section with Dual Navigation */}
+        <div className="px-6 pt-4 pb-4 shrink-0 flex items-center gap-4 border-b border-white/5">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -99,9 +95,26 @@ export default function PortalSheet({
               e.stopPropagation();
               onClose();
             }} 
-            className="rounded-full bg-white/5 hover:bg-white/10 text-white/40 shrink-0 ml-4"
+            className="rounded-full bg-white/5 hover:bg-white/10 text-white/40 shrink-0"
           >
-            <X size={20} />
+            <ArrowLeft size={18} />
+          </Button>
+
+          <div className="flex-1 min-w-0">
+            {title && <h2 className="text-xl font-bold text-white tracking-tight truncate">{title}</h2>}
+            {description && <p className="text-[9px] font-black uppercase tracking-[0.25em] text-white/30 truncate">{description}</p>}
+          </div>
+
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }} 
+            className="rounded-full bg-white/5 hover:bg-white/10 text-white/40 shrink-0"
+          >
+            <X size={18} />
           </Button>
         </div>
 
