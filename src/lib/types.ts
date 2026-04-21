@@ -2,6 +2,12 @@
 export type UrgeIntensity = 'Low' | 'Medium' | 'High';
 export type AppTheme = 'light' | 'dark' | 'purple' | 'amoled';
 
+export interface UserProfile {
+  name?: string;
+  gender?: 'male' | 'female' | 'other' | 'prefer-not-to-say';
+  ageGroup?: 'under-18' | '18-24' | '25-34' | '35-44' | '45-plus';
+}
+
 export interface UrgeLog {
   id: string;
   timestamp: number;
@@ -28,6 +34,7 @@ export interface DayNote {
 }
 
 export interface UserData {
+  profile: UserProfile;
   bestStreak: number;
   currentStreak: number;
   lastRelapseTimestamp: number | null;
@@ -48,6 +55,7 @@ export interface UserData {
 }
 
 export const INITIAL_DATA: UserData = {
+  profile: {},
   bestStreak: 0,
   currentStreak: 0,
   lastRelapseTimestamp: null,

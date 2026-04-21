@@ -12,6 +12,7 @@ const migrateData = (parsed: any): UserData => {
   return {
     ...INITIAL_DATA,
     ...parsed,
+    profile: parsed?.profile || {},
     urges: Array.isArray(parsed?.urges) ? parsed.urges : [],
     relapses: Array.isArray(parsed?.relapses) ? parsed.relapses : [],
     checkIns: Array.isArray(parsed?.checkIns) ? parsed.checkIns : [],

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -225,6 +226,10 @@ export default function SankalpOverview() {
               onUpdateReminder={(e, t_time) => {
                 feedback.tap();
                 updateState({ ...data, notificationsEnabled: e, reminderTime: t_time });
+              }}
+              onUpdateProfile={(p) => {
+                feedback.success();
+                updateState({ ...data, profile: p });
               }}
             />
 

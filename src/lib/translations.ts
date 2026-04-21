@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Centralized translation dictionary for Sankalp.
  */
@@ -171,7 +172,26 @@ export const translations = {
     stay_aware_msg: "Stay Aware",
     commitment_path: "Commitment Path",
     available_pauses: "Available",
-    pauses_label: "Pauses"
+    pauses_label: "Pauses",
+    profile_center: "Profile Center",
+    profile_desc: "Personalize your resolve journey",
+    name_label: "Name",
+    name_placeholder: "Enter your name",
+    gender_label: "Gender",
+    age_label: "Age Group",
+    privacy_note: "Your profile data is stored locally on this device only. It is never sent to any server.",
+    gender_male: "Male",
+    gender_female: "Female",
+    gender_other: "Other",
+    gender_none: "Prefer not to say",
+    age_u18: "Under 18",
+    age_18_24: "18 - 24",
+    age_25_34: "25 - 34",
+    age_35_44: "35 - 44",
+    age_45p: "45+",
+    save_profile: "Save Profile",
+    greeting_default: "Stay steady",
+    greeting_named: "Stay steady, {{name}}"
   },
   hi: {
     app_name: "संकल्प",
@@ -333,12 +353,31 @@ export const translations = {
     consistency_alert: "दैनिक निरंतरता अलर्ट",
     prot_time: "प्रोटोकॉल समय",
     notif_denied: "सूचनाएं अवरुद्ध हैं। इस सुविधा का उपयोग करने के लिए ब्राउज़र अनुमतियां रीसेट करें।",
-    save_prot: "प्रोटोकॉल सहेजें",
+    save_prot: "Save Protocol",
     access_granted: "अनुमति मिली",
     notif_info: "अब आपको अनुशासन अनुस्मारक प्राप्त होंगे।",
     stay_aware_msg: "सचेत रहें",
     commitment_path: "प्रतिबद्धता पथ",
     available_pauses: "उपलब्ध",
-    pauses_label: "विराम"
+    pauses_label: "विराम",
+    profile_center: "प्रोफ़ाइल केंद्र",
+    profile_desc: "अपनी संकल्प यात्रा को निजीकृत करें",
+    name_label: "नाम",
+    name_placeholder: "अपना नाम दर्ज करें",
+    gender_label: "लिंग",
+    age_label: "आयु वर्ग",
+    privacy_note: "आपका प्रोफ़ाइल डेटा केवल इसी डिवाइस पर स्थानीय रूप से संग्रहीत है। इसे कभी किसी सर्वर पर नहीं भेजा जाता।",
+    gender_male: "पुरुष",
+    gender_female: "महिला",
+    gender_other: "अन्य",
+    gender_none: "बताना नहीं चाहते",
+    age_u18: "18 से कम",
+    age_18_24: "18 - 24",
+    age_25_34: "25 - 34",
+    age_35_44: "35 - 44",
+    age_45p: "45+",
+    save_profile: "प्रोफ़ाइल सहेजें",
+    greeting_default: "स्थिर रहें",
+    greeting_named: "स्थिर रहें, {{name}}"
   }
 };

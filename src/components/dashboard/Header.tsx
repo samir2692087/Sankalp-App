@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -13,7 +14,8 @@ import {
   Database,
   X,
   ChevronRight,
-  Languages
+  Languages,
+  User
 } from 'lucide-react';
 import SankalpIcon from '@/components/icons/SankalpIcon';
 import {
@@ -32,9 +34,10 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { AppTheme, UserData } from '@/lib/types';
+import { AppTheme, UserData, UserProfile } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import ReminderModal from '@/components/modals/ReminderModal';
+import ProfileModal from '@/components/modals/ProfileModal';
 import { 
   motion, 
   AnimatePresence, 
@@ -56,6 +59,7 @@ interface HeaderProps {
   onToggleFocus: () => void;
   onShowExport: () => void;
   onUpdateReminder: (enabled: boolean, time: string) => void;
+  onUpdateProfile: (profile: UserProfile) => void;
 }
 
 const springConfig = { type: "spring", stiffness: 150, damping: 18, mass: 1 };
@@ -69,11 +73,13 @@ export default function Header({
   onReset, 
   onToggleFocus, 
   onShowExport,
-  onUpdateReminder
+  onUpdateReminder,
+  onUpdateProfile
 }: HeaderProps) {
   const { t, language, setLanguage } = useLanguage();
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const { scrollY } = useScroll();
@@ -84,7 +90,7 @@ export default function Header({
     damping: 30
   });
 
-  const themes: { id: AppTheme, nameKey: keyof typeof translations['en'], icon: any, bg: string }[] = [
+  const themes: { id: AppTheme, nameKey: any, icon: any, bg: string }[] = [
     { id: 'light', nameKey: 'theme_light', icon: Sun, bg: 'bg-white' },
     { id: 'dark', nameKey: 'theme_dark', icon: Moon, bg: 'bg-slate-900' },
     { id: 'purple', nameKey: 'theme_purple', icon: Sparkles, bg: 'bg-purple-950' },
@@ -95,6 +101,10 @@ export default function Header({
     feedback.tap();
     setIsSettingsOpen(true);
   };
+
+  const greeting = data.profile?.name 
+    ? t('greeting_named').replace('{{name}}', data.profile.name)
+    : t('greeting_default');
 
   return (
     <>
@@ -113,7 +123,7 @@ export default function Header({
               </div>
               <div className="flex flex-col">
                 <h1 className="text-white font-black text-2xl leading-none tracking-tighter">{t('app_name')}</h1>
-                <span className="text-white/30 font-black uppercase tracking-[0.3em] text-[8px]">{t('tagline')}</span>
+                <span className="text-white/30 font-black uppercase tracking-[0.3em] text-[8px] mt-1">{greeting}</span>
               </div>
             </motion.div>
           </Magnetic>
@@ -191,11 +201,11 @@ export default function Header({
 
                 <div className="p-8 space-y-3">
                   {[
+                    { label: t('profile_center'), sub: t('profile_desc'), icon: User, color: 'bg-green-500/20 text-green-400', action: () => { setIsProfileOpen(true); setIsSettingsOpen(false); } },
                     { label: t('appearance'), sub: t('choose_view'), icon: Palette, color: 'bg-purple-500/20 text-purple-400', action: () => { setIsThemeSheetOpen(true); setIsSettingsOpen(false); } },
                     { label: t('reminders'), sub: t('stay_steady'), icon: Bell, color: 'bg-blue-500/20 text-blue-400', action: () => { setIsReminderOpen(true); setIsSettingsOpen(false); } },
                     { label: t('archive'), sub: t('preferences'), icon: Database, color: 'bg-slate-500/20 text-slate-400', action: () => { onShowExport(); setIsSettingsOpen(false); } },
                     { label: t('focus_mode'), sub: focusMode ? t('active') : t('dormant'), icon: Zap, color: 'bg-yellow-500/20 text-yellow-400', action: () => { onToggleFocus(); setIsSettingsOpen(false); }, isToggle: true },
-                    { label: t('language'), sub: language === 'en' ? 'English' : 'हिन्दी', icon: Languages, color: 'bg-green-500/20 text-green-400', action: () => setLanguage(language === 'en' ? 'hi' : 'en') },
                   ].map((item, idx) => (
                     <motion.div 
                       key={item.label}
@@ -281,7 +291,7 @@ export default function Header({
                 <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:rotate-12", t_item.bg)}>
                   <t_item.icon size={20} className={cn(t_item.id === 'light' ? 'text-blue-500' : 'text-white')} />
                 </div>
-                <span className="text-white font-black text-xs uppercase tracking-[0.2em]">{t(t_item.nameKey)}</span>
+                <span className="text-white font-black text-xs uppercase tracking-[0.2em]">{t(t_item.nameKey as any)}</span>
               </motion.button>
             ))}
           </div>
@@ -295,6 +305,15 @@ export default function Header({
           enabled={data.notificationsEnabled} 
           time={data.reminderTime} 
           onUpdate={onUpdateReminder} 
+        />
+      )}
+
+      {isProfileOpen && (
+        <ProfileModal 
+          isOpen={isProfileOpen} 
+          onClose={() => setIsProfileOpen(false)} 
+          profile={data.profile} 
+          onUpdate={onUpdateProfile} 
         />
       )}
     </>
