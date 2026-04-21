@@ -1,7 +1,6 @@
-
 "use client";
 
-import { TrendingUp, Clock, Zap, Target, Star, Trophy, BarChart3, ShieldCheck } from 'lucide-react';
+import { TrendingUp, Clock, Zap, Target, Star, Trophy, BarChart3 } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useMemo } from 'react';
@@ -18,6 +17,7 @@ import {
 import { UserData } from '@/lib/types';
 import { getWeeklyData, getAchievements, getBehavioralInsights } from '@/lib/discipline-engine';
 import { cn } from '@/lib/utils';
+import SankalpIcon from '@/components/icons/SankalpIcon';
 
 interface AnalyticsProps {
   score: number;
@@ -138,7 +138,7 @@ export default function Analytics({ score, trigger, window, challenge, data, foc
           </div>
           <div className="group flex items-center justify-between p-4 rounded-2xl neu-inset">
             <div className="flex items-center gap-3">
-              <ShieldCheck size={18} className="text-green-500" />
+              <SankalpIcon size={18} className="text-green-500" />
               <span className="text-sm font-bold uppercase tracking-wider">Victory Rate</span>
             </div>
             <span className="text-sm font-black text-green-500 bg-green-500/5 px-3 py-1 rounded-full">{insights.winRate}%</span>
