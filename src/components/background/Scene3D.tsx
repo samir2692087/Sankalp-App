@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useRef, useMemo, useEffect, useState } from 'react';
@@ -76,17 +77,15 @@ function NeuralParticles({ intensity }: { intensity: number }) {
   const pointsRef = useRef<THREE.Points>(null!);
   const count = 2000;
   
-  const positions = useMemo(() => {
+  const [positions, initialPositions] = useMemo(() => {
     const pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       pos[i * 3] = (Math.random() - 0.5) * 40;
       pos[i * 3 + 1] = (Math.random() - 0.5) * 40;
       pos[i * 3 + 2] = (Math.random() - 0.5) * 20 - 10;
     }
-    return pos;
+    return [pos, new Float32Array(pos)];
   }, []);
-
-  const initialPositions = useMemo(() => new Float32Array(positions), [positions]);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
@@ -156,6 +155,9 @@ export default function Scene3D({ isBlurred }: SceneProps) {
   const [mounted, setMounted] = useState(false);
   const { mode, intensity } = useInteraction();
 
+  const riskOffset = useMemo(() => new THREE.Vector2(0.008, 0.008), []);
+  const zeroOffset = useMemo(() => new THREE.Vector2(0, 0), []);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -181,11 +183,9 @@ export default function Scene3D({ isBlurred }: SceneProps) {
           />
           <Noise opacity={0.04} />
           <Vignette offset={0.1} darkness={1.2} />
-          {mode === 'risk' && (
-            <ChromaticAberration 
-              offset={new THREE.Vector2(0.008, 0.008)} 
-            />
-          )}
+          <ChromaticAberration 
+            offset={mode === 'risk' ? riskOffset : zeroOffset} 
+          />
         </EffectComposer>
         
         <Environment preset="night" />
