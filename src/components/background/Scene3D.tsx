@@ -160,7 +160,7 @@ export default function Scene3D({ isBlurred }: SceneProps) {
   const intensity = typeof interaction?.intensity === 'number' ? interaction.intensity : 0;
   const mode = interaction?.mode ?? 'calm';
   
-  const currentOffset = useMemo(() => {
+  const chromaticOffset = useMemo(() => {
     const val = mode === 'risk' ? 0.008 : 0;
     return new THREE.Vector2(val, val);
   }, [mode]);
@@ -182,7 +182,7 @@ export default function Scene3D({ isBlurred }: SceneProps) {
           <NeuralParticles intensity={intensity} />
           <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
           
-          <EffectComposer disableNormalPass multisampling={0}>
+          <EffectComposer multisampling={0} disableNormalPass>
             <Bloom 
               luminanceThreshold={0.2} 
               mipmapBlur 
@@ -191,7 +191,7 @@ export default function Scene3D({ isBlurred }: SceneProps) {
             />
             <Noise opacity={0.04} />
             <Vignette offset={0.1} darkness={1.2} />
-            <ChromaticAberration offset={currentOffset} opacity={mode === 'risk' ? 1 : 0} />
+            <ChromaticAberration offset={chromaticOffset} opacity={mode === 'risk' ? 1 : 0} />
           </EffectComposer>
           
           <Environment preset="night" />
