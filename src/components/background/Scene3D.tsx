@@ -4,7 +4,6 @@
 import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { 
-  Points, 
   PointMaterial, 
   MeshDistortMaterial, 
   PerspectiveCamera, 
@@ -41,14 +40,16 @@ function EnergyCore({ intensity, mode }: { intensity: number, mode: string }) {
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
+    const safeIntensity = intensity || 0;
+    
     if (meshRef.current) {
-      meshRef.current.rotation.y = t * 0.1 * (1 + intensity * 2);
+      meshRef.current.rotation.y = t * 0.1 * (1 + safeIntensity * 2);
       meshRef.current.rotation.z = t * 0.05;
-      const pulse = 1 + Math.sin(t * 2) * 0.05 + intensity * 0.2;
-      meshRef.current.scale.lerp(new THREE.Vector3(pulse, pulse, pulse), 0.1);
+      const pulse = 1 + Math.sin(t * 2) * 0.05 + safeIntensity * 0.2;
+      meshRef.current.scale.set(pulse, pulse, pulse);
     }
     if (lightRef.current) {
-      lightRef.current.intensity = (50 + intensity * 200) * (mode === 'risk' ? 1.5 : 1);
+      lightRef.current.intensity = (50 + safeIntensity * 200) * (mode === 'risk' ? 1.5 : 1);
     }
   });
 
@@ -60,10 +61,10 @@ function EnergyCore({ intensity, mode }: { intensity: number, mode: string }) {
         <MeshDistortMaterial
           color={coreColor}
           speed={2}
-          distort={0.4 + intensity * 0.5}
+          distort={0.4 + (intensity || 0) * 0.5}
           radius={1}
           emissive={coreColor}
-          emissiveIntensity={1 + intensity * 4}
+          emissiveIntensity={1 + (intensity || 0) * 4}
           transparent
           opacity={0.9}
         />
@@ -76,38 +77,39 @@ function NeuralParticles({ intensity }: { intensity: number }) {
   const pointsRef = useRef<THREE.Points>(null!);
   const count = 2000;
   
-  const [positions, initialPositions] = useMemo(() => {
+  const positions = useMemo(() => {
     const pos = new Float32Array(count * 3);
-    const initial = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      const x = (Math.random() - 0.5) * 40;
-      const y = (Math.random() - 0.5) * 40;
-      const z = (Math.random() - 0.5) * 20 - 10;
-      pos[i * 3] = initial[i * 3] = x;
-      pos[i * 3 + 1] = initial[i * 3 + 1] = y;
-      pos[i * 3 + 2] = initial[i * 3 + 2] = z;
+      pos[i * 3] = (Math.random() - 0.5) * 40;
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 40;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 20 - 10;
     }
-    return [pos, initial];
+    return pos;
   }, []);
+
+  const initialPositions = useMemo(() => new Float32Array(positions), [positions]);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    if (!pointsRef.current) return;
+    if (!pointsRef.current?.geometry?.attributes?.position) return;
     
     const posAttr = pointsRef.current.geometry.attributes.position;
+    const array = posAttr.array as Float32Array;
+    const safeIntensity = intensity || 0;
+    
     for (let i = 0; i < count; i++) {
       const ix = i * 3;
       const iy = i * 3 + 1;
       const iz = i * 3 + 2;
       
       // Drift motion
-      posAttr.array[ix] = initialPositions[ix] + Math.sin(t * 0.5 + initialPositions[iz]) * 0.5;
-      posAttr.array[iy] = initialPositions[iy] + Math.cos(t * 0.3 + initialPositions[ix]) * 0.5;
+      array[ix] = initialPositions[ix] + Math.sin(t * 0.5 + initialPositions[iz]) * 0.5;
+      array[iy] = initialPositions[iy] + Math.cos(t * 0.3 + initialPositions[ix]) * 0.5;
       
       // Interaction scatter effect
-      if (intensity > 0.1) {
-        posAttr.array[ix] += (Math.random() - 0.5) * intensity * 2;
-        posAttr.array[iy] += (Math.random() - 0.5) * intensity * 2;
+      if (safeIntensity > 0.1) {
+        array[ix] += (Math.random() - 0.5) * safeIntensity * 2;
+        array[iy] += (Math.random() - 0.5) * safeIntensity * 2;
       }
     }
     posAttr.needsUpdate = true;
@@ -115,7 +117,15 @@ function NeuralParticles({ intensity }: { intensity: number }) {
   });
 
   return (
-    <Points ref={pointsRef} positions={positions} stride={3}>
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={count}
+          array={positions}
+          itemSize={3}
+        />
+      </bufferGeometry>
       <PointMaterial
         transparent
         color="#22d3ee"
@@ -123,18 +133,19 @@ function NeuralParticles({ intensity }: { intensity: number }) {
         sizeAttenuation
         depthWrite={false}
         blending={THREE.AdditiveBlending}
-        opacity={0.3 + intensity * 0.7}
+        opacity={0.3 + (intensity || 0) * 0.7}
       />
-    </Points>
+    </points>
   );
 }
 
 function CameraRig() {
   useFrame((state) => {
-    const { mouse } = state;
-    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, mouse.x * 3, 0.02);
-    state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, mouse.y * 3, 0.02);
-    state.camera.lookAt(0, 0, -5);
+    const { mouse, camera } = state;
+    if (!camera) return;
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, mouse.x * 3, 0.02);
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, mouse.y * 3, 0.02);
+    camera.lookAt(0, 0, -5);
   });
   return <PerspectiveCamera makeDefault fov={50} position={[0, 0, 10]} />;
 }
@@ -163,7 +174,7 @@ export default function Scene3D({ isBlurred }: SceneProps) {
           <Bloom 
             luminanceThreshold={0.2} 
             mipmapBlur 
-            intensity={1.2 + intensity * 4} 
+            intensity={1.2 + (intensity || 0) * 4} 
             radius={0.5} 
           />
           <Noise opacity={0.04} />
