@@ -77,14 +77,18 @@ function NeuralParticles({ intensity }: { intensity: number }) {
   const pointsRef = useRef<THREE.Points>(null!);
   const count = 2000;
   
-  const [positions, initialPositions] = useMemo(() => {
+  const { positions, initialPositions } = useMemo(() => {
     const pos = new Float32Array(count * 3);
+    const initial = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       pos[i * 3] = (Math.random() - 0.5) * 40;
       pos[i * 3 + 1] = (Math.random() - 0.5) * 40;
       pos[i * 3 + 2] = (Math.random() - 0.5) * 20 - 10;
+      initial[i * 3] = pos[i * 3];
+      initial[i * 3 + 1] = pos[i * 3 + 1];
+      initial[i * 3 + 2] = pos[i * 3 + 2];
     }
-    return [pos, new Float32Array(pos)];
+    return { positions: pos, initialPositions: initial };
   }, []);
 
   useFrame((state) => {
@@ -156,7 +160,6 @@ export default function Scene3D({ isBlurred }: SceneProps) {
   const intensity = typeof interaction?.intensity === 'number' ? interaction.intensity : 0;
   const mode = interaction?.mode ?? 'calm';
   
-  // Static vectors for EffectComposer compatibility in React 19 / Fiber 9
   const currentOffset = useMemo(() => {
     const val = mode === 'risk' ? 0.008 : 0;
     return new THREE.Vector2(val, val);
@@ -187,7 +190,7 @@ export default function Scene3D({ isBlurred }: SceneProps) {
           />
           <Noise opacity={0.04} />
           <Vignette offset={0.1} darkness={1.2} />
-          <ChromaticAberration offset={currentOffset} />
+          <ChromaticAberration offset={currentOffset} opacity={mode === 'risk' ? 1 : 0} />
         </EffectComposer>
         
         <Environment preset="night" />
