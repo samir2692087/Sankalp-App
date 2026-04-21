@@ -18,12 +18,11 @@ import {
   ChromaticAberration 
 } from '@react-three/postprocessing';
 import * as THREE from 'three';
-import { AppTheme } from '@/lib/types';
 import { useInteraction } from '@/context/InteractionContext';
 
 interface SceneProps {
   streak: number;
-  theme: AppTheme;
+  theme: string;
   riskLevel?: string;
   isBlurred?: boolean;
 }
@@ -152,7 +151,7 @@ function CameraRig() {
   return <PerspectiveCamera makeDefault fov={50} position={[0, 0, 10]} />;
 }
 
-function PostProcessingStack({ intensity, mode }: { intensity: number, mode: string }) {
+function PostProcessingStack({ intensity = 0, mode = 'calm' }: { intensity?: number, mode?: string }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -202,8 +201,6 @@ export default function Scene3D({ isBlurred }: SceneProps) {
           <NeuralParticles intensity={intensity} />
           <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
           <Environment preset="night" />
-          
-          {/* Post-processing inside Suspense boundary to ensure all scene assets are ready */}
           <PostProcessingStack intensity={intensity} mode={mode} />
         </Suspense>
       </Canvas>
