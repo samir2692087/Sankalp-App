@@ -23,6 +23,9 @@ const migrateData = (parsed: any): UserData => {
     disciplineScore: typeof parsed?.disciplineScore === 'number' && !isNaN(parsed.disciplineScore) ? parsed.disciplineScore : 0,
     streakFreezes: typeof parsed?.streakFreezes === 'number' && !isNaN(parsed.streakFreezes) ? parsed.streakFreezes : 3,
     maxFreezes: typeof parsed?.maxFreezes === 'number' && !isNaN(parsed.maxFreezes) ? parsed.maxFreezes : 3,
+    theme: ['light', 'dark', 'purple', 'amoled'].includes(parsed?.theme) ? parsed.theme : 'dark',
+    notificationsEnabled: !!parsed?.notificationsEnabled,
+    reminderTime: typeof parsed?.reminderTime === 'string' ? parsed.reminderTime : '09:00',
   };
 };
 
