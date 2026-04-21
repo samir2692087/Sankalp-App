@@ -14,8 +14,7 @@ import {
   Bell, 
   Database,
   X,
-  ChevronRight,
-  UserCircle
+  ChevronRight
 } from 'lucide-react';
 import {
   Dialog,
@@ -112,7 +111,7 @@ export default function Header({
               </div>
               <div className="flex flex-col">
                 <h1 className="text-white font-black text-2xl leading-none tracking-tighter">IronWill</h1>
-                <span className="text-white/30 font-black uppercase tracking-[0.3em] text-[8px]">Mastery Focus</span>
+                <span className="text-white/30 font-black uppercase tracking-[0.3em] text-[8px]">Focus Mastery</span>
               </div>
             </motion.div>
           </Magnetic>
@@ -183,7 +182,7 @@ export default function Header({
                       {[
                         { label: 'Appearance', sub: 'Change your view', icon: Palette, color: 'bg-purple-500/20 text-purple-400', action: () => { setIsThemeSheetOpen(true); setIsSettingsOpen(false); } },
                         { label: 'Reminders', sub: 'Stay on track', icon: Bell, color: 'bg-blue-500/20 text-blue-400', action: () => { setIsReminderOpen(true); setIsSettingsOpen(false); } },
-                        { label: 'Mastery Records', sub: 'Manage your history', icon: Database, color: 'bg-slate-500/20 text-slate-400', action: () => { onShowExport(); setIsSettingsOpen(false); } },
+                        { label: 'Discipline Archive', sub: 'Manage your history', icon: Database, color: 'bg-slate-500/20 text-slate-400', action: () => { onShowExport(); setIsSettingsOpen(false); } },
                         { label: 'Focus Mode', sub: focusMode ? 'Active' : 'Dormant', icon: Zap, color: 'bg-yellow-500/20 text-yellow-400', action: () => { onToggleFocus(); setIsSettingsOpen(false); }, isToggle: true },
                       ].map((item, idx) => (
                         <motion.div 
@@ -231,7 +230,7 @@ export default function Header({
                             <Trash2 size={22} />
                           </div>
                           <div className="text-left flex-1">
-                            <p className="font-bold text-sm">Clear progress</p>
+                            <p className="font-bold text-sm">Reset Focus</p>
                             <p className="text-red-500/30 text-[9px] uppercase font-black tracking-widest mt-1">Start your path over</p>
                           </div>
                         </Button>
@@ -291,4 +290,3 @@ export default function Header({
     </>
   );
 }
-

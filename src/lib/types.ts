@@ -27,13 +27,6 @@ export interface DayNote {
   content: string;
 }
 
-export interface BrowserHistoryItem {
-  url: string;
-  title: string;
-  timestamp: number;
-  safe: boolean;
-}
-
 export interface UserData {
   bestStreak: number;
   currentStreak: number;
@@ -52,7 +45,6 @@ export interface UserData {
   lastNotificationDate: string | null;
   streakFreezes: number;
   maxFreezes: number;
-  browserHistory: BrowserHistoryItem[];
 }
 
 export const INITIAL_DATA: UserData = {
@@ -73,5 +65,4 @@ export const INITIAL_DATA: UserData = {
   lastNotificationDate: null,
   streakFreezes: 3,
   maxFreezes: 3,
-  browserHistory: [],
 };

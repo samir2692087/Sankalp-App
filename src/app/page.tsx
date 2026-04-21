@@ -4,7 +4,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
 import Header from '@/components/dashboard/Header';
 import ClockBar from '@/components/dashboard/ClockBar';
 import StreakDisplay from '@/components/dashboard/StreakDisplay';
@@ -32,9 +31,8 @@ import {
 } from '@/lib/discipline-engine';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
-import { Globe, AlertCircle, ArrowRight, BookOpen, Sparkles, TrendingUp } from 'lucide-react';
+import { ShieldAlert, BookOpen, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import Magnetic from '@/components/interactions/Magnetic';
 import Tilt from '@/components/interactions/Tilt';
 import Parallax from '@/components/interactions/Parallax';
@@ -52,7 +50,6 @@ const Scene3D = dynamic(() => import('@/components/background/Scene3D'), {
 const springConfig = { type: "spring", stiffness: 100, damping: 20 };
 
 export default function IronWillDashboard() {
-  const router = useRouter();
   const { toast } = useToast();
   const { triggerPulse, setMode, mode, recordInteraction } = useInteraction();
   const [data, setData] = useState<UserData>(INITIAL_DATA);
@@ -138,7 +135,7 @@ export default function IronWillDashboard() {
     };
     updateState(newData);
     handleCloseModal(setShowUrgeModal);
-    toast({ title: "Stayed firm", description: "You are in control. XP earned." });
+    toast({ title: "Stayed firm", description: "You are in control. Strength earned." });
   };
 
   const insights = useMemo(() => getBehavioralInsights(data), [data]);
@@ -171,9 +168,6 @@ export default function IronWillDashboard() {
         mode === 'risk' ? 'bg-red-950/20' : 'bg-transparent'
       )}>
         <Scene3D 
-          streak={data.currentStreak} 
-          theme={data.theme || 'dark'} 
-          riskLevel={insights.riskLevel}
           isBlurred={isAnySheetOpen || isLoading}
         />
         
@@ -226,7 +220,6 @@ export default function IronWillDashboard() {
                 mode === 'focus' ? 'gap-4' : 'gap-8'
               )}
             >
-              {/* Mastery Level HUD */}
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -242,7 +235,7 @@ export default function IronWillDashboard() {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1.5">
-                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{data.xp} Total XP</span>
+                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{data.xp} Strength Points</span>
                   <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">
                     <motion.div 
                       initial={{ width: 0 }}
@@ -280,17 +273,17 @@ export default function IronWillDashboard() {
                   className="p-6 rounded-[2.5rem] bg-red-500/10 border border-red-500/20 flex flex-col gap-4 shadow-[0_20px_40px_rgba(239,68,68,0.1)]"
                 >
                   <div className="flex items-center gap-3 text-red-500">
-                    <AlertCircle size={24} className="animate-pulse" />
+                    <ShieldAlert size={24} className="animate-pulse" />
                     <h3 className="font-bold uppercase tracking-widest text-sm">Vulnerability High</h3>
                   </div>
                   <p className="text-xs text-white/60 leading-relaxed font-medium">
-                    Our analysis shows a high risk of relapse. Pause, breathe, and step away from any triggers immediately.
+                    Awareness check: Risk of relapse detected. Pause, breathe, and return to your center immediately.
                   </p>
                   <Button 
                     onClick={() => handleOpenModal(setShowEmergencyModal)}
                     className="w-full bg-red-500 hover:bg-red-600 text-white font-bold h-12 rounded-xl"
                   >
-                    Enter Emergency Protocol
+                    Enter Emergency Calm
                   </Button>
                 </motion.div>
               )}
@@ -302,14 +295,11 @@ export default function IronWillDashboard() {
                   <Magnetic strength={0.3}>
                     <motion.div whileHover={{ scale: 1.02, y: -5 }}>
                       <Button 
-                        onClick={() => {
-                          feedback.tap();
-                          router.push('/browser');
-                        }}
+                        onClick={() => handleOpenModal(setShowEmergencyModal)}
                         className="h-24 w-full rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex flex-col items-center justify-center gap-2 p-0"
                       >
-                        <Globe size={24} className="text-primary group-hover:shadow-[0_0_15px_rgba(124,58,237,0.4)]" />
-                        <span className="text-white/80 font-bold text-xs">Safe Browser</span>
+                        <ShieldAlert size={24} className="text-red-500 group-hover:shadow-[0_0_15px_rgba(239,68,68,0.4)]" />
+                        <span className="text-white/80 font-bold text-xs">Emergency Calm</span>
                       </Button>
                     </motion.div>
                   </Magnetic>
@@ -341,7 +331,7 @@ export default function IronWillDashboard() {
                       ...data, 
                       checkIns: [{ date: today, timestamp: Date.now() }, ...(Array.isArray(data.checkIns) ? data.checkIns : [])] 
                     });
-                    toast({ title: "Checked in", description: "Protocol maintained. XP earned." });
+                    toast({ title: "Checked in", description: "Protocol maintained. Strength earned." });
                   }
                 }} 
                 onUrge={() => handleOpenModal(setShowUrgeModal)} 

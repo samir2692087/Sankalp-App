@@ -16,7 +16,6 @@ const migrateData = (parsed: any): UserData => {
     relapses: Array.isArray(parsed?.relapses) ? parsed.relapses : [],
     checkIns: Array.isArray(parsed?.checkIns) ? parsed.checkIns : [],
     notes: Array.isArray(parsed?.notes) ? parsed.notes : [],
-    browserHistory: Array.isArray(parsed?.browserHistory) ? parsed.browserHistory : [],
     currentStreak: typeof parsed?.currentStreak === 'number' && !isNaN(parsed.currentStreak) ? parsed.currentStreak : 0,
     bestStreak: typeof parsed?.bestStreak === 'number' && !isNaN(parsed.bestStreak) ? parsed.bestStreak : 0,
     disciplineScore: typeof parsed?.disciplineScore === 'number' && !isNaN(parsed.disciplineScore) ? parsed.disciplineScore : 0,
