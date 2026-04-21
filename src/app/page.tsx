@@ -20,7 +20,7 @@ import ClarityLibrary from '@/components/modals/ClarityLibrary';
 import LaunchScreen from '@/components/layout/LaunchScreen';
 import FAB from '@/components/dashboard/FAB';
 import SankalpIcon from '@/components/icons/SankalpIcon';
-import { UserData, INITIAL_DATA, UrgeIntensity, AppTheme } from '@/lib/types';
+import { UserData, INITIAL_DATA, UrgeIntensity } from '@/lib/types';
 import { getStoredData, saveData, clearData } from '@/lib/storage';
 import { 
   calculateStreak, 
@@ -413,13 +413,13 @@ export default function SankalpOverview() {
 
         <Toaster />
 
-        {showRelapseModal && <RelapseModal isOpen={showRelapseModal} onClose={() => handleCloseModal(setShowRelapseModal)} onSubmit={handleRelapseSubmit} />}
-        {showUrgeModal && <UrgeModal isOpen={showUrgeModal} onClose={() => handleCloseModal(setShowUrgeModal)} onSubmit={handleUrgeSubmit} />}
-        {showInsightsSheet && <InsightsSheet isOpen={showInsightsSheet} onClose={() => handleCloseModal(setShowInsightsSheet)} data={data} defaultTab={insightsTab} />}
-        {showCalendarSheet && <CalendarSheet isOpen={showCalendarSheet} onClose={() => handleCloseModal(setShowCalendarSheet)} data={data} onToggleDate={() => {}} onSaveNote={() => {}} />}
-        {showEmergencyModal && <EmergencyModal isOpen={showEmergencyModal} onClose={() => handleCloseModal(setShowEmergencyModal)} />}
-        {showExportModal && <ExportModal isOpen={showExportModal} onClose={() => handleCloseModal(setShowExportModal)} data={data} onDataImport={() => {}} />}
-        {showLibrary && <ClarityLibrary isOpen={showLibrary} onClose={() => handleCloseModal(setShowLibrary)} />}
+        <RelapseModal isOpen={showRelapseModal} onClose={() => handleCloseModal(setShowRelapseModal)} onSubmit={handleRelapseSubmit} />
+        <UrgeModal isOpen={showUrgeModal} onClose={() => handleCloseModal(setShowUrgeModal)} onSubmit={handleUrgeSubmit} />
+        <InsightsSheet isOpen={showInsightsSheet} onClose={() => handleCloseModal(setShowInsightsSheet)} data={data} defaultTab={insightsTab} />
+        <CalendarSheet isOpen={showCalendarSheet} onClose={() => handleCloseModal(setShowCalendarSheet)} data={data} onToggleDate={() => {}} onSaveNote={() => {}} />
+        <EmergencyModal isOpen={showEmergencyModal} onClose={() => handleCloseModal(setShowEmergencyModal)} />
+        <ExportModal isOpen={showExportModal} onClose={() => handleCloseModal(setShowExportModal)} data={data} onDataImport={() => {}} />
+        <ClarityLibrary isOpen={showLibrary} onClose={() => handleCloseModal(setShowLibrary)} />
       </div>
     </>
   );

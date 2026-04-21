@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   Settings, 
   Trash2, 
@@ -36,7 +36,6 @@ import ProfileModal from '@/components/modals/ProfileModal';
 import InfoModal from '@/components/modals/InfoModal';
 import { 
   motion, 
-  AnimatePresence, 
   useScroll, 
   useVelocity, 
   useTransform, 
@@ -297,37 +296,31 @@ export default function Header({
         </div>
       </PortalSheet>
 
-      {isReminderOpen && (
-        <ReminderModal 
-          isOpen={isReminderOpen} 
-          onClose={() => setIsReminderOpen(false)} 
-          enabled={data.notificationsEnabled} 
-          time={data.reminderTime} 
-          onUpdate={onUpdateReminder} 
-        />
-      )}
+      <ReminderModal 
+        isOpen={isReminderOpen} 
+        onClose={() => setIsReminderOpen(false)} 
+        enabled={data.notificationsEnabled} 
+        time={data.reminderTime} 
+        onUpdate={onUpdateReminder} 
+      />
 
-      {isProfileOpen && (
-        <ProfileModal 
-          isOpen={isProfileOpen} 
-          onClose={() => setIsProfileOpen(false)} 
-          profile={data.profile} 
-          onUpdate={onUpdateProfile} 
-        />
-      )}
+      <ProfileModal 
+        isOpen={isProfileOpen} 
+        onClose={() => setIsProfileOpen(false)} 
+        profile={data.profile} 
+        onUpdate={onUpdateProfile} 
+      />
 
-      {isInfoOpen && (
-        <InfoModal 
-          isOpen={isInfoOpen} 
-          onClose={() => setIsInfoOpen(false)} 
-          onDeleteData={() => {
-            if(confirm(t('delete_confirm'))) {
-              onReset();
-              setIsInfoOpen(false);
-            }
-          }}
-        />
-      )}
+      <InfoModal 
+        isOpen={isInfoOpen} 
+        onClose={() => setIsInfoOpen(false)} 
+        onDeleteData={() => {
+          if(confirm(t('delete_confirm'))) {
+            onReset();
+            setIsInfoOpen(false);
+          }
+        }}
+      />
     </>
   );
 }
