@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useRef, useMemo, useEffect, useState } from 'react';
+import React, { useRef, useMemo, useEffect, useState, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { 
   PointMaterial, 
@@ -177,23 +177,25 @@ export default function Scene3D({ isBlurred }: SceneProps) {
         <CameraRig />
         <ambientLight intensity={0.1} />
         
-        <EnergyCore intensity={intensity} mode={mode} />
-        <NeuralParticles intensity={intensity} />
-        <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
-        
-        <EffectComposer disableNormalPass multisampling={0}>
-          <Bloom 
-            luminanceThreshold={0.2} 
-            mipmapBlur 
-            intensity={1.2 + intensity * 4} 
-            radius={0.5} 
-          />
-          <Noise opacity={0.04} />
-          <Vignette offset={0.1} darkness={1.2} />
-          <ChromaticAberration offset={currentOffset} opacity={mode === 'risk' ? 1 : 0} />
-        </EffectComposer>
-        
-        <Environment preset="night" />
+        <Suspense fallback={null}>
+          <EnergyCore intensity={intensity} mode={mode} />
+          <NeuralParticles intensity={intensity} />
+          <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
+          
+          <EffectComposer disableNormalPass multisampling={0}>
+            <Bloom 
+              luminanceThreshold={0.2} 
+              mipmapBlur 
+              intensity={1.2 + intensity * 4} 
+              radius={0.5} 
+            />
+            <Noise opacity={0.04} />
+            <Vignette offset={0.1} darkness={1.2} />
+            <ChromaticAberration offset={currentOffset} opacity={mode === 'risk' ? 1 : 0} />
+          </EffectComposer>
+          
+          <Environment preset="night" />
+        </Suspense>
       </Canvas>
     </div>
   );
