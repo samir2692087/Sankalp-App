@@ -105,7 +105,12 @@ export default function IronWillDashboard() {
     triggerPulse(0.8);
     recordInteraction('relapse');
     const newRelapse = { id: Date.now().toString(), timestamp: Date.now(), reason, timeOfDay: time };
-    const newData = { ...data, lastRelapseTimestamp: Date.now(), relapses: [newRelapse, ...data.relapses], streakFreezes: Math.max(0, data.streakFreezes - 1) };
+    const newData = { 
+      ...data, 
+      lastRelapseTimestamp: Date.now(), 
+      relapses: [newRelapse, ...(Array.isArray(data.relapses) ? data.relapses : [])], 
+      streakFreezes: Math.max(0, (data.streakFreezes || 0) - 1) 
+    };
     updateState(newData);
     handleCloseModal(setShowRelapseModal);
     toast({ title: "Neural Protocol Reset", description: "Day One. Stay focused." });
@@ -116,7 +121,10 @@ export default function IronWillDashboard() {
     triggerPulse(0.6);
     recordInteraction('urge');
     const newUrge = { id: Date.now().toString(), timestamp: Date.now(), intensity };
-    const newData = { ...data, urges: [newUrge, ...data.urges] };
+    const newData = { 
+      ...data, 
+      urges: [newUrge, ...(Array.isArray(data.urges) ? data.urges : [])] 
+    };
     updateState(newData);
     handleCloseModal(setShowUrgeModal);
     toast({ title: "Victory Confirmed", description: "You are mastering your mind." });
@@ -274,17 +282,20 @@ export default function IronWillDashboard() {
               <ActionCards 
                 onCheckIn={() => {
                   const today = new Date().toISOString().split('T')[0];
-                  if (!data.checkIns.some(c => c.date === today)) {
+                  if (!(Array.isArray(data.checkIns) && data.checkIns.some(c => c.date === today))) {
                     feedback.success();
                     triggerPulse(0.4);
                     recordInteraction('checkin');
-                    updateState({ ...data, checkIns: [{ date: today, timestamp: Date.now() }, ...data.checkIns] });
+                    updateState({ 
+                      ...data, 
+                      checkIns: [{ date: today, timestamp: Date.now() }, ...(Array.isArray(data.checkIns) ? data.checkIns : [])] 
+                    });
                     toast({ title: "Protocol Marked Clean", description: "Consistency is power." });
                   }
                 }} 
                 onUrge={() => handleOpenModal(setShowUrgeModal)} 
                 onRelapse={() => handleOpenModal(setShowRelapseModal)} 
-                checkedInToday={data.checkIns.some(c => c.date === new Date().toISOString().split('T')[0])}
+                checkedInToday={Array.isArray(data.checkIns) && data.checkIns.some(c => c.date === new Date().toISOString().split('T')[0])}
               />
 
               <Tilt strength={8}>
