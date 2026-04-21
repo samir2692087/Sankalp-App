@@ -228,7 +228,7 @@ export const translations = {
     about_content_detailed: "Sankalp is a cinematic mastery companion built to help you reclaim control over your focus. We believe that true growth happens in silence and privacy. By removing distractions, tracking streaks with physics-based interactions, and keeping 100% of your data on your device, Sankalp serves as your digital fortress for self-discipline.",
     contact_content_detailed: "For technical support, feedback, or inquiries regarding compliance, please reach out to us. We aim to respond to meaningful feedback within 3-5 business days.",
     contact_email_label: "Support Email",
-    contact_email_value: "support@sankalp.app"
+    contact_email_value: "pixaro.creation@gmail.com"
   },
   hi: {
     app_name: "संकल्प",
@@ -337,7 +337,7 @@ export const translations = {
     core_insight: "मुख्य अंतर्दृष्टि",
     next_step: "अगला कदम",
     open_source: "पुस्तकालय में स्रोत खोलें",
-    return_results: "परिणामों पर लौटें",
+    return_results: "परिलामों पर लौटें",
     mood_question: "अभी आप कैसा महसूस कर रहे हैं?",
     select_state: "लक्षित ज्ञान के लिए एक स्थिति चुनें",
     mood_struggling: "संघर्ष कर रहे हैं",
@@ -452,6 +452,6 @@ export const translations = {
     about_content_detailed: "संकल्प एक सिनेमैटिक मास्टरी साथी है जिसे आपके फोकस पर नियंत्रण वापस पाने में मदद करने के लिए बनाया गया है। हमारा मानना है कि वास्तविक विकास शांति और गोपनीयता में होता है। विकर्षणों को दूर करके, भौतिकी-आधारित इंटरैक्शन के साथ स्ट्रीक्स को ट्रैक करके, और आपके डेटा का 100% आपके डिवाइस पर रखकर, संकल्प आत्म-अनुशासन के लिए आपके डिजिटल किले के रूप में कार्य करता है।",
     contact_content_detailed: "तकनीकी सहायता, प्रतिक्रिया या अनुपालन के संबंध में पूछताछ के लिए, कृपया हमसे संपर्क करें। हमारा लक्ष्य 3-5 कार्य दिवसों के भीतर सार्थक प्रतिक्रिया देना है।",
     contact_email_label: "सहायता ईमेल",
-    contact_email_value: "support@sankalp.app"
+    contact_email_value: "pixaro.creation@gmail.com"
   }
 };
