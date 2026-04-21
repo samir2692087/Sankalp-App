@@ -18,12 +18,10 @@ interface PortalSheetProps {
 
 /**
  * A highly stable, portal-based bottom sheet.
- * Stabilization Logic:
- * - Always stays in DOM (controlled by opacity/visibility)
- * - Explicit open/close state logic
- * - Stops all inner event propagation
- * - Locked body scroll on mount
- * - No gesture conflicts (animations handled by CSS)
+ * Optimized for Mobile Keyboards:
+ * - Uses dvh (dynamic viewport height)
+ * - Includes scroll-padding-bottom for input focus
+ * - Large bottom buffer for keyboard shifts
  */
 export default function PortalSheet({ 
   isOpen, 
@@ -35,24 +33,21 @@ export default function PortalSheet({
 }: PortalSheetProps) {
   const [mounted, setMounted] = useState(false);
 
-  // Ensure portal target exists
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
   }, []);
 
-  // Lock body scroll and log state for stabilization check
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      console.log("MODAL_STABILITY_SCAN: OPEN", title || "Sheet");
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, title]);
+  }, [isOpen]);
 
   if (!mounted) return null;
 
@@ -62,9 +57,9 @@ export default function PortalSheet({
         "fixed inset-0 z-[10000] flex items-end justify-center transition-all duration-300 ease-in-out",
         isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none invisible"
       )}
-      style={{ touchAction: 'auto' }}
+      style={{ height: '100dvh' }}
     >
-      {/* Backdrop - Explicit close receiver */}
+      {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
         onClick={(e) => {
@@ -74,19 +69,19 @@ export default function PortalSheet({
         }}
       />
 
-      {/* Sheet Container - Strictly controlled position */}
+      {/* Sheet Container */}
       <div 
         className={cn(
-          "relative w-full max-w-2xl bg-[#0a0a0f] border-t border-white/10 rounded-t-[3rem] shadow-[0_-20px_100px_rgba(0,0,0,0.9)] flex flex-col max-h-[85vh] outline-none transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1) transform",
+          "relative w-full max-w-2xl bg-[#0a0a0f] border-t border-white/10 rounded-t-[3rem] shadow-[0_-20px_100px_rgba(0,0,0,0.9)] flex flex-col outline-none transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1) transform",
+          "max-h-[92dvh]", 
           isOpen ? "translate-y-0" : "translate-y-full",
           className
         )}
         onClick={(e) => {
-          // Hard stop on propagation to prevent accidental closure
           e.stopPropagation();
         }}
       >
-        {/* Visual Drag Handle (Static) */}
+        {/* Visual Drag Handle */}
         <div className="w-full pt-5 pb-2 flex justify-center shrink-0 select-none">
           <div className="w-14 h-1.5 bg-white/10 rounded-full" />
         </div>
@@ -110,12 +105,13 @@ export default function PortalSheet({
           </Button>
         </div>
 
-        {/* Content Area - Scrollable with isolation */}
+        {/* Content Area - Keyboard Friendly */}
         <div 
           className="flex-1 overflow-y-auto no-scrollbar overscroll-contain touch-pan-y"
+          style={{ scrollPaddingBottom: '320px' }}
           onScroll={(e) => e.stopPropagation()}
         >
-          <div className="p-8 pt-6 pb-40">
+          <div className="p-8 pt-6 pb-80">
             {children}
           </div>
         </div>

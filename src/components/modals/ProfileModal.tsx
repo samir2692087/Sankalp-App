@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -23,7 +22,6 @@ import {
 import { UserProfile } from '@/lib/types';
 import { useLanguage } from '@/context/LanguageContext';
 import { User, ShieldCheck, ArrowLeft } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -31,8 +29,6 @@ interface ProfileModalProps {
   profile: UserProfile;
   onUpdate: (profile: UserProfile) => void;
 }
-
-const springConfig = { type: "spring", stiffness: 150, damping: 18 };
 
 export default function ProfileModal({ isOpen, onClose, profile, onUpdate }: ProfileModalProps) {
   const { t } = useLanguage();
@@ -61,7 +57,7 @@ export default function ProfileModal({ isOpen, onClose, profile, onUpdate }: Pro
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="glass-card sm:max-w-[450px] rounded-[3rem] border-none shadow-2xl p-0 overflow-hidden outline-none">
-        <div className="bg-primary/10 p-8 text-center border-b border-white/5 relative">
+        <div className="bg-primary/10 p-8 text-center border-b border-white/5 relative shrink-0">
           <Button 
             variant="ghost" 
             onClick={onClose} 
@@ -76,62 +72,64 @@ export default function ProfileModal({ isOpen, onClose, profile, onUpdate }: Pro
           <DialogDescription className="mt-2 text-white/40 font-bold uppercase tracking-widest text-[9px]">{t('profile_desc')}</DialogDescription>
         </div>
 
-        <div className="p-8 space-y-6">
-          <div className="space-y-2">
-            <Label className="font-bold text-xs uppercase tracking-widest text-white/40 ml-1">{t('name_label')}</Label>
-            <Input 
-              value={localProfile.name || ''}
-              onChange={(e) => setLocalProfile({ ...localProfile, name: e.target.value })}
-              placeholder={t('name_placeholder')}
-              className="h-14 rounded-2xl bg-white/[0.03] border-white/5 font-bold focus:ring-1 focus:ring-primary/20"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+        <div className="flex-1 overflow-y-auto no-scrollbar">
+          <div className="p-8 space-y-6 pb-60"> {/* Mobile Keyboard Buffer */}
             <div className="space-y-2">
-              <Label className="font-bold text-xs uppercase tracking-widest text-white/40 ml-1">{t('gender_label')}</Label>
-              <Select 
-                value={localProfile.gender} 
-                onValueChange={(v) => setLocalProfile({ ...localProfile, gender: v as any })}
-              >
-                <SelectTrigger className="h-14 rounded-2xl bg-white/[0.03] border-white/5 font-bold">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="glass-card border-white/10 rounded-2xl">
-                  {GENDERS.map(g => <SelectItem key={g.key} value={g.key!} className="rounded-xl p-3 font-bold">{g.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <Label className="font-bold text-xs uppercase tracking-widest text-white/40 ml-1">{t('name_label')}</Label>
+              <Input 
+                value={localProfile.name || ''}
+                onChange={(e) => setLocalProfile({ ...localProfile, name: e.target.value })}
+                placeholder={t('name_placeholder')}
+                className="h-14 rounded-2xl bg-white/[0.03] border-white/5 font-bold focus:ring-1 focus:ring-primary/20"
+              />
             </div>
 
-            <div className="space-y-2">
-              <Label className="font-bold text-xs uppercase tracking-widest text-white/40 ml-1">{t('age_label')}</Label>
-              <Select 
-                value={localProfile.ageGroup} 
-                onValueChange={(v) => setLocalProfile({ ...localProfile, ageGroup: v as any })}
-              >
-                <SelectTrigger className="h-14 rounded-2xl bg-white/[0.03] border-white/5 font-bold">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="glass-card border-white/10 rounded-2xl">
-                  {AGE_GROUPS.map(a => <SelectItem key={a.key} value={a.key!} className="rounded-xl p-3 font-bold">{a.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="font-bold text-xs uppercase tracking-widest text-white/40 ml-1">{t('gender_label')}</Label>
+                <Select 
+                  value={localProfile.gender} 
+                  onValueChange={(v) => setLocalProfile({ ...localProfile, gender: v as any })}
+                >
+                  <SelectTrigger className="h-14 rounded-2xl bg-white/[0.03] border-white/5 font-bold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="glass-card border-white/10 rounded-2xl">
+                    {GENDERS.map(g => <SelectItem key={g.key} value={g.key!} className="rounded-xl p-3 font-bold">{g.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="font-bold text-xs uppercase tracking-widest text-white/40 ml-1">{t('age_label')}</Label>
+                <Select 
+                  value={localProfile.ageGroup} 
+                  onValueChange={(v) => setLocalProfile({ ...localProfile, ageGroup: v as any })}
+                >
+                  <SelectTrigger className="h-14 rounded-2xl bg-white/[0.03] border-white/5 font-bold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="glass-card border-white/10 rounded-2xl">
+                    {AGE_GROUPS.map(a => <SelectItem key={a.key} value={a.key!} className="rounded-xl p-3 font-bold">{a.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          </div>
 
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex items-start gap-3">
-            <ShieldCheck size={18} className="text-green-500 shrink-0 mt-0.5" />
-            <p className="text-[10px] leading-relaxed text-white/50 font-medium">
-              {t('privacy_note')}
-            </p>
-          </div>
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex items-start gap-3">
+              <ShieldCheck size={18} className="text-green-500 shrink-0 mt-0.5" />
+              <p className="text-[10px] leading-relaxed text-white/50 font-medium">
+                {t('privacy_note')}
+              </p>
+            </div>
 
-          <Button 
-            onClick={handleSave}
-            className="w-full h-16 rounded-2xl font-bold bg-primary text-white shadow-lg shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all text-sm uppercase tracking-[0.2em]"
-          >
-            {t('save_profile')}
-          </Button>
+            <Button 
+              onClick={handleSave}
+              className="w-full h-16 rounded-2xl font-bold bg-primary text-white shadow-lg shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all text-sm uppercase tracking-[0.2em]"
+            >
+              {t('save_profile')}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
