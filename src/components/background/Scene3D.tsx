@@ -10,13 +10,6 @@ import {
   Stars, 
   Environment 
 } from '@react-three/drei';
-import { 
-  EffectComposer, 
-  Bloom, 
-  Noise, 
-  Vignette, 
-  ChromaticAberration 
-} from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { useInteraction } from '@/context/InteractionContext';
 
@@ -29,7 +22,9 @@ interface SceneProps {
 
 function EnergyCore({ intensity = 0, mode = 'calm' }: { intensity?: number, mode?: string }) {
   const meshRef = useRef<THREE.Mesh>(null!);
+  const glowRef = useRef<THREE.Mesh>(null!);
   const lightRef = useRef<THREE.PointLight>(null!);
+  const secondaryLightRef = useRef<THREE.PointLight>(null!);
   
   const coreColor = useMemo(() => {
     if (mode === 'risk') return '#ff1e1e';
@@ -39,33 +34,63 @@ function EnergyCore({ intensity = 0, mode = 'calm' }: { intensity?: number, mode
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    if (!meshRef.current) return;
+    if (!meshRef.current || !glowRef.current) return;
     
     const safeIntensity = typeof intensity === 'number' && !isNaN(intensity) ? intensity : 0;
+    
+    // Core Rotation & Pulsing
     meshRef.current.rotation.y = t * 0.1 * (1 + safeIntensity * 2);
     meshRef.current.rotation.z = t * 0.05;
-    const pulse = 1 + Math.sin(t * 2) * 0.05 + safeIntensity * 0.2;
+    
+    const pulse = 1 + Math.sin(t * 2) * 0.05 + safeIntensity * 0.1;
     meshRef.current.scale.set(pulse, pulse, pulse);
+    
+    // Glow Layer Scaling
+    const glowPulse = 1.2 + Math.sin(t * 1.5) * 0.1 + safeIntensity * 0.15;
+    glowRef.current.scale.set(glowPulse, glowPulse, glowPulse);
+    glowRef.current.rotation.x = -t * 0.05;
 
+    // Layered Lighting Simulation (Fake Bloom)
     if (lightRef.current) {
-      lightRef.current.intensity = (50 + safeIntensity * 200) * (mode === 'risk' ? 1.5 : 1);
+      lightRef.current.intensity = (40 + safeIntensity * 100) * (mode === 'risk' ? 1.5 : 1);
+    }
+    if (secondaryLightRef.current) {
+      secondaryLightRef.current.intensity = (20 + safeIntensity * 60) * (mode === 'risk' ? 1.2 : 1);
     }
   });
 
   return (
     <group position={[0, 0, -5]}>
-      <pointLight ref={lightRef} color={coreColor} intensity={50} distance={20} />
+      {/* Primary Light Source */}
+      <pointLight ref={lightRef} color={coreColor} intensity={50} distance={15} decay={2} />
+      
+      {/* Secondary Soft Fill Light for Bloom Effect */}
+      <pointLight ref={secondaryLightRef} color={coreColor} intensity={25} distance={30} decay={1} />
+
+      {/* Main Distorted Core */}
       <mesh ref={meshRef}>
         <sphereGeometry args={[2, 64, 64]} />
         <MeshDistortMaterial
           color={coreColor}
           speed={2}
-          distort={0.4 + (intensity || 0) * 0.5}
+          distort={0.4 + (intensity || 0) * 0.3}
           radius={1}
           emissive={coreColor}
-          emissiveIntensity={1 + (intensity || 0) * 4}
+          emissiveIntensity={2 + (intensity || 0) * 5}
+        />
+      </mesh>
+
+      {/* Volumetric Glow Layer (Fake Bloom) */}
+      <mesh ref={glowRef}>
+        <sphereGeometry args={[2.1, 64, 64]} />
+        <meshStandardMaterial
+          color={coreColor}
           transparent
-          opacity={0.9}
+          opacity={0.15 + (intensity || 0) * 0.1}
+          emissive={coreColor}
+          emissiveIntensity={5 + (intensity || 0) * 10}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
         />
       </mesh>
     </group>
@@ -104,13 +129,14 @@ function NeuralParticles({ intensity = 0 }: { intensity?: number }) {
     for (let i = 0; i < count; i++) {
       const ix = i * 3;
       const iy = i * 3 + 1;
+      const iz = i * 3 + 2;
       
-      array[ix] = initialPositions[ix] + Math.sin(t * 0.5 + initialPositions[i * 3 + 2]) * 0.5;
+      array[ix] = initialPositions[ix] + Math.sin(t * 0.5 + initialPositions[iz]) * 0.5;
       array[iy] = initialPositions[iy] + Math.cos(t * 0.3 + initialPositions[ix]) * 0.5;
       
       if (safeIntensity > 0.1) {
-        array[ix] += (Math.random() - 0.5) * safeIntensity * 2;
-        array[iy] += (Math.random() - 0.5) * safeIntensity * 2;
+        array[ix] += (Math.random() - 0.5) * safeIntensity * 1.5;
+        array[iy] += (Math.random() - 0.5) * safeIntensity * 1.5;
       }
     }
     posAttr.needsUpdate = true;
@@ -130,11 +156,11 @@ function NeuralParticles({ intensity = 0 }: { intensity?: number }) {
       <PointMaterial
         transparent
         color="#22d3ee"
-        size={0.06}
+        size={0.07}
         sizeAttenuation
         depthWrite={false}
         blending={THREE.AdditiveBlending}
-        opacity={0.3 + (intensity || 0) * 0.7}
+        opacity={0.4 + (intensity || 0) * 0.5}
       />
     </points>
   );
@@ -151,34 +177,6 @@ function CameraRig() {
   return <PerspectiveCamera makeDefault fov={50} position={[0, 0, 10]} />;
 }
 
-function PostProcessingStack({ intensity = 0, mode = 'calm' }: { intensity?: number, mode?: string }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const chromaticOffset = useMemo(() => {
-    const val = mode === 'risk' ? 0.008 : 0;
-    return new THREE.Vector2(val, val);
-  }, [mode]);
-
-  if (!mounted) return null;
-
-  return (
-    <EffectComposer multisampling={0} disableNormalPass>
-      <Bloom 
-        luminanceThreshold={0.2} 
-        mipmapBlur 
-        intensity={1.2 + (intensity || 0) * 4} 
-        radius={0.5} 
-      />
-      <Noise opacity={0.04} />
-      <Vignette offset={0.1} darkness={1.2} />
-      <ChromaticAberration offset={chromaticOffset} />
-    </EffectComposer>
-  );
-}
-
 export default function Scene3D({ isBlurred }: SceneProps) {
   const [mounted, setMounted] = useState(false);
   const interaction = useInteraction();
@@ -193,19 +191,25 @@ export default function Scene3D({ isBlurred }: SceneProps) {
   if (!mounted) return <div className="fixed inset-0 -z-10 bg-[#05070a]" />;
 
   return (
-    <div className={`fixed inset-0 -z-10 pointer-events-none bg-[#05070a] transition-all duration-1000 ${isBlurred ? 'blur-2xl scale-110' : ''}`}>
-      <Canvas gl={{ antialias: true, stencil: true }}>
+    <div className={cn(
+      "fixed inset-0 -z-10 pointer-events-none bg-[#05070a] transition-all duration-1000",
+      isBlurred ? 'blur-2xl scale-110' : ''
+    )}>
+      {/* Cinematic Vignette Overlay (Stable CSS-based) */}
+      <div className="absolute inset-0 z-10 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.6)_100%)]" />
+      
+      {/* Static Noise Grain (Stable CSS-based) */}
+      <div className="absolute inset-0 z-10 pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+
+      <Canvas gl={{ antialias: true, stencil: false, alpha: false }} dpr={[1, 2]}>
         <CameraRig />
-        <ambientLight intensity={0.1} />
+        <ambientLight intensity={0.2} />
         
         <Suspense fallback={null}>
           <EnergyCore intensity={intensity} mode={mode} />
           <NeuralParticles intensity={intensity} />
-          <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
+          <Stars radius={100} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />
           <Environment preset="night" />
-          
-          {/* EffectComposer moved INSIDE Suspense for React 19 stability when siblings suspend */}
-          <PostProcessingStack intensity={intensity} mode={mode} />
         </Suspense>
       </Canvas>
     </div>
