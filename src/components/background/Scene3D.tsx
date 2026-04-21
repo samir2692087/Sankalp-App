@@ -84,10 +84,10 @@ const EnergyMaterial = shaderMaterial(
     vUv = uv;
     vNormal = normalize(normalMatrix * normal);
     
-    // Organic deformation with scroll reaction
+    // Organic deformation with high-sensitivity scroll reaction
     float noise = snoise(vec3(position * 0.4 + uTime * 0.15));
     float interactionEffect = uIntensity * snoise(vec3(position * 1.5 + uTime * 1.5)) * 0.4;
-    float scrollEffect = abs(uScrollVelocity) * snoise(vec3(position * 0.8)) * 0.1;
+    float scrollEffect = abs(uScrollVelocity) * snoise(vec3(position * 1.2)) * 0.25;
     
     vec3 newPos = position + normal * (noise * 0.15 + interactionEffect + scrollEffect);
     vPosition = newPos;
@@ -168,23 +168,26 @@ function EnergyCore({ intensity = 0, mode = 'calm', scrollVelocity = 0, scrollY 
     if (!matRef.current) return;
     
     matRef.current.uTime = t;
-    matRef.current.uIntensity = THREE.MathUtils.lerp(matRef.current.uIntensity, intensity, 0.08);
-    matRef.current.uColor.lerp(coreColor, 0.04);
+    matRef.current.uIntensity = THREE.MathUtils.lerp(matRef.current.uIntensity, intensity, 0.12);
+    matRef.current.uColor.lerp(coreColor, 0.06);
     matRef.current.uMode = modeVal;
     matRef.current.uScrollVelocity = scrollVelocity;
 
-    // PHYSICS DRIVEN MOTION
-    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, -scrollY * 0.005, 0.05);
-    meshRef.current.rotation.y = t * 0.1 + scrollVelocity * 0.5;
-    meshRef.current.rotation.z = t * 0.05 + scrollVelocity * 0.2;
+    // HIGH SENSITIVITY PHYSICS DRIVEN MOTION
+    // Faster snapping for immediate response
+    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, -scrollY * 0.008, 0.1);
     
-    const targetScale = 1 + Math.abs(scrollVelocity) * 0.2;
-    meshRef.current.scale.setScalar(THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.05));
+    // Aggressive rotation based on velocity
+    meshRef.current.rotation.y = t * 0.1 + scrollVelocity * 1.2;
+    meshRef.current.rotation.z = t * 0.05 + scrollVelocity * 0.6;
+    
+    // Micro-bounce scale reaction
+    const targetScale = 1 + Math.abs(scrollVelocity) * 0.45;
+    meshRef.current.scale.setScalar(THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.12));
   });
 
   return (
     <group position={[0, 0, -5]}>
-      {/* LAYERED LIGHTING FOR DEPTH (FAKE BLOOM) */}
       <pointLight color={coreColor} intensity={30 + intensity * 60} distance={12} position={[2, 2, 2]} />
       <pointLight color={mode === 'risk' ? '#ff0000' : '#4f46e5'} intensity={15} distance={20} position={[-5, -2, -2]} />
       
@@ -199,7 +202,6 @@ function EnergyCore({ intensity = 0, mode = 'calm', scrollVelocity = 0, scrollY 
         />
       </mesh>
 
-      {/* VOLUMETRIC ATMOSPHERE LAYER */}
       <mesh scale={1.15}>
         <sphereGeometry args={[2.5, 48, 48]} />
         <meshStandardMaterial
@@ -218,7 +220,7 @@ function EnergyCore({ intensity = 0, mode = 'calm', scrollVelocity = 0, scrollY 
 
 function NeuralParticles({ intensity = 0, scrollY = 0, scrollVelocity = 0 }: { intensity?: number, scrollY?: number, scrollVelocity?: number }) {
   const pointsRef = useRef<THREE.Points>(null!);
-  const count = 2500;
+  const count = 3000; // Increased density for high-sensitivity feel
   
   const { positions, initialPositions, colors } = useMemo(() => {
     const pos = new Float32Array(count * 3);
@@ -227,8 +229,8 @@ function NeuralParticles({ intensity = 0, scrollY = 0, scrollVelocity = 0 }: { i
     const color = new THREE.Color();
     
     for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 45;
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 45;
+      pos[i * 3] = (Math.random() - 0.5) * 50;
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 50;
       pos[i * 3 + 2] = (Math.random() - 0.5) * 25 - 12;
       
       initial[i * 3] = pos[i * 3];
@@ -255,19 +257,19 @@ function NeuralParticles({ intensity = 0, scrollY = 0, scrollVelocity = 0 }: { i
       const iy = i * 3 + 1;
       const iz = i * 3 + 2;
       
-      // PARALLAX + VELOCITY REACTION
-      const speedFactor = 1 + Math.abs(scrollVelocity) * 2;
+      // HIGH VELOCITY REACTION
+      const speedFactor = 1 + Math.abs(scrollVelocity) * 3.5;
       array[ix] = initialPositions[ix] + Math.sin(t * 0.15 + initialPositions[iz]) * 0.4;
-      array[iy] = initialPositions[iy] + Math.cos(t * 0.12 + initialPositions[ix]) * 0.4 - (scrollY * 0.012); // Fast Parallax
+      array[iy] = initialPositions[iy] + Math.cos(t * 0.12 + initialPositions[ix]) * 0.4 - (scrollY * 0.018); 
       
-      // Interaction reaction
-      if (intensity > 0.05) {
-        array[ix] += (Math.random() - 0.5) * intensity * 0.6;
-        array[iy] += (Math.random() - 0.5) * intensity * 0.6;
+      // Energetic dispersion on velocity spike
+      if (Math.abs(scrollVelocity) > 0.1) {
+        array[ix] += (Math.random() - 0.5) * scrollVelocity * 5;
+        array[iy] += (Math.random() - 0.5) * scrollVelocity * 5;
       }
     }
     posAttr.needsUpdate = true;
-    pointsRef.current.rotation.y = t * 0.008;
+    pointsRef.current.rotation.y = t * 0.008 + scrollVelocity * 0.5;
   });
 
   return (
@@ -289,7 +291,7 @@ function NeuralParticles({ intensity = 0, scrollY = 0, scrollVelocity = 0 }: { i
       <pointsMaterial
         transparent
         vertexColors
-        size={0.07}
+        size={0.08}
         sizeAttenuation
         depthWrite={false}
         blending={THREE.AdditiveBlending}
@@ -302,9 +304,9 @@ function NeuralParticles({ intensity = 0, scrollY = 0, scrollVelocity = 0 }: { i
 function CameraRig({ scrollY = 0 }: { scrollY?: number }) {
   useFrame((state) => {
     const { mouse, camera } = state;
-    // SMOOTH CAMERA LERP
-    camera.position.x = THREE.MathUtils.lerp(camera.position.x, mouse.x * 2.5, 0.04);
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, (mouse.y * 2.5) - (scrollY * 0.001), 0.04);
+    // Fast snappy camera tracking
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, mouse.x * 2.5, 0.08);
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, (mouse.y * 2.5) - (scrollY * 0.001), 0.08);
     camera.lookAt(0, -scrollY * 0.002, -5);
   });
   return <PerspectiveCamera makeDefault fov={40} position={[0, 0, 12]} />;
@@ -314,7 +316,7 @@ export default function Scene3D({ isBlurred }: { isBlurred?: boolean }) {
   const [mounted, setMounted] = useState(false);
   const { intensity, mode } = useInteraction();
   
-  // SCROLL PHYSICS STATE
+  // HIGH SENSITIVITY SCROLL PHYSICS STATE
   const [scroll, setScroll] = useState({ y: 0, velocity: 0 });
   const scrollRef = useRef({ lastY: 0, currentY: 0 });
 
@@ -322,20 +324,21 @@ export default function Scene3D({ isBlurred }: { isBlurred?: boolean }) {
     setMounted(true);
     const handleScroll = () => {
       const currentY = window.scrollY;
-      const diff = currentY - scrollRef.current.lastY;
+      // High influence multiplier
+      const diff = (currentY - scrollRef.current.lastY) * 0.25; 
       scrollRef.current.currentY = currentY;
       scrollRef.current.lastY = currentY;
-      setScroll({ y: currentY, velocity: diff * 0.1 });
+      setScroll({ y: currentY, velocity: diff });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Velocity Damping
+  // Snappy Damping
   useEffect(() => {
     const damp = setInterval(() => {
-      setScroll(prev => ({ ...prev, velocity: prev.velocity * 0.9 }));
+      setScroll(prev => ({ ...prev, velocity: prev.velocity * 0.88 }));
     }, 16);
     return () => clearInterval(damp);
   }, []);
@@ -347,7 +350,6 @@ export default function Scene3D({ isBlurred }: { isBlurred?: boolean }) {
       "fixed inset-0 -z-10 pointer-events-none bg-[#05070a] transition-all duration-1000",
       isBlurred ? 'blur-3xl scale-110' : ''
     )}>
-      {/* VIGNETTE & GRAIN OVERLAY */}
       <div className="absolute inset-0 z-10 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.85)_100%)]" />
       <div className="absolute inset-0 z-10 pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat" />
 
@@ -371,7 +373,6 @@ export default function Scene3D({ isBlurred }: { isBlurred?: boolean }) {
             scrollVelocity={scroll.velocity} 
           />
           
-          {/* SLOWEST PARALLAX LAYER: BACKGROUND STARS */}
           <group position={[0, scroll.y * 0.001, 0]}>
             <Stars radius={120} depth={60} count={4000} factor={6} saturation={0.5} fade speed={1.5} />
           </group>
@@ -382,4 +383,3 @@ export default function Scene3D({ isBlurred }: { isBlurred?: boolean }) {
     </div>
   );
 }
-
