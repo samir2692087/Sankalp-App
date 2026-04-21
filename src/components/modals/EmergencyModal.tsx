@@ -1,3 +1,4 @@
+
 "use client";
 
 import { 
@@ -32,7 +33,7 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
   }, [isActive, seconds]);
 
   const protocols = [
-    { name: 'Cold Water', icon: Zap, desc: 'Splash face with freezing water.' },
+    { name: 'Cold Water', icon: Zap, desc: 'Splash face with cold water.' },
     { name: 'Breath Work', icon: Brain, desc: '4-7-8 Deep Breathing.' },
     { name: 'Physical', icon: Heart, desc: 'Do 20 fast pushups.' },
   ];
