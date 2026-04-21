@@ -105,9 +105,8 @@ function NeuralParticles({ intensity }: { intensity: number }) {
     for (let i = 0; i < count; i++) {
       const ix = i * 3;
       const iy = i * 3 + 1;
-      const iz = i * 3 + 2;
       
-      array[ix] = initialPositions[ix] + Math.sin(t * 0.5 + initialPositions[iz]) * 0.5;
+      array[ix] = initialPositions[ix] + Math.sin(t * 0.5 + initialPositions[i * 3 + 2]) * 0.5;
       array[iy] = initialPositions[iy] + Math.cos(t * 0.3 + initialPositions[ix]) * 0.5;
       
       if (safeIntensity > 0.1) {
@@ -153,21 +152,37 @@ function CameraRig() {
   return <PerspectiveCamera makeDefault fov={50} position={[0, 0, 10]} />;
 }
 
-export default function Scene3D({ isBlurred }: SceneProps) {
-  const [mounted, setMounted] = useState(false);
-  const interaction = useInteraction();
-  
-  const intensity = typeof interaction?.intensity === 'number' ? interaction.intensity : 0;
-  const mode = interaction?.mode ?? 'calm';
-  
+function PostProcessingStack({ intensity, mode }: { intensity: number, mode: string }) {
   const chromaticOffset = useMemo(() => {
     const val = mode === 'risk' ? 0.008 : 0;
     return new THREE.Vector2(val, val);
   }, [mode]);
 
+  return (
+    <EffectComposer multisampling={0} disableNormalPass>
+      <Bloom 
+        luminanceThreshold={0.2} 
+        mipmapBlur 
+        intensity={1.2 + intensity * 4} 
+        radius={0.5} 
+      />
+      <Noise opacity={0.04} />
+      <Vignette offset={0.1} darkness={1.2} />
+      <ChromaticAberration offset={chromaticOffset} />
+    </EffectComposer>
+  );
+}
+
+export default function Scene3D({ isBlurred }: SceneProps) {
+  const [mounted, setMounted] = useState(false);
+  const interaction = useInteraction();
+  
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const intensity = typeof interaction?.intensity === 'number' ? interaction.intensity : 0;
+  const mode = interaction?.mode ?? 'calm';
 
   if (!mounted) return <div className="fixed inset-0 -z-10 bg-[#05070a]" />;
 
@@ -182,19 +197,8 @@ export default function Scene3D({ isBlurred }: SceneProps) {
           <NeuralParticles intensity={intensity} />
           <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
           <Environment preset="night" />
+          <PostProcessingStack intensity={intensity} mode={mode} />
         </Suspense>
-
-        <EffectComposer multisampling={0} disableNormalPass>
-          <Bloom 
-            luminanceThreshold={0.2} 
-            mipmapBlur 
-            intensity={1.2 + intensity * 4} 
-            radius={0.5} 
-          />
-          <Noise opacity={0.04} />
-          <Vignette offset={0.1} darkness={1.2} />
-          <ChromaticAberration offset={chromaticOffset} />
-        </EffectComposer>
       </Canvas>
     </div>
   );
