@@ -199,7 +199,7 @@ export default function Scene3D({ isBlurred }: SceneProps) {
           <Environment preset="night" />
         </Suspense>
 
-        {/* Post-processing moved outside Suspense for React 19 stability */}
+        {/* Post-processing outside Suspense for stability */}
         <PostProcessingStack intensity={intensity} mode={mode} />
       </Canvas>
     </div>
