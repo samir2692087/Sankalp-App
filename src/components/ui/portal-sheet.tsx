@@ -80,15 +80,9 @@ export default function PortalSheet({
               className
             )}
           >
-            {/* Drag Handle */}
-            <div 
-              className="w-full pt-4 pb-2 flex justify-center shrink-0 cursor-pointer" 
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-            >
-              <div className="w-12 h-1 bg-white/20 rounded-full hover:bg-white/40 transition-colors" />
+            {/* Visual Handle - Non-interactive for stability */}
+            <div className="w-full pt-4 pb-2 flex justify-center shrink-0 select-none">
+              <div className="w-12 h-1 bg-white/10 rounded-full" />
             </div>
 
             {/* Header */}
