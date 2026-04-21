@@ -18,14 +18,15 @@ export interface Book {
   coverUrl?: string;
 }
 
-const MOOD_QUERIES: Record<MoodState, string> = {
-  'relapse-risk': 'addiction recovery discipline',
-  'anxious': 'stoicism meditations anxiety',
-  'distracted': 'focus deep work concentration',
-  'low-energy': 'motivation growth grit',
-  'motivated': 'peak performance mastery habit',
-  'focused': 'productivity effective systems',
-  'bored': 'purpose meaning adventure',
+// Maps user moods to Open Library Subjects
+const MOOD_SUBJECTS: Record<MoodState, string> = {
+  'relapse-risk': 'self-help',
+  'anxious': 'stoicism',
+  'distracted': 'psychology',
+  'low-energy': 'motivation',
+  'motivated': 'success',
+  'focused': 'discipline',
+  'bored': 'philosophy',
 };
 
 export const LIBRARY: Book[] = [
@@ -65,28 +66,31 @@ export const LIBRARY: Book[] = [
 ];
 
 export async function fetchBooksByMood(mood: MoodState): Promise<Book[]> {
-  const query = MOOD_QUERIES[mood] || 'self-help';
-  const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=8`;
+  const subject = MOOD_SUBJECTS[mood] || 'self_help';
+  const url = `https://openlibrary.org/subjects/${subject}.json?limit=12`;
 
   try {
     const response = await fetch(url);
+    if (!response.ok) throw new Error('Network response was not ok');
     const data = await response.json();
 
-    return data.docs.map((doc: any) => ({
-      id: doc.key,
-      title: doc.title,
-      author: doc.author_name ? doc.author_name[0] : 'Unknown Author',
-      language: (doc.language && doc.language.includes('hin')) ? 'Hindi' : 'English',
-      description: doc.first_sentence ? doc.first_sentence[0] : `Explore this work on the philosophy of ${query}.`,
+    if (!data.works) return [];
+
+    return data.works.map((work: any) => ({
+      id: work.key,
+      title: work.title,
+      author: work.authors && work.authors.length > 0 ? work.authors[0].name : 'Various Authors',
+      language: 'English', // Subjects API usually returns English metadata
+      description: `Explore the core principles of ${subject.replace('_', ' ')} through this work.`,
       moods: [mood],
-      readingTime: doc.number_of_pages_median ? `${Math.ceil(doc.number_of_pages_median / 50)} hr` : 'N/A',
-      insight: "This work offers a perspective on maintaining focus and building character.",
-      nextStep: "Read the first chapter to ground your current state of mind.",
-      sourceUrl: `https://openlibrary.org${doc.key}`,
-      coverUrl: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : undefined
+      readingTime: 'Variable',
+      insight: "This work offers a disciplined perspective on maintaining focus and building character.",
+      nextStep: "Analyze the foundational arguments in the first chapter to ground your current state.",
+      sourceUrl: `https://openlibrary.org${work.key}`,
+      coverUrl: work.cover_id ? `https://covers.openlibrary.org/b/id/${work.cover_id}-M.jpg` : undefined
     }));
   } catch (error) {
-    console.error('Error fetching from Open Library:', error);
+    console.error('Error fetching from Open Library Subjects:', error);
     return [];
   }
 }
