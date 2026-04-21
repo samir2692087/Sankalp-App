@@ -78,8 +78,8 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="bottom" className="h-[90vh] max-h-[90vh] rounded-t-[3rem] p-0 border-t border-slate-200 bg-white/95 backdrop-blur-md outline-none flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
         <div className="sr-only">
-          <SheetTitle>Behavioral Hub</SheetTitle>
-          <SheetDescription>High-precision tracking and mastery logs.</SheetDescription>
+          <SheetTitle>Mastery Hub</SheetTitle>
+          <SheetDescription>Personal tracking and focus logs.</SheetDescription>
         </div>
 
         <div className="w-12 h-1 bg-slate-300 rounded-full mx-auto mt-4 shrink-0" />
@@ -100,8 +100,8 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                       <LayoutGrid size={20} />
                     </div>
                     <div className="flex flex-col">
-                      <h2 className="text-xl font-bold text-slate-900 tracking-tight">Behavioral Hub</h2>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Neural History Protocol</span>
+                      <h2 className="text-xl font-bold text-slate-900 tracking-tight">Mastery Hub</h2>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Personal History</span>
                     </div>
                   </div>
                   <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full h-10 w-10 hover:bg-slate-100 text-slate-600">
@@ -109,7 +109,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                   </Button>
                 </div>
 
-                <div className="bg-white border border-slate-200 shadow-xl shadow-slate-200/50 p-6 rounded-[2rem] w-full max-w-sm flex flex-col items-center relative">
+                <div className="bg-white border border-slate-200 shadow-xl shadow-slate-200/50 p-6 rounded-[2rem] w-full max-sm flex flex-col items-center relative">
                   <Calendar 
                     mode="multiple" 
                     selected={checkInDates}
@@ -189,7 +189,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                       <StickyNote size={20} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-black uppercase text-indigo-400">Neural Reflection</span>
+                      <span className="text-[9px] font-black uppercase text-indigo-400">Reflection</span>
                       <span className="text-lg font-bold text-slate-900">{selectedDate ? format(selectedDate, "MMM do, yyyy") : ''}</span>
                     </div>
                   </div>
@@ -201,7 +201,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                 <Textarea 
                   value={currentNote}
                   onChange={(e) => setCurrentNote(e.target.value)}
-                  placeholder="Record triggers, neural victories, or key lessons..."
+                  placeholder="Record your thoughts, victories, or lessons..."
                   className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl p-6 resize-none mb-6 text-slate-800 focus-visible:ring-indigo-500/20"
                 />
 
@@ -235,7 +235,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
               </div>
               <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-red-500 text-white shadow-lg shadow-red-100">
                 <AlertCircle size={14} />
-                <span className="text-[9px] font-black uppercase tracking-widest">Relapse</span>
+                <span className="text-[9px] font-black uppercase tracking-widest">Reset</span>
               </div>
               <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-100">
                 <Zap size={14} />

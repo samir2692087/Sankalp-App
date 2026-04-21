@@ -7,12 +7,12 @@ import { Shield, CheckCircle2, Cpu, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const BOOT_MESSAGES = [
-  { text: "Initializing Neural Core...", phase: 0 },
-  { text: "Scanning Environment Integrity...", phase: 20 },
-  { text: "Stabilizing Focus Systems...", phase: 45 },
-  { text: "Activating Discipline Engine...", phase: 70 },
-  { text: "Neural Link Established.", phase: 90 },
-  { text: "System Ready.", phase: 100 }
+  { text: "Setting up your focus...", phase: 0 },
+  { text: "Grounding your environment...", phase: 20 },
+  { text: "Stabilizing inner clarity...", phase: 45 },
+  { text: "Finding your rhythm...", phase: 70 },
+  { text: "Ready for today.", phase: 90 },
+  { text: "You're in control.", phase: 100 }
 ];
 
 // Spring config for physics-driven feel

@@ -111,7 +111,7 @@ export default function StreakDisplay({ current, best, focusMode, freezes, onUse
                 mode === 'risk' ? "text-red-500" : "text-white/40"
               )}
             >
-              {mode === 'risk' ? 'Protocol Alert' : 'Neural Mastery'}
+              {mode === 'risk' ? 'Stay aware' : 'Discipline streak'}
             </motion.span>
             <motion.h2 
               key={current}
@@ -154,7 +154,7 @@ export default function StreakDisplay({ current, best, focusMode, freezes, onUse
           >
              <Trophy size={18} className="text-yellow-400" />
              <div className="flex flex-col">
-                <span className="text-white/20 text-[8px] font-black uppercase tracking-widest leading-none mb-1">Peak Protocol</span>
+                <span className="text-white/20 text-[8px] font-black uppercase tracking-widest leading-none mb-1">Personal Best</span>
                 <span className="text-white font-bold text-sm">{best} Days</span>
              </div>
           </motion.div>
@@ -174,7 +174,7 @@ export default function StreakDisplay({ current, best, focusMode, freezes, onUse
           >
              <Snowflake size={18} className={cn("text-blue-400", freezes > 0 && "animate-spin-slow")} />
              <div className="flex flex-col text-left">
-                <span className="text-white/20 text-[8px] font-black uppercase tracking-widest leading-none mb-1">Cryo Locks</span>
+                <span className="text-white/20 text-[8px] font-black uppercase tracking-widest leading-none mb-1">Pauses left</span>
                 <span className="text-white font-bold text-sm">{freezes} Available</span>
              </div>
           </motion.button>

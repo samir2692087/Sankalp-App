@@ -113,7 +113,7 @@ export default function IronWillDashboard() {
     };
     updateState(newData);
     handleCloseModal(setShowRelapseModal);
-    toast({ title: "Neural Protocol Reset", description: "Day One. Stay focused." });
+    toast({ title: "Focus reset", description: "Day one. Stay grounded." });
   };
 
   const handleUrgeSubmit = (intensity: UrgeIntensity) => {
@@ -127,7 +127,7 @@ export default function IronWillDashboard() {
     };
     updateState(newData);
     handleCloseModal(setShowUrgeModal);
-    toast({ title: "Victory Confirmed", description: "You are mastering your mind." });
+    toast({ title: "Stayed firm", description: "You are in control." });
   };
 
   const insights = useMemo(() => getBehavioralInsights(data), [data]);
@@ -182,7 +182,7 @@ export default function IronWillDashboard() {
               }}
               onReset={() => { 
                 feedback.warning();
-                if(confirm("Wipe all neural mastery data?")) { clearData(); setData(INITIAL_DATA); } 
+                if(confirm("Erase all your progress?")) { clearData(); setData(INITIAL_DATA); } 
               }}
               onToggleFocus={() => {
                 feedback.tap();
@@ -218,7 +218,7 @@ export default function IronWillDashboard() {
                         triggerPulse(0.5);
                         recordInteraction('freeze');
                         updateState({ ...data, streakFreezes: data.streakFreezes - 1 });
-                        toast({ title: "Freeze Activated", description: "Integrity preserved." });
+                        toast({ title: "Pause used", description: "Clarity maintained." });
                       }
                     }}
                   />
@@ -233,16 +233,16 @@ export default function IronWillDashboard() {
                 >
                   <div className="flex items-center gap-3 text-red-500">
                     <AlertCircle size={24} className="animate-pulse" />
-                    <h3 className="font-bold uppercase tracking-widest text-sm">Instability Detected</h3>
+                    <h3 className="font-bold uppercase tracking-widest text-sm">Stay aware</h3>
                   </div>
                   <p className="text-xs text-white/60 leading-relaxed font-medium">
-                    You've recorded multiple urges recently. Your neural resilience is under pressure. Switch to focus mode or use the emergency protocol.
+                    You've noted a few urges lately. Take a breath, stay sharp, and return to focus.
                   </p>
                   <Button 
                     onClick={() => handleOpenModal(setShowEmergencyModal)}
                     className="w-full bg-red-500 hover:bg-red-600 text-white font-bold h-12 rounded-xl"
                   >
-                    Deploy Emergency Protocol
+                    Breathe and reset
                   </Button>
                 </motion.div>
               )}
@@ -269,8 +269,8 @@ export default function IronWillDashboard() {
                           <Globe size={24} />
                         </div>
                         <div className="text-left">
-                          <p className="text-white font-bold text-base">Neural Portal</p>
-                          <p className="text-white/20 text-[9px] uppercase font-black tracking-[0.2em]">Guardian Protected</p>
+                          <p className="text-white font-bold text-base">Safe Browser</p>
+                          <p className="text-white/20 text-[9px] uppercase font-black tracking-[0.2em]">Always protected</p>
                         </div>
                       </div>
                       <ArrowRight size={18} className="text-white/20 group-hover:text-primary transition-colors" />
@@ -290,7 +290,7 @@ export default function IronWillDashboard() {
                       ...data, 
                       checkIns: [{ date: today, timestamp: Date.now() }, ...(Array.isArray(data.checkIns) ? data.checkIns : [])] 
                     });
-                    toast({ title: "Protocol Marked Clean", description: "Consistency is power." });
+                    toast({ title: "Checked in", description: "Consistency is strength." });
                   }
                 }} 
                 onUrge={() => handleOpenModal(setShowUrgeModal)} 
@@ -321,7 +321,7 @@ export default function IronWillDashboard() {
                       transition={springConfig}
                       className="glass-card p-8 rounded-[3rem] bg-card/20 border-white/5 perspective-1000"
                     >
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 opacity-60">Neural Task</h4>
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 opacity-60">Focus Task</h4>
                       <p className="text-lg font-bold leading-relaxed text-foreground/90">{challenge}</p>
                     </motion.div>
                   </Draggable>

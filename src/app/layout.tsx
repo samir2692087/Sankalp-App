@@ -4,8 +4,8 @@ import './globals.css';
 import { InteractionProvider } from '@/context/InteractionContext';
 
 export const metadata: Metadata = {
-  title: 'IronWill | Discipline Monitor Pro',
-  description: 'Track your streak, resist urges, and master your discipline with IronWill.',
+  title: 'IronWill | Your Path to Discipline',
+  description: 'Track your streak, resist urges, and master your focus with IronWill.',
 };
 
 export default function RootLayout({

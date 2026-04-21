@@ -51,8 +51,8 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
           >
             <ShieldAlert size={40} className="text-white" />
           </motion.div>
-          <DialogTitle className="text-3xl font-bold font-headline mb-2 text-red-500">Neural Shutdown</DialogTitle>
-          <DialogDescription className="font-bold text-red-500/60 uppercase tracking-[0.2em] text-[9px]">Emergency Protocol Active</DialogDescription>
+          <DialogTitle className="text-3xl font-bold font-headline mb-2 text-red-500">Emergency Calm</DialogTitle>
+          <DialogDescription className="font-bold text-red-500/60 uppercase tracking-[0.2em] text-[9px]">Pause and reflect</DialogDescription>
         </div>
 
         <div className="p-8 space-y-8 overflow-y-auto no-scrollbar pb-24">
@@ -60,24 +60,24 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
             <div className="flex items-center gap-3 text-red-500 font-black text-5xl font-headline tabular-nums">
               <Timer size={32} /> {Math.floor(seconds / 60)}:{(seconds % 60).toString().padStart(2, '0')}
             </div>
-            <p className="text-sm font-medium text-red-300 italic opacity-80">"Urges are temporary signals. Stay in the observer role."</p>
+            <p className="text-sm font-medium text-red-300 italic opacity-80">"Urges are temporary signals. You are the observer."</p>
             <AnimatePresence mode="wait">
               {!isActive ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <Button onClick={() => setIsActive(true)} className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl h-14 px-10 shadow-lg shadow-red-600/20">
-                    Deploy Pattern Interrupt
+                    Take a breath
                   </Button>
                 </motion.div>
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-red-400 font-bold uppercase text-[10px]">
-                  <Shield size={14} className="animate-pulse" /> Protocol in progress
+                  <Shield size={14} className="animate-pulse" /> Focus active
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Rapid Pattern Breaks</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Quick ways to reset</h4>
             {protocols.map((p) => (
               <motion.div 
                 whileHover={{ scale: 1.02, x: 5 }}
@@ -96,7 +96,7 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
           </div>
 
           <Button variant="ghost" onClick={onClose} className="w-full h-16 rounded-2xl font-bold uppercase tracking-widest text-[10px] border border-dashed border-red-500/30 text-red-500/70 hover:bg-red-500/5">
-            Victory Confirmed: Protocol Complete
+            Done: Control regained
           </Button>
         </div>
       </DialogContent>

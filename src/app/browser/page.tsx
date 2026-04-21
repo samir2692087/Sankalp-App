@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -45,7 +44,6 @@ export default function DisciplineBrowserPage() {
   const [inputUrl, setInputUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   
-  // Launch state
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
   const [riskAssessment, setRiskAssessment] = useState<any>(null);
   const [showWarning, setShowWarning] = useState(false);
@@ -61,7 +59,6 @@ export default function DisciplineBrowserPage() {
 
     setIsAnalyzing(true);
     
-    // Intelligent Routing
     const isProbablyUrl = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(scrubbedInput) && !scrubbedInput.includes(' ');
     let finalUrl = '';
     if (isProbablyUrl) {
@@ -70,7 +67,6 @@ export default function DisciplineBrowserPage() {
       finalUrl = `https://www.google.com/search?q=${encodeURIComponent(scrubbedInput)}&safe=active`;
     }
 
-    // Pre-flight content assessment
     const assessment = assessContentSafety(finalUrl, streak);
     
     setTimeout(() => {
@@ -107,7 +103,6 @@ export default function DisciplineBrowserPage() {
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#07070a] overflow-hidden text-white selection:bg-primary/30">
-      {/* Search Header */}
       <div className="bg-[#0b0b0f]/95 backdrop-blur-3xl border-b border-white/5 p-4 flex flex-col gap-3 shrink-0 z-50">
         <div className="flex items-center gap-4">
           <Button 
@@ -140,7 +135,7 @@ export default function DisciplineBrowserPage() {
 
           <div className="flex items-center gap-3">
              <div className="hidden sm:flex flex-col items-end mr-2">
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/20 mb-1">Neural Shield</span>
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/20 mb-1">Protection</span>
                 <div className="w-16 h-1 bg-green-500/20 rounded-full overflow-hidden">
                   <div className="w-full h-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
                 </div>
@@ -152,9 +147,7 @@ export default function DisciplineBrowserPage() {
         </div>
       </div>
 
-      {/* Main Dashboard View */}
       <div className="flex-1 relative overflow-y-auto no-scrollbar p-6 sm:p-12 flex flex-col items-center">
-        {/* Animated Grid Background */}
         <div className="absolute inset-0 -z-10 opacity-20 pointer-events-none" 
              style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
@@ -165,7 +158,7 @@ export default function DisciplineBrowserPage() {
         >
           <div className="text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary mb-4">
-              <Sparkles size={12} /> Neural Launchpad Active
+              <Sparkles size={12} /> Focus Launchpad Active
             </div>
             <h2 className="text-4xl sm:text-5xl font-bold font-headline leading-tight">
               Browse with <span className="text-primary">Intent.</span>
@@ -175,7 +168,6 @@ export default function DisciplineBrowserPage() {
             </p>
           </div>
 
-          {/* Quick Access Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
             {QUICK_ACCESS.map((item, idx) => (
               <motion.button
@@ -198,14 +190,13 @@ export default function DisciplineBrowserPage() {
             ))}
           </div>
 
-          {/* Status HUD Card */}
           <div className="w-full glass-card p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.02] flex flex-col sm:flex-row items-center gap-8">
             <div className="w-24 h-24 rounded-full border-4 border-primary/20 flex items-center justify-center relative">
                <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin-slow" />
                <Zap size={32} className="text-primary drop-shadow-[0_0_10px_rgba(124,58,237,0.5)]" />
             </div>
             <div className="flex-1 text-center sm:text-left">
-              <h3 className="text-xl font-bold mb-2">Neural Synchronization High</h3>
+              <h3 className="text-xl font-bold mb-2">Focus Stability High</h3>
               <p className="text-sm text-white/40 font-medium leading-relaxed">
                 You are currently browsing under Level {Math.floor(streak / 7)} protection. Distraction patterns are monitored in real-time.
               </p>
@@ -225,7 +216,6 @@ export default function DisciplineBrowserPage() {
         </motion.div>
       </div>
 
-      {/* Protocol Warning Modal */}
       <AnimatePresence>
         {showWarning && (
           <motion.div 
@@ -286,18 +276,17 @@ export default function DisciplineBrowserPage() {
         )}
       </AnimatePresence>
 
-      {/* Analytics Footer */}
       <div className="bg-[#0b0b0f] border-t border-white/5 px-8 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-6">
            <div className="flex items-center gap-2 text-[9px] font-bold text-white/20 uppercase tracking-widest">
-             <div className="w-1.5 h-1.5 rounded-full bg-green-500" /> Neural Link Secure
+             <div className="w-1.5 h-1.5 rounded-full bg-green-500" /> Secure Connection
            </div>
            <div className="flex items-center gap-2 text-[9px] font-bold text-white/20 uppercase tracking-widest">
-             <Globe size={12} className="text-primary/50" /> VPN Tunnel Active
+             <Globe size={12} className="text-primary/50" /> Focus VPN Active
            </div>
         </div>
         <div className="text-[9px] font-black uppercase text-white/10 tracking-widest">
-          Guardian Engine v3.5 Stable
+          Guardian Stable
         </div>
       </div>
     </div>

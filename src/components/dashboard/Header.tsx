@@ -88,7 +88,7 @@ export default function Header({
             </div>
             <div className="flex flex-col">
               <h1 className="text-white font-black text-2xl leading-none tracking-tighter">IronWill</h1>
-              <span className="text-white/30 font-black uppercase tracking-[0.3em] text-[8px]">Neural Interface v2.5</span>
+              <span className="text-white/30 font-black uppercase tracking-[0.3em] text-[8px]">Growth Track v2.5</span>
             </div>
           </motion.div>
         </Magnetic>
@@ -105,16 +105,16 @@ export default function Header({
           </Magnetic>
           <DialogContent className="max-w-[440px] glass-card border-white/10 p-0 outline-none overflow-hidden rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.8)]">
             <div className="bg-white/[0.02] p-10 text-center border-b border-white/5">
-              <DialogTitle className="text-2xl font-black text-white tracking-tight">System Core</DialogTitle>
-              <DialogDescription className="text-white/30 font-black uppercase tracking-[0.25em] text-[9px] mt-1">Calibration Protocols</DialogDescription>
+              <DialogTitle className="text-2xl font-black text-white tracking-tight">Settings</DialogTitle>
+              <DialogDescription className="text-white/30 font-black uppercase tracking-[0.25em] text-[9px] mt-1">Refine your path</DialogDescription>
             </div>
 
             <div className="p-8 space-y-3">
               {[
-                { label: 'Visual Persona', sub: 'Theme Calibration', icon: Palette, color: 'bg-purple-500/20 text-purple-400', action: () => { setIsThemeSheetOpen(true); setIsSettingsOpen(false); } },
-                { label: 'Neural Alerts', sub: 'Reminder Sync', icon: Bell, color: 'bg-blue-500/20 text-blue-400', action: () => { setIsReminderOpen(true); setIsSettingsOpen(false); } },
-                { label: 'Archive Matrix', sub: 'Data Management', icon: Database, color: 'bg-slate-500/20 text-slate-400', action: () => { onShowExport(); setIsSettingsOpen(false); } },
-                { label: 'Focus Flow', sub: focusMode ? 'Active' : 'Standby', icon: Zap, color: 'bg-yellow-500/20 text-yellow-400', action: () => { onToggleFocus(); setIsSettingsOpen(false); }, isToggle: true },
+                { label: 'Appearance', sub: 'Change your view', icon: Palette, color: 'bg-purple-500/20 text-purple-400', action: () => { setIsThemeSheetOpen(true); setIsSettingsOpen(false); } },
+                { label: 'Reminders', sub: 'Stay on track', icon: Bell, color: 'bg-blue-500/20 text-blue-400', action: () => { setIsReminderOpen(true); setIsSettingsOpen(false); } },
+                { label: 'Data Archive', sub: 'Manage your history', icon: Database, color: 'bg-slate-500/20 text-slate-400', action: () => { onShowExport(); setIsSettingsOpen(false); } },
+                { label: 'Focus Mode', sub: focusMode ? 'Active' : 'Off', icon: Zap, color: 'bg-yellow-500/20 text-yellow-400', action: () => { onToggleFocus(); setIsSettingsOpen(false); }, isToggle: true },
               ].map((item, idx) => (
                 <motion.div 
                   key={item.label}
@@ -159,8 +159,8 @@ export default function Header({
                     <Trash2 size={22} />
                   </div>
                   <div className="text-left flex-1">
-                    <p className="font-bold text-sm">Purge Core</p>
-                    <p className="text-red-500/30 text-[9px] uppercase font-black tracking-widest">Irreversible Reset</p>
+                    <p className="font-bold text-sm">Clear progress</p>
+                    <p className="text-red-500/30 text-[9px] uppercase font-black tracking-widest">Start from scratch</p>
                   </div>
                 </Button>
               </motion.div>
@@ -172,8 +172,8 @@ export default function Header({
       <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-[4rem] bg-[#07070a]/95 backdrop-blur-3xl border-white/10 p-10 pb-16 outline-none">
           <SheetHeader className="mb-10">
-            <SheetTitle className="text-white font-black text-3xl text-center tracking-tighter">Neural Skin</SheetTitle>
-            <SheetDescription className="text-white/30 text-center uppercase tracking-[0.3em] text-[10px] font-black">Environmental Aesthetic calibration</SheetDescription>
+            <SheetTitle className="text-white font-black text-3xl text-center tracking-tighter">Choose your view</SheetTitle>
+            <SheetDescription className="text-white/30 text-center uppercase tracking-[0.3em] text-[10px] font-black">Find the style that fits you</SheetDescription>
           </SheetHeader>
           <div className="grid grid-cols-2 gap-5 max-w-xl mx-auto">
             {themes.map((t) => (

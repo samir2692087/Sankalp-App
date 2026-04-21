@@ -32,9 +32,9 @@ export function getBehavioralInsights(data: UserData) {
     mostCommonTrigger: "Consistent data required",
     highRiskWindow: "N/A",
     winRate: 100,
-    resilienceLevel: 'Steel',
+    resilienceLevel: 'Steady',
     riskLevel: 'STABLE' as const,
-    protectionMessage: "Neural paths stabilizing. Keep focus."
+    protectionMessage: "Staying focused. Keep going."
   };
 
   if (!data) return defaultInsights;
@@ -76,11 +76,11 @@ export function getBehavioralInsights(data: UserData) {
     mostCommonTrigger, 
     highRiskWindow,
     winRate,
-    resilienceLevel: winRate > 85 ? 'Fortress' : winRate > 60 ? 'Steel' : 'Vulnerable',
+    resilienceLevel: winRate > 85 ? 'Fortress' : winRate > 60 ? 'Steady' : 'Vulnerable',
     riskLevel,
-    protectionMessage: riskLevel === 'CRITICAL' ? "High relapse risk detected. Deploy Emergency Protocol." :
-                       riskLevel === 'ELEVATED' ? "Pattern of urges noted. Stay vigilant." :
-                       "Neural paths stabilizing. Keep focus."
+    protectionMessage: riskLevel === 'CRITICAL' ? "Take a moment to reset. Reach out for support." :
+                       riskLevel === 'ELEVATED' ? "Stay sharp. Temptation is high." :
+                       "Staying focused. Keep going."
   };
 }
 
@@ -126,33 +126,33 @@ export function getAchievements(streak: number, score: number) {
   const s = typeof streak === 'number' && !isNaN(streak) ? streak : 0;
   const sc = typeof score === 'number' && !isNaN(score) ? score : 0;
   return [
-    { id: '1', name: 'Initiate', desc: 'First 24 hours clean', unlocked: s >= 1 },
-    { id: '2', name: 'Warrior', desc: '7 Day Streak reached', unlocked: s >= 7 },
-    { id: '3', name: 'Steel Mind', desc: '30 Day Mastery', unlocked: s >= 30 },
-    { id: '4', name: 'Iron Will', desc: '90 Day Ascension', unlocked: s >= 90 },
-    { id: '5', name: 'Fortress', desc: 'Maintain Score > 90', unlocked: sc >= 90 },
+    { id: '1', name: 'Starting', desc: 'First 24 hours in control', unlocked: s >= 1 },
+    { id: '2', name: 'Steady', desc: '7 Day streak reached', unlocked: s >= 7 },
+    { id: '3', name: 'Clear Mind', desc: '30 Day mastery', unlocked: s >= 30 },
+    { id: '4', name: 'Iron Will', desc: '90 Day path complete', unlocked: s >= 90 },
+    { id: '5', name: 'Grounded', desc: 'Inner Strength > 90', unlocked: sc >= 90 },
   ];
 }
 
 export function getDailyChallenge(streak: number) {
   const s = typeof streak === 'number' && !isNaN(streak) ? streak : 0;
   const lowStreak = [
-    "Identify one trigger and remove it.",
-    "Do 10 pushups when an urge hits.",
+    "Identify one distraction and remove it.",
+    "Do 10 pushups if you feel restless.",
     "Drink a glass of cold water now.",
     "Write 1 goal for tomorrow."
   ];
   const midStreak = [
-    "Meditate for 10 minutes.",
-    "Take a 2-minute cold shower.",
-    "No social media for 2 hours.",
-    "Read 10 pages of self-improvement."
+    "Reflect quietly for 10 minutes.",
+    "Take a quick 2-minute cold shower.",
+    "Unplug for 2 hours.",
+    "Read 10 pages for growth."
   ];
   const highStreak = [
-    "Complete a 24-hour dopamine fast.",
-    "Run 3 miles for mental clarity.",
-    "Mentor someone else in discipline.",
-    "Reflect on your 90-day transformation."
+    "Complete a 24-hour focus fast.",
+    "Go for a run for clarity.",
+    "Help someone else stay disciplined.",
+    "Reflect on your 90-day growth."
   ];
 
   const pool = s >= 90 ? highStreak : s >= 30 ? midStreak : lowStreak;

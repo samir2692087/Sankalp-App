@@ -72,8 +72,8 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
           >
             <Zap size={36} className="text-white fill-white animate-pulse" />
           </motion.div>
-          <DialogTitle className="text-2xl font-bold font-headline text-white mb-1 relative z-10">Neural Victory</DialogTitle>
-          <DialogDescription className="text-white/40 font-black uppercase tracking-[0.3em] text-[8px] relative z-10">Pattern Fortification Log</DialogDescription>
+          <DialogTitle className="text-2xl font-bold font-headline text-white mb-1 relative z-10">Victory</DialogTitle>
+          <DialogDescription className="text-white/40 font-black uppercase tracking-[0.3em] text-[8px] relative z-10">Building strength</DialogDescription>
         </div>
 
         <div className="flex-1 overflow-y-auto bg-[#0b0b0f] p-10 space-y-12 no-scrollbar pb-36">
@@ -105,9 +105,9 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
             
             <div className="w-full space-y-8 px-4">
               <div className="flex justify-between px-2 text-[9px] uppercase font-black tracking-[0.3em] text-white/40">
-                <span>Minimal</span>
-                <span>Moderate</span>
-                <span>Critical</span>
+                <span>Low</span>
+                <span>Medium</span>
+                <span>High</span>
               </div>
               <Slider 
                 value={val} 
@@ -117,7 +117,7 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
                 className="py-6"
               />
               <p className="text-center text-[10px] font-bold uppercase tracking-[0.2em] text-white/30 italic">
-                Adjust slider based on neural pressure level
+                How strong was the urge?
               </p>
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
             className="w-full h-18 rounded-[2rem] font-black uppercase tracking-[0.25em] bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] hover:bg-right transition-all duration-700 text-white text-xs shadow-2xl flex items-center justify-center gap-3"
             onClick={() => onSubmit(intensity)}
           >
-            <Sparkles size={18} /> Confirm Fortification
+            <Sparkles size={18} /> Confirm victory
           </motion.button>
         </div>
       </DialogContent>

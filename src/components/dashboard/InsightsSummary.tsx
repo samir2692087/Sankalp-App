@@ -50,7 +50,7 @@ export default function InsightsSummary({
       <div className="flex items-center justify-between mb-6">
         <div className="flex flex-col gap-1">
           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 flex items-center gap-2">
-            <TrendingUp size={14} className="text-primary" /> Neural Integrity
+            <TrendingUp size={14} className="text-primary" /> Inner Clarity
           </h3>
           <span className={cn(
             "text-4xl font-black text-white",
@@ -81,8 +81,8 @@ export default function InsightsSummary({
           />
         </div>
         <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-[0.2em] text-white/20">
-           <span>Neural Paths Stable</span>
-           <span>90 Day Target</span>
+           <span>Focus is steady</span>
+           <span>90 Day Path</span>
         </div>
       </div>
 
