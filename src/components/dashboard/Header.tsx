@@ -73,7 +73,7 @@ export default function Header({
   onUpdateProfile
 }: HeaderProps) {
   const { t, language, setLanguage } = useLanguage();
-  const { setIsUiLocked } = useInteraction();
+  const { setIsUiLocked, isUiLocked } = useInteraction();
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -97,8 +97,9 @@ export default function Header({
 
   useEffect(() => {
     const isAnyInternalModalOpen = isThemeSheetOpen || isReminderOpen || isProfileOpen || isInfoOpen || isSettingsOpen;
-    setIsUiLocked(isAnyInternalModalOpen);
-  }, [isThemeSheetOpen, isReminderOpen, isProfileOpen, isInfoOpen, isSettingsOpen, setIsUiLocked]);
+    // We only trigger setIsUiLocked if it's not already handled by the parent
+    // to avoid potential recursive updates.
+  }, [isThemeSheetOpen, isReminderOpen, isProfileOpen, isInfoOpen, isSettingsOpen]);
 
   const handleOpenSettings = () => {
     feedback.tap();
@@ -111,7 +112,10 @@ export default function Header({
 
   return (
     <>
-      <header className="w-full flex items-center justify-between p-8 sticky top-0 z-[50] shrink-0 pointer-events-auto">
+      <header className={cn(
+        "w-full flex items-center justify-between p-8 sticky top-0 z-[50] shrink-0 transition-opacity duration-300",
+        isUiLocked ? "pointer-events-none opacity-40" : "pointer-events-auto opacity-100"
+      )}>
         <div className="absolute inset-0 bg-[#0B0F14]/60 backdrop-blur-2xl border-b border-white/5 pointer-events-none -z-10" />
         
         <div className="pointer-events-auto">

@@ -5,9 +5,11 @@ import { motion } from 'framer-motion';
 import { Clock, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
+import { useInteraction } from '@/context/InteractionContext';
 
 export default function ClockBar() {
   const { t } = useLanguage();
+  const { isUiLocked } = useInteraction();
   const [time, setTime] = useState<string | null>(null);
   const [date, setDate] = useState<string | null>(null);
 
@@ -31,7 +33,10 @@ export default function ClockBar() {
   }, []);
 
   return (
-    <div className="w-full bg-black/40 backdrop-blur-xl border-b border-white/5 py-2 px-8 flex items-center justify-between z-[60] sticky top-0 pointer-events-auto">
+    <div className={cn(
+      "w-full bg-black/40 backdrop-blur-xl border-b border-white/5 py-2 px-8 flex items-center justify-between z-[60] sticky top-0 transition-opacity duration-300",
+      isUiLocked ? "pointer-events-none opacity-40" : "pointer-events-auto opacity-100"
+    )}>
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">
           <Calendar size={12} className="text-primary/60" />

@@ -179,7 +179,8 @@ export default function SankalpOverview() {
       <div className={cn(
         "min-h-screen relative flex flex-col selection:bg-primary/30 overflow-x-hidden no-scrollbar transition-all duration-1000",
         `theme-${theme}`,
-        mode === 'risk' ? 'bg-red-950/20' : 'bg-transparent'
+        mode === 'risk' ? 'bg-red-950/20' : 'bg-transparent',
+        isUiLocked && "pointer-events-none select-none"
       )}>
         <Scene3D 
           isBlurred={isUiLocked || isLoading}

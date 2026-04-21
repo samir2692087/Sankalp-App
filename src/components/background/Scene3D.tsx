@@ -102,7 +102,9 @@ function StarField({ scrollVelocity, theme }: { scrollVelocity: number, theme: A
   const starOpacity = theme === 'light' ? 0.1 : 1;
 
   useFrame(() => {
-    ref.current.rotation.y += 0.0002 + Math.abs(scrollVelocity) * 0.002;
+    if (ref.current) {
+      ref.current.rotation.y += 0.0002 + Math.abs(scrollVelocity) * 0.002;
+    }
   });
   return (
     <group ref={ref}>
@@ -120,6 +122,7 @@ function StarField({ scrollVelocity, theme }: { scrollVelocity: number, theme: A
 }
 
 export default function Scene3D({ isBlurred, theme }: { isBlurred?: boolean, theme: AppTheme }) {
+  const { isUiLocked } = useInteraction();
   const [mounted, setMounted] = useState(false);
   const [scroll, setScroll] = useState({ velocity: 0 });
   const lastScrollY = useRef(0);
@@ -127,6 +130,7 @@ export default function Scene3D({ isBlurred, theme }: { isBlurred?: boolean, the
   useEffect(() => {
     setMounted(true);
     const handleScroll = () => {
+      if (isUiLocked) return;
       const currentY = window.scrollY;
       const vel = (currentY - lastScrollY.current) * 0.02;
       setScroll({ velocity: vel });
@@ -134,7 +138,7 @@ export default function Scene3D({ isBlurred, theme }: { isBlurred?: boolean, the
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isUiLocked]);
 
   // Friction effect for scroll velocity
   useEffect(() => {
@@ -158,7 +162,7 @@ export default function Scene3D({ isBlurred, theme }: { isBlurred?: boolean, the
   return (
     <div className={cn(
       "fixed inset-0 -z-10 transition-all duration-1000",
-      isBlurred ? 'opacity-40 blur-sm' : 'opacity-100'
+      isBlurred ? 'opacity-40 blur-sm pointer-events-none' : 'opacity-100'
     )} style={{ backgroundColor: getBgColor() }}>
       {/* Vignette Overlay for depth */}
       <div className={cn(
@@ -169,7 +173,7 @@ export default function Scene3D({ isBlurred, theme }: { isBlurred?: boolean, the
       <Canvas 
         gl={{ antialias: true, stencil: false, powerPreference: 'high-performance' }}
         dpr={[1, 2]}
-        className="cursor-move"
+        className={cn(isUiLocked ? "pointer-events-none" : "cursor-move")}
       >
         <PerspectiveCamera makeDefault fov={50} position={[0, 15, 30]} />
         <OrbitControls 
@@ -178,6 +182,7 @@ export default function Scene3D({ isBlurred, theme }: { isBlurred?: boolean, the
           minDistance={10} 
           maxDistance={60}
           maxPolarAngle={Math.PI / 1.8}
+          enabled={!isUiLocked}
         />
         
         <ambientLight intensity={theme === 'light' ? 0.5 : 0.1} />
