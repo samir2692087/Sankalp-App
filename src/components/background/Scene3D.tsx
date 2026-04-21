@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useRef, useMemo, useEffect, useState, Suspense } from 'react';
@@ -172,7 +173,7 @@ export default function Scene3D({ isBlurred }: SceneProps) {
 
   return (
     <div className={`fixed inset-0 -z-10 pointer-events-none bg-[#05070a] transition-all duration-1000 ${isBlurred ? 'blur-2xl scale-110' : ''}`}>
-      <Canvas gl={{ antialias: true, stencil: false }}>
+      <Canvas gl={{ antialias: true, stencil: true }}>
         <CameraRig />
         <ambientLight intensity={0.1} />
         
@@ -180,21 +181,20 @@ export default function Scene3D({ isBlurred }: SceneProps) {
           <EnergyCore intensity={intensity} mode={mode} />
           <NeuralParticles intensity={intensity} />
           <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
-          
-          <EffectComposer multisampling={0} disableNormalPass>
-            <Bloom 
-              luminanceThreshold={0.2} 
-              mipmapBlur 
-              intensity={1.2 + intensity * 4} 
-              radius={0.5} 
-            />
-            <Noise opacity={0.04} />
-            <Vignette offset={0.1} darkness={1.2} />
-            <ChromaticAberration offset={chromaticOffset} />
-          </EffectComposer>
-          
           <Environment preset="night" />
         </Suspense>
+
+        <EffectComposer multisampling={0} disableNormalPass>
+          <Bloom 
+            luminanceThreshold={0.2} 
+            mipmapBlur 
+            intensity={1.2 + intensity * 4} 
+            radius={0.5} 
+          />
+          <Noise opacity={0.04} />
+          <Vignette offset={0.1} darkness={1.2} />
+          <ChromaticAberration offset={chromaticOffset} />
+        </EffectComposer>
       </Canvas>
     </div>
   );
