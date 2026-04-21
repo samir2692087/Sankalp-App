@@ -7,35 +7,29 @@ import {
   PerspectiveCamera, 
   Stars, 
   Environment,
-  shaderMaterial,
-  Line
+  shaderMaterial
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { useInteraction } from '@/context/InteractionContext';
 import { cn } from '@/lib/utils';
 
-// --- ASTRONOMICAL DATA (Orbital Periods in Earth Days) ---
+// --- ASTRO-PHYSICS DATA ---
 const PLANET_DATA = [
-  { name: 'Mercury', color: '#888888', orbitRadius: 4.5, period: 87.97, size: 0.08 },
-  { name: 'Venus', color: '#e3bb76', orbitRadius: 6.5, period: 224.7, size: 0.15 },
-  { name: 'Earth', color: '#2271b3', orbitRadius: 8.5, period: 365.26, size: 0.16 },
-  { name: 'Mars', color: '#e27b58', orbitRadius: 10.5, period: 686.98, size: 0.12 },
-  { name: 'Jupiter', color: '#d39c7e', orbitRadius: 14.5, period: 4332.59, size: 0.45 },
-  { name: 'Saturn', color: '#c5ab6e', orbitRadius: 18.5, period: 10759.22, size: 0.38 },
+  { name: 'Inner Strength', color: '#ff22aa', a: 4.2, b: 3.8, baseSpeed: 0.8, size: 0.12, tilt: 0.2, spin: 0.02 },
+  { name: 'Discipline', color: '#7c3aed', a: 6.5, b: 5.8, baseSpeed: 0.5, size: 0.18, tilt: 0.4, spin: 0.01 },
+  { name: 'Clarity', color: '#22d3ee', a: 9.0, b: 8.2, baseSpeed: 0.35, size: 0.15, tilt: 0.1, spin: 0.015 },
+  { name: 'Fortitude', color: '#f59e0b', a: 12.5, b: 11.0, baseSpeed: 0.2, size: 0.25, tilt: 0.3, spin: 0.005 },
+  { name: 'Persistence', color: '#ef4444', a: 16.0, b: 14.5, baseSpeed: 0.12, size: 0.3, tilt: 0.5, spin: 0.003 },
 ];
 
-// Speed multiplier: 1 second in app = ~11.5 days in reality
-const TIME_MULTIPLIER = 1000000; 
-
-// --- SHADER DEFINITION: CLARITY ENERGY ---
-
-const ClarityMaterial = shaderMaterial(
+// --- SHADER DEFINITION: LIVING ENERGY CORE ---
+const LivingCoreMaterial = shaderMaterial(
   {
     uTime: 0,
-    uColor: new THREE.Color('#7c3aed'),
+    uColorA: new THREE.Color('#a855f7'),
+    uColorB: new THREE.Color('#ec4899'),
     uIntensity: 0,
-    uMode: 0, // 0: calm, 1: active, 2: focus, 3: risk
-    uScrollVelocity: 0,
+    uMode: 0,
   },
   // Vertex Shader
   `
@@ -44,7 +38,6 @@ const ClarityMaterial = shaderMaterial(
   varying vec3 vPosition;
   uniform float uTime;
   uniform float uIntensity;
-  uniform float uScrollVelocity;
 
   // Simplex 3D Noise 
   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -98,12 +91,10 @@ const ClarityMaterial = shaderMaterial(
     vUv = uv;
     vNormal = normalize(normalMatrix * normal);
     
-    // Organic deformation with high-sensitivity scroll reaction
-    float noise = snoise(vec3(position * 0.4 + uTime * 0.15));
-    float interactionEffect = uIntensity * snoise(vec3(position * 1.5 + uTime * 1.5)) * 0.4;
-    float scrollEffect = abs(uScrollVelocity) * snoise(vec3(position * 1.2)) * 0.25;
-    
-    vec3 newPos = position + normal * (noise * 0.15 + interactionEffect + scrollEffect);
+    // Organic pulsing distortion
+    float noise = snoise(vec3(position * 0.5 + uTime * 0.2));
+    float pulse = snoise(vec3(position * 2.0 + uTime)) * uIntensity * 0.2;
+    vec3 newPos = position + normal * (noise * 0.15 + pulse);
     vPosition = newPos;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
@@ -115,282 +106,174 @@ const ClarityMaterial = shaderMaterial(
   varying vec3 vNormal;
   varying vec3 vPosition;
   uniform float uTime;
-  uniform vec3 uColor;
+  uniform vec3 uColorA;
+  uniform vec3 uColorB;
   uniform float uIntensity;
   uniform float uMode;
 
   void main() {
-    // Plasma color logic
-    float pulse = sin(uTime * 0.4) * 0.1 + 0.9;
-    
-    // RIM / FRESNEL LIGHTING (For Sharp Edges)
     vec3 viewDirection = normalize(-vPosition);
     float fresnel = pow(1.0 - dot(vNormal, viewDirection), 3.0);
-    fresnel = smoothstep(0.1, 0.9, fresnel); // Sharpen the glow
     
-    // Internal "hot" spots
-    float glow = pow(0.5 + 0.5 * sin(vPosition.x * 1.5 + uTime), 3.0);
+    // Gradient mix based on position and time
+    float mixVal = sin(vPosition.y + uTime * 0.5) * 0.5 + 0.5;
+    vec3 baseColor = mix(uColorA, uColorB, mixVal);
     
-    vec3 finalColor = uColor;
+    // Additive glow
+    vec3 finalColor = baseColor + (fresnel * baseColor * 2.0);
     if(uMode > 2.5) { // Risk Mode
-        finalColor = mix(uColor, vec3(1.0, 0.05, 0.05), glow * (1.2 + uIntensity));
-    } else if(uMode > 1.5) { // Focus Mode
-        finalColor = mix(uColor, vec3(0.3, 0.7, 1.0), glow);
-    } else {
-        finalColor = mix(uColor, vec3(0.7, 0.3, 1.0), glow);
+        finalColor = mix(finalColor, vec3(1.0, 0.1, 0.1), 0.5);
     }
 
-    // Alpha blending with sharp edge falloff
-    float alpha = mix(0.6, 0.95, fresnel) + uIntensity * 0.4;
-    
-    // Additive glow highlights
-    vec3 emissive = finalColor * (1.2 + uIntensity * 2.5 + fresnel * 1.5);
-    
-    gl_FragColor = vec4(emissive, alpha);
+    gl_FragColor = vec4(finalColor, 1.0);
   }
   `
 );
 
-extend({ ClarityMaterial });
+extend({ LivingCoreMaterial });
 
 declare module '@react-three/fiber' {
   interface ThreeElements {
-    clarityMaterial: ThreeElement<typeof ClarityMaterial>;
+    livingCoreMaterial: ThreeElement<typeof LivingCoreMaterial>;
   }
 }
 
 // --- COMPONENTS ---
 
-function ClarityCore({ intensity = 0, mode = 'calm', scrollVelocity = 0, scrollY = 0 }: { intensity?: number, mode?: string, scrollVelocity?: number, scrollY?: number }) {
+function EnergyCore({ intensity, mode }: { intensity: number, mode: string }) {
   const meshRef = useRef<THREE.Mesh>(null!);
   const matRef = useRef<any>(null!);
-  
-  const coreColor = useMemo(() => {
-    if (mode === 'risk') return new THREE.Color('#ff2222');
-    if (mode === 'focus') return new THREE.Color('#4338ca');
-    return new THREE.Color('#6d28d9');
-  }, [mode]);
-
-  const modeVal = useMemo(() => {
-    if (mode === 'risk') return 3;
-    if (mode === 'focus') return 2;
-    if (mode === 'active') return 1;
-    return 0;
-  }, [mode]);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    if (!matRef.current) return;
-    
-    matRef.current.uTime = t;
-    matRef.current.uIntensity = THREE.MathUtils.lerp(matRef.current.uIntensity, intensity, 0.12);
-    matRef.current.uColor.lerp(coreColor, 0.06);
-    matRef.current.uMode = modeVal;
-    matRef.current.uScrollVelocity = scrollVelocity;
-
-    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, -scrollY * 0.008, 0.1);
-    meshRef.current.rotation.y = t * 0.1 + scrollVelocity * 1.2;
-    meshRef.current.rotation.z = t * 0.05 + scrollVelocity * 0.6;
-    
-    const targetScale = 1 + Math.abs(scrollVelocity) * 0.45;
-    meshRef.current.scale.setScalar(THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.12));
-  });
-
-  return (
-    <group position={[0, 0, -5]}>
-      <pointLight color={coreColor} intensity={30 + intensity * 60} distance={12} position={[2, 2, 2]} />
-      <pointLight color={mode === 'risk' ? '#ff0000' : '#4f46e5'} intensity={15} distance={20} position={[-5, -2, -2]} />
-      
-      <mesh ref={meshRef}>
-        <sphereGeometry args={[1.8, 96, 96]} />
-        <clarityMaterial 
-          ref={matRef} 
-          transparent 
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      <mesh scale={1.15}>
-        <sphereGeometry args={[1.8, 48, 48]} />
-        <meshStandardMaterial
-          color={coreColor}
-          transparent
-          opacity={0.08 + intensity * 0.15}
-          emissive={coreColor}
-          emissiveIntensity={1.5 + intensity * 8}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-    </group>
-  );
-}
-
-function Planet({ data, scrollY }: { data: typeof PLANET_DATA[0], scrollY: number }) {
-  const meshRef = useRef<THREE.Mesh>(null!);
-  const trailRef = useRef<THREE.Points>(null!);
-
-  const { positions } = useMemo(() => {
-    const pos = new Float32Array(50 * 3);
-    return { positions: pos };
-  }, []);
-
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
-    // Formula: angle = (time / period) * 2π
-    // Period is in days, convert to seconds: period * 86400
-    const orbitalPeriodSeconds = data.period * 86400;
-    const angle = ((t * TIME_MULTIPLIER) / orbitalPeriodSeconds) * Math.PI * 2;
-    
-    const x = Math.cos(angle) * data.orbitRadius;
-    const z = Math.sin(angle) * data.orbitRadius;
-    
-    meshRef.current.position.set(x, -scrollY * 0.008, z - 5);
-    meshRef.current.rotation.y += 0.02;
+    if (matRef.current) {
+      matRef.current.uTime = t;
+      matRef.current.uIntensity = intensity;
+      matRef.current.uMode = mode === 'risk' ? 3 : mode === 'focus' ? 2 : 1;
+    }
+    meshRef.current.rotation.y = t * 0.1;
   });
 
   return (
     <group>
+      <pointLight intensity={50 + intensity * 50} distance={20} color="#a855f7" />
       <mesh ref={meshRef}>
-        <sphereGeometry args={[data.size, 32, 32]} />
-        <meshStandardMaterial 
-          color={data.color} 
-          emissive={data.color} 
-          emissiveIntensity={2}
-          roughness={0.2}
-          metalness={0.8}
-        />
-        <pointLight color={data.color} intensity={1} distance={2} />
+        <sphereGeometry args={[1.5, 64, 64]} />
+        <livingCoreMaterial ref={matRef} />
       </mesh>
-      
-      {/* Orbit Ring */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, -scrollY * 0.008, -5]}>
-        <ringGeometry args={[data.orbitRadius - 0.01, data.orbitRadius + 0.01, 128]} />
-        <meshBasicMaterial color="white" transparent opacity={0.05} side={THREE.DoubleSide} />
+      {/* Volumetric Atmosphere */}
+      <mesh scale={1.2}>
+        <sphereGeometry args={[1.5, 32, 32]} />
+        <meshStandardMaterial 
+          color="#ec4899" 
+          transparent 
+          opacity={0.1} 
+          emissive="#ec4899" 
+          emissiveIntensity={2} 
+          side={THREE.BackSide}
+        />
       </mesh>
     </group>
   );
 }
 
-function StellarFocus({ intensity = 0, scrollY = 0, scrollVelocity = 0 }: { intensity?: number, scrollY?: number, scrollVelocity?: number }) {
-  const pointsRef = useRef<THREE.Points>(null!);
-  const count = 3000; 
-  
-  const { positions, initialPositions, colors } = useMemo(() => {
-    const pos = new Float32Array(count * 3);
-    const initial = new Float32Array(count * 3);
-    const cols = new Float32Array(count * 3);
-    const color = new THREE.Color();
-    
-    for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 50;
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 50;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 25 - 12;
-      
-      initial[i * 3] = pos[i * 3];
-      initial[i * 3 + 1] = pos[i * 3 + 1];
-      initial[i * 3 + 2] = pos[i * 3 + 2];
+function Planet({ data, scrollVelocity }: { data: typeof PLANET_DATA[0], scrollVelocity: number }) {
+  const meshRef = useRef<THREE.Mesh>(null!);
+  const groupRef = useRef<THREE.Group>(null!);
+  const angleRef = useRef(Math.random() * Math.PI * 2);
 
-      color.setHSL(Math.random() * 0.2 + 0.6, 0.8, 0.6);
-      cols[i * 3] = color.r;
-      cols[i * 3 + 1] = color.g;
-      cols[i * 3 + 2] = color.b;
-    }
-    return { positions: pos, initialPositions: initial, colors: cols };
-  }, []);
-
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
-    if (!pointsRef.current) return;
     
-    const posAttr = pointsRef.current.geometry.getAttribute('position') as THREE.BufferAttribute;
-    const array = posAttr.array as Float32Array;
+    // Elliptical Orbit Physics
+    // Speed increases as it gets closer (Kepler-ish approximation)
+    const currentDist = Math.sqrt(
+      Math.pow(data.a * Math.cos(angleRef.current), 2) + 
+      Math.pow(data.b * Math.sin(angleRef.current), 2)
+    );
     
-    for (let i = 0; i < count; i++) {
-      const ix = i * 3;
-      const iy = i * 3 + 1;
-      const iz = i * 3 + 2;
-      
-      const speedFactor = 1 + Math.abs(scrollVelocity) * 3.5;
-      array[ix] = initialPositions[ix] + Math.sin(t * 0.15 + initialPositions[iz]) * 0.4;
-      array[iy] = initialPositions[iy] + Math.cos(t * 0.12 + initialPositions[ix]) * 0.4 - (scrollY * 0.018); 
-      
-      if (Math.abs(scrollVelocity) > 0.1) {
-        array[ix] += (Math.random() - 0.5) * scrollVelocity * 5;
-        array[iy] += (Math.random() - 0.5) * scrollVelocity * 5;
-      }
-    }
-    posAttr.needsUpdate = true;
-    pointsRef.current.rotation.y = t * 0.008 + scrollVelocity * 0.5;
+    const speedFactor = (data.baseSpeed * 5.0) / currentDist;
+    const scrollBoost = Math.abs(scrollVelocity) * 2.0;
+    
+    angleRef.current += delta * (speedFactor + scrollBoost);
+
+    const x = Math.cos(angleRef.current) * data.a;
+    const z = Math.sin(angleRef.current) * data.b;
+    const y = Math.sin(angleRef.current * 0.5) * (data.a * 0.1); // 3D path variation
+
+    groupRef.current.position.set(x, y, z);
+    meshRef.current.rotation.y += data.spin;
+    meshRef.current.rotation.x += data.spin * 0.5;
   });
 
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={count}
-          array={positions}
-          itemSize={3}
+    <group ref={groupRef}>
+      <mesh ref={meshRef} rotation={[data.tilt, 0, 0]}>
+        <sphereGeometry args={[data.size, 32, 32]} />
+        <meshStandardMaterial 
+          color={data.color} 
+          emissive={data.color} 
+          emissiveIntensity={1.5} 
+          roughness={0.2}
+          metalness={0.8}
         />
-        <bufferAttribute
-          attach="attributes-color"
-          count={count}
-          array={colors}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        transparent
-        vertexColors
-        size={0.08}
-        sizeAttenuation
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-        opacity={0.4 + intensity * 0.4}
-      />
-    </points>
+        <pointLight intensity={2} distance={3} color={data.color} />
+      </mesh>
+      {/* Orbital Trail */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[data.a - 0.01, data.a + 0.01, 128]} />
+        <meshBasicMaterial color="white" transparent opacity={0.03} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
   );
 }
 
-function CameraRig({ scrollY = 0 }: { scrollY?: number }) {
+function StarField({ scrollVelocity }: { scrollVelocity: number }) {
+  const ref = useRef<THREE.Group>(null!);
+  useFrame(() => {
+    ref.current.rotation.y += 0.0005 + Math.abs(scrollVelocity) * 0.01;
+  });
+  return (
+    <group ref={ref}>
+      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+    </group>
+  );
+}
+
+function CameraRig() {
   useFrame((state) => {
     const { mouse, camera } = state;
-    camera.position.x = THREE.MathUtils.lerp(camera.position.x, mouse.x * 2.5, 0.08);
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, (mouse.y * 2.5) - (scrollY * 0.001), 0.08);
-    camera.lookAt(0, -scrollY * 0.002, -5);
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, mouse.x * 3, 0.05);
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, mouse.y * 3, 0.05);
+    camera.lookAt(0, 0, 0);
   });
-  return <PerspectiveCamera makeDefault fov={40} position={[0, 0, 12]} />;
+  return <PerspectiveCamera makeDefault fov={55} position={[0, 0, 15]} />;
 }
 
 export default function Scene3D({ isBlurred }: { isBlurred?: boolean }) {
   const [mounted, setMounted] = useState(false);
   const { intensity, mode } = useInteraction();
-  
-  const [scroll, setScroll] = useState({ y: 0, velocity: 0 });
-  const scrollRef = useRef({ lastY: 0, currentY: 0 });
+  const [scroll, setScroll] = useState({ velocity: 0 });
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     setMounted(true);
     const handleScroll = () => {
       const currentY = window.scrollY;
-      const diff = (currentY - scrollRef.current.lastY) * 0.25; 
-      scrollRef.current.currentY = currentY;
-      scrollRef.current.lastY = currentY;
-      setScroll({ y: currentY, velocity: diff });
+      const vel = (currentY - lastScrollY.current) * 0.05;
+      setScroll({ velocity: vel });
+      lastScrollY.current = currentY;
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Friction effect
   useEffect(() => {
-    const damp = setInterval(() => {
-      setScroll(prev => ({ ...prev, velocity: prev.velocity * 0.88 }));
+    const timer = setInterval(() => {
+      setScroll(s => ({ velocity: s.velocity * 0.9 }));
     }, 16);
-    return () => clearInterval(damp);
+    return () => clearInterval(timer);
   }, []);
 
   if (!mounted) return <div className="fixed inset-0 -z-10 bg-[#05070a]" />;
@@ -398,39 +281,26 @@ export default function Scene3D({ isBlurred }: { isBlurred?: boolean }) {
   return (
     <div className={cn(
       "fixed inset-0 -z-10 pointer-events-none bg-[#05070a] transition-all duration-1000",
-      isBlurred ? 'blur-3xl scale-110' : ''
+      isBlurred ? 'opacity-30' : 'opacity-100'
     )}>
-      <div className="absolute inset-0 z-10 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.85)_100%)]" />
-      <div className="absolute inset-0 z-10 pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat" />
-
+      {/* Subtle Vignette Overlay */}
+      <div className="absolute inset-0 z-10 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
+      
       <Canvas 
-        gl={{ antialias: true, stencil: false, alpha: false, powerPreference: 'high-performance' }} 
+        gl={{ antialias: true, stencil: false, powerPreference: 'high-performance' }}
         dpr={[1, 2]}
       >
-        <CameraRig scrollY={scroll.y} />
-        <ambientLight intensity={0.15} />
+        <CameraRig />
+        <ambientLight intensity={0.2} />
         
         <Suspense fallback={null}>
-          <ClarityCore 
-            intensity={intensity} 
-            mode={mode} 
-            scrollY={scroll.y} 
-            scrollVelocity={scroll.velocity} 
-          />
-          <StellarFocus 
-            intensity={intensity} 
-            scrollY={scroll.y} 
-            scrollVelocity={scroll.velocity} 
-          />
+          <EnergyCore intensity={intensity} mode={mode} />
           
-          {PLANET_DATA.map((planet) => (
-            <Planet key={planet.name} data={planet} scrollY={scroll.y} />
+          {PLANET_DATA.map((p) => (
+            <Planet key={p.name} data={p} scrollVelocity={scroll.velocity} />
           ))}
 
-          <group position={[0, scroll.y * 0.001, 0]}>
-            <Stars radius={120} depth={60} count={4000} factor={6} saturation={0.5} fade speed={1.5} />
-          </group>
-          
+          <StarField scrollVelocity={scroll.velocity} />
           <Environment preset="night" />
         </Suspense>
       </Canvas>
