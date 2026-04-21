@@ -153,17 +153,22 @@ function CameraRig() {
 }
 
 function PostProcessingStack({ intensity, mode }: { intensity: number, mode: string }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const chromaticOffset = useMemo(() => {
     const val = mode === 'risk' ? 0.008 : 0;
     return new THREE.Vector2(val, val);
   }, [mode]);
+
+  if (!mounted) return null;
 
   return (
     <EffectComposer multisampling={0} disableNormalPass>
       <Bloom 
         luminanceThreshold={0.2} 
         mipmapBlur 
-        intensity={1.2 + intensity * 4} 
+        intensity={1.2 + (intensity ?? 0) * 4} 
         radius={0.5} 
       />
       <Noise opacity={0.04} />
@@ -197,10 +202,10 @@ export default function Scene3D({ isBlurred }: SceneProps) {
           <NeuralParticles intensity={intensity} />
           <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
           <Environment preset="night" />
+          
+          {/* Post-processing inside Suspense boundary to ensure all scene assets are ready */}
+          <PostProcessingStack intensity={intensity} mode={mode} />
         </Suspense>
-
-        {/* Post-processing outside Suspense for stability */}
-        <PostProcessingStack intensity={intensity} mode={mode} />
       </Canvas>
     </div>
   );
