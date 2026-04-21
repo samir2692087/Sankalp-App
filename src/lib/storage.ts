@@ -35,7 +35,6 @@ export const getStoredData = (): UserData => {
     const parsed = JSON.parse(stored);
     return migrateData(parsed);
   } catch (e) {
-    console.warn("Corrupted storage detected, resetting to defaults.");
     return INITIAL_DATA;
   }
 };
@@ -45,7 +44,7 @@ export const saveData = (data: UserData) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {
-    console.error("Failed to save data to localStorage", e);
+    // Fail silently to avoid UI crashes
   }
 };
 
