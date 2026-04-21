@@ -94,7 +94,7 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
 
   return (
     <Sheet open={isOpen} onOpenChange={handleClose}>
-      <SheetContent side="bottom" className="h-[90vh] rounded-t-[3rem] p-0 border-t border-white/5 bg-[#07070a] backdrop-blur-3xl outline-none flex flex-col overflow-hidden">
+      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] rounded-t-[3rem] p-0 border-t border-white/5 bg-[#07070a] backdrop-blur-3xl outline-none flex flex-col overflow-hidden">
         <div className="w-12 h-1 bg-white/10 rounded-full mx-auto mt-4 shrink-0" />
         
         <SheetHeader className="px-8 pt-6 pb-2 shrink-0">
@@ -123,7 +123,7 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
           </div>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto px-8 py-6 no-scrollbar">
+        <div className="flex-1 overflow-y-auto px-8 py-6 no-scrollbar overscroll-contain pb-32">
           <AnimatePresence mode="wait">
             {selectedBook ? (
               <motion.div
@@ -342,7 +342,7 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
           </AnimatePresence>
         </div>
 
-        <div className="bg-[#0b0b0f] border-t border-white/5 px-8 py-4 flex items-center justify-between shrink-0">
+        <div className="shrink-0 bg-[#0b0b0f] border-t border-white/5 px-8 py-4 pb-8 flex items-center justify-between">
           <div className="flex items-center gap-2 text-[9px] font-bold text-white/20 uppercase tracking-widest">
             <Sparkles size={12} className="text-amber-500/50" /> {t('active_resolve')}
           </div>

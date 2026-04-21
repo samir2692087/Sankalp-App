@@ -18,6 +18,14 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 
+interface CalendarSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  data: UserData;
+  onToggleDate: (date: string) => void;
+  onSaveNote: (date: string, content: string) => void;
+}
+
 export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onSaveNote }: CalendarSheetProps) {
   const { t } = useLanguage();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -71,7 +79,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[90vh] max-h-[90vh] rounded-t-[3rem] p-0 border-t border-slate-200 bg-white/95 backdrop-blur-md outline-none flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
+      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] rounded-t-[3rem] p-0 border-t border-slate-200 bg-white/95 backdrop-blur-md outline-none flex flex-col overflow-hidden">
         <div className="sr-only">
           <SheetTitle>{t('mastery_hub')}</SheetTitle>
           <SheetDescription>{t('personal_history')}</SheetDescription>
@@ -79,7 +87,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
 
         <div className="w-12 h-1 bg-slate-300 rounded-full mx-auto mt-4 shrink-0" />
         
-        <div className="flex-1 overflow-y-auto px-6 pt-6 no-scrollbar relative">
+        <div className="flex-1 overflow-y-auto px-6 pt-6 no-scrollbar overscroll-contain pb-32">
           <AnimatePresence mode="wait">
             {!noteMode ? (
               <motion.div 
@@ -104,7 +112,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                   </Button>
                 </div>
 
-                <div className="bg-white border border-slate-200 shadow-xl shadow-slate-200/50 p-6 rounded-[2rem] w-full max-sm flex flex-col items-center relative">
+                <div className="bg-white border border-slate-200 shadow-xl shadow-slate-200/50 p-6 rounded-[2rem] w-full max-w-sm flex flex-col items-center relative">
                   <Calendar 
                     mode="multiple" 
                     selected={checkInDates}
@@ -222,7 +230,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
         </div>
 
         {!noteMode && (
-          <div className="sticky bottom-0 left-0 w-full bg-white border-t border-slate-100 p-6 flex flex-col gap-4 z-20">
+          <div className="shrink-0 bg-white border-t border-slate-100 p-6 pb-10 flex flex-col gap-4 z-20">
             <div className="grid grid-cols-3 gap-3 w-full">
               <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-green-500 text-white shadow-lg shadow-green-100">
                 <SankalpIcon size={14} />

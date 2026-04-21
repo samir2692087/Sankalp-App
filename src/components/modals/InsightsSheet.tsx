@@ -53,7 +53,7 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[90vh] rounded-t-[3rem] p-0 border-t border-slate-200 bg-white/95 backdrop-blur-md outline-none overflow-hidden flex flex-col">
+      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] rounded-t-[3rem] p-0 border-t border-slate-200 bg-white/95 backdrop-blur-md outline-none overflow-hidden flex flex-col">
         <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mt-4 shrink-0" />
         
         <SheetHeader className="px-8 pt-6 pb-4 shrink-0">
@@ -75,7 +75,7 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
             <TabsTrigger value="achievements" className="flex-1 rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest text-slate-500 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-md transition-all"><Trophy size={14}/> {t('mastery')}</TabsTrigger>
           </TabsList>
 
-          <div className="flex-1 overflow-y-auto pb-20 no-scrollbar">
+          <div className="flex-1 overflow-y-auto no-scrollbar overscroll-contain pb-32">
             <TabsContent value="milestones" className="mt-0 outline-none space-y-3">
               <div className="grid grid-cols-1 gap-3">
                 {[7, 30, 90, 365].map((goal) => {
