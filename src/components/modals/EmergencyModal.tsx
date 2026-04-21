@@ -1,4 +1,3 @@
-
 "use client";
 
 import { 
@@ -13,6 +12,7 @@ import { Zap, Timer, Brain, Heart, ArrowLeft } from 'lucide-react';
 import SankalpIcon from '@/components/icons/SankalpIcon';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface EmergencyModalProps {
   isOpen: boolean;
@@ -20,6 +20,7 @@ interface EmergencyModalProps {
 }
 
 export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps) {
+  const { t } = useLanguage();
   const [seconds, setSeconds] = useState(120);
   const [isActive, setIsActive] = useState(false);
 
@@ -34,9 +35,9 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
   }, [isActive, seconds]);
 
   const protocols = [
-    { name: 'Cold Water', icon: Zap, desc: 'Splash face with cold water.' },
-    { name: 'Breath Work', icon: Brain, desc: '4-7-8 Deep Breathing.' },
-    { name: 'Physical Release', icon: Heart, desc: 'Do 20 fast pushups.' },
+    { name: t('prot_cold'), icon: Zap, desc: t('prot_cold_desc') },
+    { name: t('prot_breath'), icon: Brain, desc: t('prot_breath_desc') },
+    { name: t('prot_phys'), icon: Heart, desc: t('prot_phys_desc') },
   ];
 
   return (
@@ -53,8 +54,8 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
           >
             <SankalpIcon size={40} className="text-white" />
           </motion.div>
-          <DialogTitle className="text-3xl font-bold font-headline mb-2 text-red-500">Control Mode</DialogTitle>
-          <DialogDescription className="font-bold text-red-500/60 uppercase tracking-[0.2em] text-[9px]">Pause and reflect</DialogDescription>
+          <DialogTitle className="text-3xl font-bold font-headline mb-2 text-red-500">{t('control_mode')}</DialogTitle>
+          <DialogDescription className="font-bold text-red-500/60 uppercase tracking-[0.2em] text-[9px]">{t('recovery_desc')}</DialogDescription>
         </div>
 
         <div className="p-8 space-y-8 overflow-y-auto no-scrollbar pb-24">
@@ -62,24 +63,24 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
             <div className="flex items-center gap-3 text-red-500 font-black text-5xl font-headline tabular-nums">
               <Timer size={32} /> {Math.floor(seconds / 60)}:{(seconds % 60).toString().padStart(2, '0')}
             </div>
-            <p className="text-sm font-medium text-red-300 italic opacity-80">"Urges are temporary. You are the observer."</p>
+            <p className="text-sm font-medium text-red-300 italic opacity-80">"{t('urge_msg')}"</p>
             <AnimatePresence mode="wait">
               {!isActive ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <Button onClick={() => setIsActive(true)} className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl h-14 px-10 shadow-lg shadow-red-600/20">
-                    Take a breath
+                    {t('take_breath')}
                   </Button>
                 </motion.div>
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-red-400 font-bold uppercase text-[10px]">
-                  <SankalpIcon size={14} className="animate-pulse" /> Focus active
+                  <SankalpIcon size={14} className="animate-pulse" /> {t('focus_active')}
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Immediate Actions</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">{t('actions')}</h4>
             {protocols.map((p) => (
               <motion.div 
                 whileHover={{ scale: 1.02, x: 5 }}
@@ -98,7 +99,7 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
           </div>
 
           <Button variant="ghost" onClick={onClose} className="w-full h-16 rounded-2xl font-bold uppercase tracking-widest text-[10px] border border-dashed border-red-500/30 text-red-500/70 hover:bg-red-500/5">
-            Done: Control regained
+            {t('done_control')}
           </Button>
         </div>
       </DialogContent>

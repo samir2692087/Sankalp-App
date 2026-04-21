@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -17,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Bell, BellOff, ArrowLeft, AlertCircle } from 'lucide-react';
 import SankalpIcon from '@/components/icons/SankalpIcon';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ReminderModalProps {
   isOpen: boolean;
@@ -27,6 +27,7 @@ interface ReminderModalProps {
 }
 
 export default function ReminderModal({ isOpen, onClose, enabled, time, onUpdate }: ReminderModalProps) {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [localEnabled, setLocalEnabled] = useState(enabled);
   const [localTime, setLocalTime] = useState(time);
@@ -53,15 +54,15 @@ export default function ReminderModal({ isOpen, onClose, enabled, time, onUpdate
     
     if (permission === 'granted') {
       toast({
-        title: "Access Granted",
-        description: "You'll now receive discipline reminders."
+        title: t('access_granted'),
+        description: t('notif_info')
       });
       setLocalEnabled(true);
     } else {
       toast({
         variant: "destructive",
         title: "Access Denied",
-        description: "Please enable notifications in your browser settings."
+        description: t('notif_denied')
       });
     }
   };
@@ -89,15 +90,15 @@ export default function ReminderModal({ isOpen, onClose, enabled, time, onUpdate
           <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
             {localEnabled ? <Bell className="text-primary" size={32} /> : <BellOff className="text-muted-foreground" size={32} />}
           </div>
-          <DialogTitle className="text-2xl font-bold font-headline">Reminder Center</DialogTitle>
-          <DialogDescription className="mt-2">Set your daily protocol alert.</DialogDescription>
+          <DialogTitle className="text-2xl font-bold font-headline">{t('reminder_center')}</DialogTitle>
+          <DialogDescription className="mt-2">{t('reminder_desc')}</DialogDescription>
         </div>
 
         <div className="p-8 space-y-8">
           <div className="flex items-center justify-between p-4 rounded-2xl neu-inset">
             <div className="flex flex-col gap-1">
-              <Label className="font-bold text-base">Active Reminder</Label>
-              <p className="text-[10px] uppercase font-black text-muted-foreground">Daily Consistency Alert</p>
+              <Label className="font-bold text-base">{t('active_reminder')}</Label>
+              <p className="text-[10px] uppercase font-black text-muted-foreground">{t('consistency_alert')}</p>
             </div>
             <Switch 
               checked={localEnabled} 
@@ -108,7 +109,7 @@ export default function ReminderModal({ isOpen, onClose, enabled, time, onUpdate
 
           <div className={`space-y-4 transition-all duration-300 ${localEnabled ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
             <div className="space-y-2">
-              <Label className="font-bold">Protocol Time</Label>
+              <Label className="font-bold">{t('prot_time')}</Label>
               <Input 
                 type="time" 
                 value={localTime} 
@@ -120,7 +121,7 @@ export default function ReminderModal({ isOpen, onClose, enabled, time, onUpdate
             {permissionStatus === 'denied' && (
               <div className="flex items-start gap-3 p-4 rounded-xl bg-destructive/10 text-destructive text-xs font-medium">
                 <AlertCircle size={16} className="shrink-0" />
-                <p>Notifications are blocked. Reset browser permissions to use this feature.</p>
+                <p>{t('notif_denied')}</p>
               </div>
             )}
           </div>
@@ -130,7 +131,7 @@ export default function ReminderModal({ isOpen, onClose, enabled, time, onUpdate
             className="w-full h-14 rounded-xl font-bold bg-primary text-white shadow-lg shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all"
           >
             <SankalpIcon className="mr-2" size={20} />
-            Save Protocol
+            {t('save_prot')}
           </Button>
         </div>
       </DialogContent>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useCallback, useRef, useMemo } from 'react';
@@ -17,8 +16,10 @@ import SankalpIcon from '@/components/icons/SankalpIcon';
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onSaveNote }: CalendarSheetProps) {
+  const { t } = useLanguage();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [noteMode, setNoteMode] = useState(false);
   const [currentNote, setCurrentNote] = useState("");
@@ -72,8 +73,8 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="bottom" className="h-[90vh] max-h-[90vh] rounded-t-[3rem] p-0 border-t border-slate-200 bg-white/95 backdrop-blur-md outline-none flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
         <div className="sr-only">
-          <SheetTitle>Mastery Hub</SheetTitle>
-          <SheetDescription>Personal tracking and focus logs.</SheetDescription>
+          <SheetTitle>{t('mastery_hub')}</SheetTitle>
+          <SheetDescription>{t('personal_history')}</SheetDescription>
         </div>
 
         <div className="w-12 h-1 bg-slate-300 rounded-full mx-auto mt-4 shrink-0" />
@@ -94,8 +95,8 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                       <LayoutGrid size={20} />
                     </div>
                     <div className="flex flex-col">
-                      <h2 className="text-xl font-bold text-slate-900 tracking-tight">Mastery Hub</h2>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Personal History</span>
+                      <h2 className="text-xl font-bold text-slate-900 tracking-tight">{t('mastery_hub')}</h2>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('personal_history')}</span>
                     </div>
                   </div>
                   <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full h-10 w-10 hover:bg-slate-100 text-slate-600">
@@ -183,7 +184,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                       <StickyNote size={20} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-black uppercase text-indigo-400">Reflection</span>
+                      <span className="text-[9px] font-black uppercase text-indigo-400">{t('reflection')}</span>
                       <span className="text-lg font-bold text-slate-900">{selectedDate ? format(selectedDate, "MMM do, yyyy") : ''}</span>
                     </div>
                   </div>
@@ -195,7 +196,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                 <Textarea 
                   value={currentNote}
                   onChange={(e) => setCurrentNote(e.target.value)}
-                  placeholder="Record your thoughts, victories, or lessons..."
+                  placeholder={t('reflection_placeholder')}
                   className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl p-6 resize-none mb-6 text-slate-800 focus-visible:ring-indigo-500/20"
                 />
 
@@ -212,7 +213,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
                     <Trash2 size={20} />
                   </Button>
                   <Button onClick={saveNote} className="flex-1 h-14 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold uppercase tracking-widest gap-2 shadow-lg active:scale-95 transition-all">
-                    <Save size={18} /> Save Archive
+                    <Save size={18} /> {t('save_archive')}
                   </Button>
                 </div>
               </motion.div>
@@ -225,15 +226,15 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
             <div className="grid grid-cols-3 gap-3 w-full">
               <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-green-500 text-white shadow-lg shadow-green-100">
                 <SankalpIcon size={14} />
-                <span className="text-[9px] font-black uppercase tracking-widest">Clean</span>
+                <span className="text-[9px] font-black uppercase tracking-widest">{t('clean')}</span>
               </div>
               <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-red-500 text-white shadow-lg shadow-red-100">
                 <AlertCircle size={14} />
-                <span className="text-[9px] font-black uppercase tracking-widest">Reset</span>
+                <span className="text-[9px] font-black uppercase tracking-widest">{t('reset')}</span>
               </div>
               <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-100">
                 <Zap size={14} />
-                <span className="text-[9px] font-black uppercase tracking-widest">Intensity</span>
+                <span className="text-[9px] font-black uppercase tracking-widest">{t('intensity')}</span>
               </div>
             </div>
           </div>

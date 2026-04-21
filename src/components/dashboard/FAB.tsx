@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from 'react';
@@ -22,6 +21,7 @@ import {
 } from 'framer-motion';
 import Magnetic from './Magnetic';
 import { feedback } from '@/lib/feedback-engine';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface FABProps {
   onOpenInsights: (tab: string) => void;
@@ -31,6 +31,7 @@ interface FABProps {
 const springConfig = { type: "spring", stiffness: 180, damping: 18, mass: 1 };
 
 export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -48,10 +49,10 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
   });
 
   const navItems = [
-    { label: 'Resolve', icon: Target, tab: 'milestones', color: 'bg-purple-600', shadow: 'shadow-purple-500/40' },
-    { label: 'Pulse', icon: BarChart3, tab: 'weekly', color: 'bg-blue-500', shadow: 'shadow-blue-500/40' },
-    { label: 'History', icon: Calendar, tab: 'history', color: 'bg-green-500', shadow: 'shadow-green-500/40' },
-    { label: 'Control', icon: SankalpIcon, isEmergency: true, color: 'bg-red-500', shadow: 'shadow-red-500/40' },
+    { label: t('nav_resolve'), icon: Target, tab: 'milestones', color: 'bg-purple-600', shadow: 'shadow-purple-500/40' },
+    { label: t('nav_pulse'), icon: BarChart3, tab: 'weekly', color: 'bg-blue-500', shadow: 'shadow-blue-500/40' },
+    { label: t('nav_history'), icon: Calendar, tab: 'history', color: 'bg-green-500', shadow: 'shadow-green-500/40' },
+    { label: t('nav_control'), icon: SankalpIcon, isEmergency: true, color: 'bg-red-500', shadow: 'shadow-red-500/40' },
   ];
 
   const handleAction = (item: any) => {

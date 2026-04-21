@@ -155,7 +155,7 @@ export default function StreakDisplay({ current, best, focusMode, freezes, onUse
           >
              <Trophy size={18} className="text-yellow-400" />
              <div className="flex flex-col">
-                <span className="text-white/20 text-[8px] font-black uppercase tracking-widest leading-none mb-1">{t('personal_best')}</span>
+                <span className="text-white/20 text-[8px] font-black uppercase tracking-widest leading-none mb-1">{t('best_streak')}</span>
                 <span className="text-white font-bold text-sm">{best} {t('days')}</span>
              </div>
           </motion.div>
@@ -175,8 +175,8 @@ export default function StreakDisplay({ current, best, focusMode, freezes, onUse
           >
              <Snowflake size={18} className={cn("text-blue-400", freezes > 0 && "animate-spin-slow")} />
              <div className="flex flex-col text-left">
-                <span className="text-white/20 text-[8px] font-black uppercase tracking-widest leading-none mb-1">{t('pauses')}</span>
-                <span className="text-white font-bold text-sm">{freezes} {t('available')}</span>
+                <span className="text-white/20 text-[8px] font-black uppercase tracking-widest leading-none mb-1">{t('pauses_label')}</span>
+                <span className="text-white font-bold text-sm">{freezes} {t('available_pauses')}</span>
              </div>
           </motion.button>
         </div>

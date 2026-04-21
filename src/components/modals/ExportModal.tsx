@@ -40,7 +40,7 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
     link.download = `sankalp-backup-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    toast({ title: t('stay_steady'), description: "Backup saved successfully." });
+    toast({ title: t('stay_steady'), description: t('backup_saved') });
   };
 
   const handleJSONImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,11 +53,11 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
       if (typeof result === 'string') {
         const success = importData(result);
         if (success) {
-          toast({ title: t('victory'), description: "Protocol restored successfully." });
+          toast({ title: t('victory'), description: t('restore_success') });
           onDataImport();
           onClose();
         } else {
-          toast({ variant: "destructive", title: "Error", description: "Incompatible backup format." });
+          toast({ variant: "destructive", title: "Error", description: t('restore_error') });
         }
       }
     };

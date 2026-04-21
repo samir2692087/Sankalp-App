@@ -23,13 +23,26 @@ interface RelapseModalProps {
   onSubmit: (reason: string, time: string) => void;
 }
 
-const REASONS = ["Stress", "Boredom", "Social Media", "Late Night", "Loneliness", "Others"];
-const TIMES = ["Morning", "Afternoon", "Evening", "Late Night"];
-
 export default function RelapseModal({ isOpen, onClose, onSubmit }: RelapseModalProps) {
   const { t } = useLanguage();
-  const [reason, setReason] = useState("Boredom");
-  const [time, setTime] = useState("Late Night");
+  const [reason, setReason] = useState("reason_boredom");
+  const [time, setTime] = useState("time_night");
+
+  const REASONS = [
+    { key: "reason_stress", label: t('reason_stress') },
+    { key: "reason_boredom", label: t('reason_boredom') },
+    { key: "reason_social", label: t('reason_social') },
+    { key: "reason_night", label: t('reason_night') },
+    { key: "reason_lonely", label: t('reason_lonely') },
+    { key: "reason_others", label: t('reason_others') },
+  ];
+
+  const TIMES = [
+    { key: "time_morning", label: t('time_morning') },
+    { key: "time_afternoon", label: t('time_afternoon') },
+    { key: "time_evening", label: t('time_evening') },
+    { key: "time_night", label: t('time_night') },
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -55,18 +68,18 @@ export default function RelapseModal({ isOpen, onClose, onSubmit }: RelapseModal
             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t('trigger_question')}</Label>
             <RadioGroup value={reason} onValueChange={setReason} className="grid grid-cols-2 gap-3">
               {REASONS.map((r) => (
-                <motion.div key={r} whileTap={{ scale: 0.98 }}>
+                <motion.div key={r.key} whileTap={{ scale: 0.98 }}>
                   <label 
-                    htmlFor={r}
+                    htmlFor={r.key}
                     className={cn(
                       "flex items-center gap-3 p-4 rounded-2xl border transition-all cursor-pointer h-full",
-                      reason === r 
+                      reason === r.key 
                         ? "bg-primary/10 border-primary text-primary shadow-[0_0_15px_rgba(124,58,237,0.2)]" 
                         : "bg-white/5 border-white/5 text-foreground/70 hover:bg-white/10"
                     )}
                   >
-                    <RadioGroupItem value={r} id={r} className="sr-only" />
-                    <span className="text-xs font-bold">{r}</span>
+                    <RadioGroupItem value={r.key} id={r.key} className="sr-only" />
+                    <span className="text-xs font-bold">{r.label}</span>
                   </label>
                 </motion.div>
               ))}
@@ -80,7 +93,7 @@ export default function RelapseModal({ isOpen, onClose, onSubmit }: RelapseModal
                 <SelectValue placeholder={t('select_window')} />
               </SelectTrigger>
               <SelectContent className="glass-card border-white/10 rounded-2xl">
-                {TIMES.map(t => <SelectItem key={t} value={t} className="rounded-xl p-3 font-bold">{t}</SelectItem>)}
+                {TIMES.map(t_item => <SelectItem key={t_item.key} value={t_item.key} className="rounded-xl p-3 font-bold">{t_item.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -91,7 +104,7 @@ export default function RelapseModal({ isOpen, onClose, onSubmit }: RelapseModal
           <Button 
             type="button"
             className="w-full h-16 rounded-2xl font-bold bg-gradient-to-r from-primary to-secondary hover:scale-[1.02] active:scale-95 transition-all text-base shadow-[0_10px_30px_rgba(124,58,237,0.3)]"
-            onClick={() => onSubmit(reason, time)}
+            onClick={() => onSubmit(t(reason as any), t(time as any))}
           >
             {t('reset_focus')}
           </Button>
