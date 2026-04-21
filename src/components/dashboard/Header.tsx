@@ -26,13 +26,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+import PortalSheet from "@/components/ui/portal-sheet";
 import { Button } from "@/components/ui/button";
 import { AppTheme, UserData, UserProfile } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -101,7 +95,6 @@ export default function Header({
     { id: 'amoled', nameKey: 'theme_amoled', icon: Moon, bg: 'bg-black' },
   ];
 
-  // Sync global UI lock state with internal settings modals
   useEffect(() => {
     const isAnyInternalModalOpen = isThemeSheetOpen || isReminderOpen || isProfileOpen || isInfoOpen || isSettingsOpen;
     setIsUiLocked(isAnyInternalModalOpen);
@@ -185,7 +178,7 @@ export default function Header({
             </DialogTrigger>
 
             <DialogContent 
-              className="max-w-[440px] glass-card border-white/10 p-0 outline-none overflow-hidden rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)] z-[100]"
+              className="max-w-[440px] glass-card border-white/10 p-0 outline-none overflow-hidden rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)] z-[10000]"
             >
               <motion.div
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -275,39 +268,38 @@ export default function Header({
         </div>
       </header>
 
-      <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
-        <SheetContent side="bottom" className="rounded-t-[4rem] bg-[#07070a]/95 backdrop-blur-3xl border-white/10 p-10 pb-16 outline-none z-[110]">
-          <SheetHeader className="mb-10">
-            <SheetTitle className="text-white font-black text-3xl text-center tracking-tighter">{t('choose_view')}</SheetTitle>
-            <SheetDescription className="text-white/30 text-center uppercase tracking-[0.3em] text-[10px] font-black">{t('stay_steady')}</SheetDescription>
-          </SheetHeader>
-          <div className="grid grid-cols-2 gap-5 max-w-xl mx-auto">
-            {themes.map((t_item) => (
-              <motion.button 
-                key={t_item.id}
-                whileHover={{ scale: 1.05, y: -5 }}
-                whileTap={{ scale: 0.95 }}
-                transition={springConfig}
-                onClick={() => {
-                  feedback.tap();
-                  onThemeChange(t_item.id);
-                }}
-                className={cn(
-                  "p-6 rounded-[2.2rem] flex flex-col gap-4 text-left border-2 transition-all group",
-                  theme === t_item.id 
-                    ? 'border-primary bg-primary/10 shadow-[0_0_30px_rgba(168,85,247,0.3)]' 
-                    : 'border-white/5 bg-white/[0.03] hover:border-white/20'
-                )}
-              >
-                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:rotate-12", t_item.bg)}>
-                  <t_item.icon size={20} className={cn(t_item.id === 'light' ? 'text-blue-500' : 'text-white')} />
-                </div>
-                <span className="text-white font-black text-xs uppercase tracking-[0.2em]">{t(t_item.nameKey as any)}</span>
-              </motion.button>
-            ))}
-          </div>
-        </SheetContent>
-      </Sheet>
+      <PortalSheet 
+        isOpen={isThemeSheetOpen} 
+        onClose={() => setIsThemeSheetOpen(false)}
+        title={t('choose_view')}
+        description={t('stay_steady')}
+      >
+        <div className="grid grid-cols-2 gap-5 max-w-xl mx-auto">
+          {themes.map((t_item) => (
+            <motion.button 
+              key={t_item.id}
+              whileHover={{ scale: 1.05, y: -5 }}
+              whileTap={{ scale: 0.95 }}
+              transition={springConfig}
+              onClick={() => {
+                feedback.tap();
+                onThemeChange(t_item.id);
+              }}
+              className={cn(
+                "p-8 rounded-[2.5rem] flex flex-col gap-4 text-left border-2 transition-all group",
+                theme === t_item.id 
+                  ? 'border-primary bg-primary/10 shadow-[0_0_40px_rgba(168,85,247,0.2)]' 
+                  : 'border-white/5 bg-white/[0.03] hover:border-white/20'
+              )}
+            >
+              <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:rotate-12", t_item.bg)}>
+                <t_item.icon size={24} className={cn(t_item.id === 'light' ? 'text-blue-500' : 'text-white')} />
+              </div>
+              <span className="text-white font-black text-xs uppercase tracking-[0.2em]">{t(t_item.nameKey as any)}</span>
+            </motion.button>
+          ))}
+        </div>
+      </PortalSheet>
 
       {isReminderOpen && (
         <ReminderModal 

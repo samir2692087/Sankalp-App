@@ -1,13 +1,7 @@
 "use client";
 
 import { useMemo } from 'react';
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle,
-  SheetDescription 
-} from "@/components/ui/sheet";
+import PortalSheet from "@/components/ui/portal-sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   XAxis, 
@@ -17,11 +11,10 @@ import {
   Line,
   YAxis
 } from 'recharts';
-import { Target, Trophy, ArrowLeft, TrendingUp } from 'lucide-react';
+import { Target, Trophy, TrendingUp } from 'lucide-react';
 import { UserData } from "@/lib/types";
 import { getWeeklyData, getAchievements } from "@/lib/discipline-engine";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -52,116 +45,104 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
   }, [data]);
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] rounded-t-[3rem] p-0 border-t border-slate-200 bg-white/95 backdrop-blur-md outline-none overflow-hidden flex flex-col">
-        <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mt-4 shrink-0" />
-        
-        <SheetHeader className="px-8 pt-6 pb-4 shrink-0">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={onClose} className="p-0 h-auto hover:bg-transparent text-slate-900">
-              <ArrowLeft size={24} />
-            </Button>
-            <div>
-              <SheetTitle className="text-2xl font-bold text-slate-900 tracking-tight">{t('insights')}</SheetTitle>
-              <SheetDescription className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">{t('pattern_analysis')}</SheetDescription>
+    <PortalSheet 
+      isOpen={isOpen} 
+      onClose={onClose}
+      title={t('insights')}
+      description={t('pattern_analysis')}
+    >
+      <Tabs defaultValue={defaultTab} className="w-full flex flex-col">
+        <TabsList className="w-full bg-white/[0.03] p-1.5 rounded-2xl h-14 mb-8 shrink-0 border border-white/5">
+          <TabsTrigger value="milestones" className="flex-1 rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest text-white/40 data-[state=active]:bg-primary data-[state=active]:text-white transition-all"><Target size={14}/> {t('goals')}</TabsTrigger>
+          <TabsTrigger value="weekly" className="flex-1 rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest text-white/40 data-[state=active]:bg-primary data-[state=active]:text-white transition-all"><TrendingUp size={14}/> {t('timeline')}</TabsTrigger>
+          <TabsTrigger value="achievements" className="flex-1 rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest text-white/40 data-[state=active]:bg-primary data-[state=active]:text-white transition-all"><Trophy size={14}/> {t('mastery')}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="milestones" className="mt-0 outline-none space-y-4">
+          {[7, 30, 90, 365].map((goal, idx) => {
+            const progress = Math.min(((data?.currentStreak || 0) / goal) * 100, 100);
+            return (
+              <motion.div 
+                key={goal} 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="bg-white/[0.03] border border-white/5 p-6 rounded-[2.2rem] flex flex-col gap-4"
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-bold text-white">{goal} {t('day_resolve')}</span>
+                  <span className={cn("text-[9px] font-black px-3 py-1 rounded-full uppercase", progress === 100 ? "bg-green-500/20 text-green-400" : "bg-white/5 text-white/40")}>
+                    {progress === 100 ? t('ascended') : `${Math.round(progress)}% ${t('stable')}`}
+                  </span>
+                </div>
+                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    className="h-full bg-primary shadow-[0_0_15px_rgba(168,85,247,0.5)] rounded-full" 
+                  />
+                </div>
+              </motion.div>
+            );
+          })}
+        </TabsContent>
+
+        <TabsContent value="weekly" className="mt-0 outline-none space-y-6">
+          <div className="bg-[#0b0b0f] border border-white/5 p-8 rounded-[2.5rem] h-64 shadow-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-primary/5 pointer-events-none" />
+            <h4 className="text-[9px] font-black uppercase tracking-widest text-white/20 mb-6 relative z-10">{t('resilience_path')}</h4>
+            <div className="h-40 w-full relative z-10">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={timelineData}>
+                  <XAxis dataKey="name" hide />
+                  <YAxis hide domain={[0, 100]} />
+                  <Tooltip contentStyle={{ backgroundColor: '#07070a', border: 'none', borderRadius: '1rem', color: '#fff', fontSize: '10px' }} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="score" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={4} 
+                    dot={{ r: 4, fill: 'hsl(var(--primary))' }} 
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
-        </SheetHeader>
 
-        <Tabs defaultValue={defaultTab} className="flex-1 flex flex-col px-6 pb-6 overflow-hidden">
-          <TabsList className="w-full bg-slate-100 p-1.5 rounded-2xl h-14 mb-6 shrink-0 border border-slate-200">
-            <TabsTrigger value="milestones" className="flex-1 rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest text-slate-500 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-md transition-all"><Target size={14}/> {t('goals')}</TabsTrigger>
-            <TabsTrigger value="weekly" className="flex-1 rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest text-slate-500 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-md transition-all"><TrendingUp size={14}/> {t('timeline')}</TabsTrigger>
-            <TabsTrigger value="achievements" className="flex-1 rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest text-slate-500 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-md transition-all"><Trophy size={14}/> {t('mastery')}</TabsTrigger>
-          </TabsList>
-
-          <div className="flex-1 overflow-y-auto no-scrollbar overscroll-contain pb-32">
-            <TabsContent value="milestones" className="mt-0 outline-none space-y-3">
-              <div className="grid grid-cols-1 gap-3">
-                {[7, 30, 90, 365].map((goal) => {
-                  const progress = Math.min(((data?.currentStreak || 0) / goal) * 100, 100);
-                  return (
-                    <motion.div 
-                      key={goal} 
-                      className="bg-white border border-slate-200 p-6 rounded-[2rem] flex flex-col gap-4 shadow-sm"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-bold text-slate-900">{goal} {t('day_resolve')}</span>
-                        <span className={cn("text-[9px] font-black px-3 py-1 rounded-full uppercase", progress === 100 ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-700")}>
-                          {progress === 100 ? t('ascended') : `${Math.round(progress)}% ${t('stable')}`}
-                        </span>
-                      </div>
-                      <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${progress}%` }}
-                          transition={{ duration: 1 }}
-                          className="h-full bg-gradient-to-r from-slate-800 to-slate-900 rounded-full" 
-                        />
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="weekly" className="mt-0 outline-none space-y-6">
-              <div className="bg-slate-900 p-8 rounded-[2.5rem] h-64 shadow-2xl">
-                <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-6">{t('resilience_path')}</h4>
-                <div className="h-40 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={timelineData}>
-                      <XAxis dataKey="name" hide />
-                      <YAxis hide domain={[0, 100]} />
-                      <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '1rem', color: '#fff', fontSize: '10px' }} />
-                      <Line 
-                        type="monotone" 
-                        dataKey="score" 
-                        stroke="#fff" 
-                        strokeWidth={3} 
-                        dot={{ r: 4, fill: '#fff' }} 
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white border border-slate-200 p-6 rounded-[2rem] text-center shadow-sm">
-                  <p className="text-[9px] font-black uppercase text-slate-400 mb-1">{t('total_conflicts')}</p>
-                  <p className="text-2xl font-bold text-slate-900">{(data?.urges?.length || 0) + (data?.relapses?.length || 0)}</p>
-                </div>
-                <div className="bg-white border border-slate-200 p-6 rounded-[2rem] text-center shadow-sm">
-                  <p className="text-[9px] font-black uppercase text-slate-400 mb-1">{t('victory_rate')}</p>
-                  <p className="text-2xl font-bold text-slate-900">{winRate}%</p>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="achievements" className="mt-0 outline-none">
-              <div className="grid grid-cols-2 gap-4">
-                {(achievements || []).map((ach) => (
-                  <div 
-                    key={ach.id} 
-                    className={cn(
-                      "rounded-[2rem] flex flex-col items-center justify-center text-center p-6 border transition-all",
-                      ach.unlocked 
-                        ? "bg-white border-slate-200 shadow-sm" 
-                        : "bg-slate-50 border-slate-100 opacity-40 grayscale"
-                    )}
-                  >
-                    <div className={cn("p-4 rounded-2xl bg-slate-50 mb-3", ach.unlocked && "bg-slate-100 text-slate-900")}>
-                      <Trophy size={32} />
-                    </div>
-                    <span className="text-11px font-bold text-slate-900 uppercase tracking-tight leading-tight">{ach.name}</span>
-                    <p className="text-[8px] font-bold uppercase text-slate-400 mt-1">{ach.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white/[0.03] border border-white/5 p-6 rounded-[2rem] text-center">
+              <p className="text-[9px] font-black uppercase text-white/20 mb-1">{t('total_conflicts')}</p>
+              <p className="text-2xl font-bold text-white">{(data?.urges?.length || 0) + (data?.relapses?.length || 0)}</p>
+            </div>
+            <div className="bg-white/[0.03] border border-white/5 p-6 rounded-[2rem] text-center">
+              <p className="text-[9px] font-black uppercase text-white/20 mb-1">{t('victory_rate')}</p>
+              <p className="text-2xl font-bold text-white">{winRate}%</p>
+            </div>
           </div>
-        </Tabs>
-      </SheetContent>
-    </Sheet>
+        </TabsContent>
+
+        <TabsContent value="achievements" className="mt-0 outline-none">
+          <div className="grid grid-cols-2 gap-4">
+            {(achievements || []).map((ach) => (
+              <div 
+                key={ach.id} 
+                className={cn(
+                  "rounded-[2.2rem] flex flex-col items-center justify-center text-center p-6 border transition-all",
+                  ach.unlocked 
+                    ? "bg-white/[0.03] border-primary/20 shadow-lg shadow-primary/5" 
+                    : "bg-white/[0.01] border-white/5 opacity-30 grayscale"
+                )}
+              >
+                <div className={cn("w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4 transition-transform", ach.unlocked && "bg-primary/20 text-primary scale-110")}>
+                  <Trophy size={32} />
+                </div>
+                <span className="text-[11px] font-bold text-white uppercase tracking-tight leading-tight">{ach.name}</span>
+                <p className="text-[8px] font-bold uppercase text-white/20 mt-2">{ach.desc}</p>
+              </div>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </PortalSheet>
   );
 }

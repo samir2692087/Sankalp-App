@@ -1,17 +1,12 @@
 "use client";
 
 import { useState, useCallback, useRef, useMemo } from 'react';
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+import PortalSheet from "@/components/ui/portal-sheet";
 import { Calendar } from "@/components/ui/calendar";
 import { UserData } from "@/lib/types";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { X, StickyNote, Save, AlertCircle, Trash2, Zap, LayoutGrid } from 'lucide-react';
+import { X, StickyNote, Save, AlertCircle, Trash2, Zap, LayoutGrid, ArrowLeft } from 'lucide-react';
 import SankalpIcon from '@/components/icons/SankalpIcon';
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from '@/lib/utils';
@@ -78,176 +73,145 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] rounded-t-[3rem] p-0 border-t border-slate-200 bg-white/95 backdrop-blur-md outline-none flex flex-col overflow-hidden">
-        <div className="sr-only">
-          <SheetTitle>{t('mastery_hub')}</SheetTitle>
-          <SheetDescription>{t('personal_history')}</SheetDescription>
-        </div>
+    <PortalSheet 
+      isOpen={isOpen} 
+      onClose={onClose}
+      title={noteMode ? t('reflection') : t('mastery_hub')}
+      description={noteMode ? (selectedDate ? format(selectedDate, "MMM do, yyyy") : '') : t('personal_history')}
+    >
+      <AnimatePresence mode="wait">
+        {!noteMode ? (
+          <motion.div 
+            key="calendar"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-full flex flex-col items-center"
+          >
+            <div className="bg-white/5 border border-white/10 shadow-2xl p-6 rounded-[2.5rem] w-full max-w-sm flex flex-col items-center relative mb-8">
+              <Calendar 
+                mode="multiple" 
+                selected={checkInDates}
+                onDayClick={handleDayClick}
+                className="p-0 w-full"
+                modifiers={{
+                  relapse: relapseDates,
+                  hasNote: noteDates,
+                }}
+                classNames={{
+                  month: "space-y-4 w-full",
+                  caption: "flex justify-center pt-1 relative items-center mb-4",
+                  caption_label: "text-sm font-bold text-white uppercase tracking-widest",
+                  head_cell: "text-white/20 font-bold uppercase text-[9px] tracking-widest text-center pb-2",
+                }}
+                components={{
+                  Day: (dayProps: any) => {
+                    const { day, modifiers, ...props } = dayProps;
+                    if (!day?.date) return null;
+                    
+                    const date = day.date;
+                    const dateStr = format(date, "yyyy-MM-dd");
+                    const isClean = modifiers?.selected;
+                    const isRelapse = modifiers?.relapse;
+                    const hasNote = modifiers?.hasNote;
+                    const isToday = modifiers?.today;
+                    const urgeCount = urgeHeatmap[dateStr] || 0;
 
-        <div className="w-12 h-1 bg-slate-300 rounded-full mx-auto mt-4 shrink-0" />
-        
-        <div className="flex-1 overflow-y-auto px-6 pt-6 no-scrollbar overscroll-contain pb-32">
-          <AnimatePresence mode="wait">
-            {!noteMode ? (
-              <motion.div 
-                key="calendar"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="w-full flex flex-col items-center"
-              >
-                <div className="w-full flex justify-between items-center mb-8">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-900 border border-slate-200">
-                      <LayoutGrid size={20} />
-                    </div>
-                    <div className="flex flex-col">
-                      <h2 className="text-xl font-bold text-slate-900 tracking-tight">{t('mastery_hub')}</h2>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('personal_history')}</span>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full h-10 w-10 hover:bg-slate-100 text-slate-600">
-                    <X size={20} />
-                  </Button>
-                </div>
+                    return (
+                      <td className="p-0.5 relative flex-1" role="presentation">
+                        <motion.button 
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          type="button"
+                          {...props}
+                          onPointerDown={() => handleLongPressStart(date)}
+                          onPointerUp={handleLongPressEnd}
+                          onPointerLeave={handleLongPressEnd}
+                          className={cn(
+                            "h-9 w-9 p-0 text-[11px] font-bold flex items-center justify-center rounded-lg relative transition-all",
+                            isClean ? "bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-500/20" : 
+                            isRelapse ? "bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-500/20" : 
+                            "text-white/80 hover:bg-white/10 border border-transparent",
+                            isToday && !isClean && !isRelapse && "border-white/30 bg-white/5",
+                            modifiers?.outside && "opacity-20",
+                            hasNote && "after:absolute after:bottom-1 after:w-1 after:h-1 after:bg-primary after:rounded-full"
+                          )}
+                        >
+                          {date.getDate()}
+                          {urgeCount > 0 && !isRelapse && (
+                              <div className={cn(
+                                  "absolute -top-1 -right-1 w-4 h-4 rounded-full border border-black flex items-center justify-center text-[8px] font-black shadow-sm",
+                                  urgeCount > 2 ? "bg-red-500 text-white" : "bg-amber-500 text-white"
+                              )}>
+                                  {urgeCount}
+                              </div>
+                          )}
+                        </motion.button>
+                      </td>
+                    );
+                  }
+                }}
+              />
+            </div>
 
-                <div className="bg-white border border-slate-200 shadow-xl shadow-slate-200/50 p-6 rounded-[2rem] w-full max-w-sm flex flex-col items-center relative">
-                  <Calendar 
-                    mode="multiple" 
-                    selected={checkInDates}
-                    onDayClick={handleDayClick}
-                    className="p-0 w-full"
-                    modifiers={{
-                      relapse: relapseDates,
-                      hasNote: noteDates,
-                    }}
-                    classNames={{
-                      month: "space-y-4 w-full",
-                      caption: "flex justify-center pt-1 relative items-center mb-4",
-                      caption_label: "text-sm font-bold text-slate-900 uppercase tracking-widest",
-                      head_cell: "text-slate-400 font-bold uppercase text-[9px] tracking-widest text-center pb-2",
-                    }}
-                    components={{
-                      Day: (dayProps: any) => {
-                        const { day, modifiers, ...props } = dayProps;
-                        if (!day?.date) return null;
-                        
-                        const date = day.date;
-                        const dateStr = format(date, "yyyy-MM-dd");
-                        const isClean = modifiers?.selected;
-                        const isRelapse = modifiers?.relapse;
-                        const hasNote = modifiers?.hasNote;
-                        const isToday = modifiers?.today;
-                        const urgeCount = urgeHeatmap[dateStr] || 0;
-
-                        return (
-                          <td className="p-0.5 relative flex-1" role="presentation">
-                            <motion.button 
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.95 }}
-                              type="button"
-                              {...props}
-                              onPointerDown={() => handleLongPressStart(date)}
-                              onPointerUp={handleLongPressEnd}
-                              onPointerLeave={handleLongPressEnd}
-                              className={cn(
-                                "h-9 w-9 p-0 text-[11px] font-bold flex items-center justify-center rounded-lg relative transition-all",
-                                isClean ? "bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-200" : 
-                                isRelapse ? "bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-200" : 
-                                "text-slate-800 hover:bg-slate-50 border border-transparent",
-                                isToday && !isClean && !isRelapse && "border-slate-300 bg-slate-50",
-                                modifiers?.outside && "opacity-20",
-                                hasNote && "after:absolute after:bottom-1 after:w-1 after:h-1 after:bg-indigo-500 after:rounded-full"
-                              )}
-                            >
-                              {date.getDate()}
-                              {urgeCount > 0 && !isRelapse && (
-                                  <div className={cn(
-                                      "absolute -top-1 -right-1 w-4 h-4 rounded-full border border-white flex items-center justify-center text-[8px] font-black shadow-sm",
-                                      urgeCount > 2 ? "bg-red-500 text-white" : "bg-amber-500 text-white"
-                                  )}>
-                                      {urgeCount}
-                                  </div>
-                              )}
-                            </motion.button>
-                          </td>
-                        );
-                      }
-                    }}
-                  />
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div 
-                key="note"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="w-full h-full flex flex-col"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100">
-                      <StickyNote size={20} />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-black uppercase text-indigo-400">{t('reflection')}</span>
-                      <span className="text-lg font-bold text-slate-900">{selectedDate ? format(selectedDate, "MMM do, yyyy") : ''}</span>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="icon" onClick={() => setNoteMode(false)} className="rounded-full h-10 w-10 text-slate-500">
-                    <X size={20} />
-                  </Button>
-                </div>
-
-                <Textarea 
-                  value={currentNote}
-                  onChange={(e) => setCurrentNote(e.target.value)}
-                  placeholder={t('reflection_placeholder')}
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl p-6 resize-none mb-6 text-slate-800 focus-visible:ring-indigo-500/20"
-                />
-
-                <div className="flex gap-4 mb-20">
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      setCurrentNote("");
-                      onSaveNote(format(selectedDate!, "yyyy-MM-dd"), "");
-                      setNoteMode(false);
-                    }} 
-                    className="h-14 rounded-xl px-6 border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50"
-                  >
-                    <Trash2 size={20} />
-                  </Button>
-                  <Button onClick={saveNote} className="flex-1 h-14 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold uppercase tracking-widest gap-2 shadow-lg active:scale-95 transition-all">
-                    <Save size={18} /> {t('save_archive')}
-                  </Button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {!noteMode && (
-          <div className="shrink-0 bg-white border-t border-slate-100 p-6 pb-10 flex flex-col gap-4 z-20">
-            <div className="grid grid-cols-3 gap-3 w-full">
-              <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-green-500 text-white shadow-lg shadow-green-100">
+            <div className="grid grid-cols-3 gap-3 w-full max-w-sm">
+              <div className="flex flex-col items-center gap-1.5 p-4 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-500">
                 <SankalpIcon size={14} />
                 <span className="text-[9px] font-black uppercase tracking-widest">{t('clean')}</span>
               </div>
-              <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-red-500 text-white shadow-lg shadow-red-100">
+              <div className="flex flex-col items-center gap-1.5 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500">
                 <AlertCircle size={14} />
                 <span className="text-[9px] font-black uppercase tracking-widest">{t('reset')}</span>
               </div>
-              <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-100">
+              <div className="flex flex-col items-center gap-1.5 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500">
                 <Zap size={14} />
                 <span className="text-[9px] font-black uppercase tracking-widest">{t('intensity')}</span>
               </div>
             </div>
-          </div>
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="note"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="w-full flex flex-col gap-6"
+          >
+            <div className="flex items-center gap-4 mb-2">
+              <Button variant="ghost" size="icon" onClick={() => setNoteMode(false)} className="rounded-full bg-white/5">
+                <ArrowLeft size={18} />
+              </Button>
+              <div className="flex flex-col">
+                <span className="text-lg font-bold text-white">{selectedDate ? format(selectedDate, "MMM do, yyyy") : ''}</span>
+              </div>
+            </div>
+
+            <Textarea 
+              value={currentNote}
+              onChange={(e) => setCurrentNote(e.target.value)}
+              placeholder={t('reflection_placeholder')}
+              className="min-h-[200px] bg-white/[0.03] border-white/10 rounded-[2rem] p-8 resize-none text-white focus-visible:ring-primary/20 text-base leading-relaxed"
+            />
+
+            <div className="flex gap-4">
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  setCurrentNote("");
+                  onSaveNote(format(selectedDate!, "yyyy-MM-dd"), "");
+                  setNoteMode(false);
+                }} 
+                className="h-16 rounded-2xl px-6 border-white/10 text-white/40 hover:text-red-500 hover:bg-red-500/10"
+              >
+                <Trash2 size={22} />
+              </Button>
+              <Button onClick={saveNote} className="flex-1 h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-[0.2em] text-xs gap-3 shadow-2xl">
+                <Save size={20} /> {t('save_archive')}
+              </Button>
+            </div>
+          </motion.div>
         )}
-      </SheetContent>
-    </Sheet>
+      </AnimatePresence>
+    </PortalSheet>
   );
 }
