@@ -1,5 +1,5 @@
 
-import { UserData, RelapseLog, UrgeLog, CheckInLog } from './types';
+import { UserData } from './types';
 
 export function calculateStreak(lastRelapseTimestamp: number | null): number {
   if (!lastRelapseTimestamp) return 0;
@@ -28,8 +28,17 @@ export function calculateDisciplineScore(data: UserData): number {
 }
 
 export function getBehavioralInsights(data: UserData) {
-  const relapses = Array.isArray(data?.relapses) ? data.relapses : [];
-  const urges = Array.isArray(data?.urges) ? data.urges : [];
+  if (!data) return {
+    mostCommonTrigger: "Consistent data required",
+    highRiskWindow: "N/A",
+    winRate: 100,
+    resilienceLevel: 'Steel',
+    riskLevel: 'STABLE',
+    protectionMessage: "Neural paths stabilizing. Keep focus."
+  };
+
+  const relapses = Array.isArray(data.relapses) ? data.relapses : [];
+  const urges = Array.isArray(data.urges) ? data.urges : [];
   
   const reasons = relapses.map(r => r?.reason || "Unknown").filter(Boolean);
   const mostCommonTrigger = reasons.length > 0 
@@ -135,6 +144,7 @@ export function getDailyChallenge(streak: number) {
   ];
 
   const pool = s >= 90 ? highStreak : s >= 30 ? midStreak : lowStreak;
-  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  const now = Date.now();
+  const dayOfYear = Math.floor((now - new Date(new Date(now).getFullYear(), 0, 0).getTime()) / 86400000);
   return pool[Math.max(0, dayOfYear % pool.length)];
 }

@@ -22,6 +22,7 @@ const migrateData = (parsed: any): UserData => {
     bestStreak: typeof parsed?.bestStreak === 'number' ? parsed.bestStreak : 0,
     disciplineScore: typeof parsed?.disciplineScore === 'number' ? parsed.disciplineScore : 0,
     streakFreezes: typeof parsed?.streakFreezes === 'number' ? parsed.streakFreezes : 3,
+    maxFreezes: typeof parsed?.maxFreezes === 'number' ? parsed.maxFreezes : 3,
   };
 };
 
