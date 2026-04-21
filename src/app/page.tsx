@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -54,7 +53,7 @@ const springConfig = { type: "spring", stiffness: 100, damping: 20 };
 
 export default function SankalpOverview() {
   const { toast } = useToast();
-  const { triggerPulse, setMode, mode, recordInteraction } = useInteraction();
+  const { triggerPulse, setMode, mode, recordInteraction, setIsUiLocked, isUiLocked } = useInteraction();
   const { t, language } = useLanguage();
   const { theme, setTheme } = useTheme();
   
@@ -84,7 +83,6 @@ export default function SankalpOverview() {
       newData.level = calculateLevel(newData.xp);
       setData(newData);
       
-      // Sync global theme state from stored user data if different
       if (newData.theme && newData.theme !== theme) {
         setTheme(newData.theme);
       }
@@ -104,7 +102,6 @@ export default function SankalpOverview() {
     setData(updatedData);
     saveData(updatedData);
     
-    // Sync context theme if data changes
     if (updatedData.theme) {
       setTheme(updatedData.theme);
     }
@@ -113,16 +110,18 @@ export default function SankalpOverview() {
   const handleOpenModal = useCallback((setter: (v: boolean) => void) => {
     triggerPulse(0.3);
     feedback.tap();
+    setIsUiLocked(true);
     window.history.pushState({ modalOpen: true }, "");
     setter(true);
-  }, [triggerPulse]);
+  }, [triggerPulse, setIsUiLocked]);
 
   const handleCloseModal = useCallback((setter: (v: boolean) => void) => {
     triggerPulse(0.2);
     feedback.tap();
+    setIsUiLocked(false);
     if (window.history.state?.modalOpen) window.history.back();
     setter(false);
-  }, [triggerPulse]);
+  }, [triggerPulse, setIsUiLocked]);
 
   const handleRelapseSubmit = (reason: string, time: string) => {
     feedback.warning();
@@ -169,8 +168,6 @@ export default function SankalpOverview() {
 
   if (!mounted) return null;
 
-  const isAnySheetOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal || showCalendarSheet || showLibrary;
-
   const xpProgress = (data.xp % 100);
 
   return (
@@ -185,13 +182,13 @@ export default function SankalpOverview() {
         mode === 'risk' ? 'bg-red-950/20' : 'bg-transparent'
       )}>
         <Scene3D 
-          isBlurred={isAnySheetOpen || isLoading}
+          isBlurred={isUiLocked || isLoading}
           theme={theme}
         />
         
         <div className={cn(
           "fixed inset-0 transition-all duration-1000 -z-[5] pointer-events-none",
-          isAnySheetOpen ? 'bg-black/60 backdrop-blur-md' : 'bg-black/20',
+          isUiLocked ? 'bg-black/60 backdrop-blur-md' : 'bg-black/20',
           mode === 'risk' && 'bg-red-950/30'
         )} />
 
@@ -393,8 +390,13 @@ export default function SankalpOverview() {
             </motion.main>
 
             <AnimatePresence>
-              {!isAnySheetOpen && (
-                <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}>
+              {!isUiLocked && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8, y: 40 }} 
+                  animate={{ opacity: 1, scale: 1, y: 0 }} 
+                  exit={{ opacity: 0, scale: 0.8, y: 40 }}
+                  transition={springConfig}
+                >
                   <FAB 
                     onOpenInsights={(tab) => {
                       feedback.tap();

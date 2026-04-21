@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Settings, 
   Trash2, 
@@ -51,6 +50,7 @@ import {
 import Magnetic from './Magnetic';
 import { feedback } from '@/lib/feedback-engine';
 import { useLanguage } from '@/context/LanguageContext';
+import { useInteraction } from '@/context/InteractionContext';
 
 interface HeaderProps {
   focusMode: boolean;
@@ -79,6 +79,7 @@ export default function Header({
   onUpdateProfile
 }: HeaderProps) {
   const { t, language, setLanguage } = useLanguage();
+  const { setIsUiLocked } = useInteraction();
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -99,6 +100,12 @@ export default function Header({
     { id: 'purple', nameKey: 'theme_purple', icon: Sparkles, bg: 'bg-purple-950' },
     { id: 'amoled', nameKey: 'theme_amoled', icon: Moon, bg: 'bg-black' },
   ];
+
+  // Sync global UI lock state with internal settings modals
+  useEffect(() => {
+    const isAnyInternalModalOpen = isThemeSheetOpen || isReminderOpen || isProfileOpen || isInfoOpen || isSettingsOpen;
+    setIsUiLocked(isAnyInternalModalOpen);
+  }, [isThemeSheetOpen, isReminderOpen, isProfileOpen, isInfoOpen, isSettingsOpen, setIsUiLocked]);
 
   const handleOpenSettings = () => {
     feedback.tap();
@@ -178,7 +185,7 @@ export default function Header({
             </DialogTrigger>
 
             <DialogContent 
-              className="max-w-[440px] glass-card border-white/10 p-0 outline-none overflow-hidden rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)]"
+              className="max-w-[440px] glass-card border-white/10 p-0 outline-none overflow-hidden rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)] z-[100]"
             >
               <motion.div
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -269,7 +276,7 @@ export default function Header({
       </header>
 
       <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
-        <SheetContent side="bottom" className="rounded-t-[4rem] bg-[#07070a]/95 backdrop-blur-3xl border-white/10 p-10 pb-16 outline-none">
+        <SheetContent side="bottom" className="rounded-t-[4rem] bg-[#07070a]/95 backdrop-blur-3xl border-white/10 p-10 pb-16 outline-none z-[110]">
           <SheetHeader className="mb-10">
             <SheetTitle className="text-white font-black text-3xl text-center tracking-tighter">{t('choose_view')}</SheetTitle>
             <SheetDescription className="text-white/30 text-center uppercase tracking-[0.3em] text-[10px] font-black">{t('stay_steady')}</SheetDescription>

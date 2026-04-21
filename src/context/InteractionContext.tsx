@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
@@ -9,8 +8,10 @@ interface InteractionState {
   intensity: number; // 0 to 1
   mode: StateOfMind;
   lastPulse: number;
+  isUiLocked: boolean;
   triggerPulse: (strength?: number) => void;
   setMode: (mode: StateOfMind) => void;
+  setIsUiLocked: (locked: boolean) => void;
   recordInteraction: (type: string) => void;
 }
 
@@ -20,6 +21,7 @@ export function InteractionProvider({ children }: { children: React.ReactNode })
   const [intensity, setIntensity] = useState(0);
   const [mode, setMode] = useState<StateOfMind>('calm');
   const [lastPulse, setLastPulse] = useState(0);
+  const [isUiLocked, setIsUiLocked] = useState(false);
   const [interactionLog, setInteractionLog] = useState<{ type: string; timestamp: number }[]>([]);
   const decayRef = useRef<number | null>(null);
 
@@ -57,7 +59,16 @@ export function InteractionProvider({ children }: { children: React.ReactNode })
   }, []);
 
   return (
-    <InteractionContext.Provider value={{ intensity, mode, lastPulse, triggerPulse, setMode, recordInteraction }}>
+    <InteractionContext.Provider value={{ 
+      intensity, 
+      mode, 
+      lastPulse, 
+      isUiLocked, 
+      triggerPulse, 
+      setMode, 
+      setIsUiLocked, 
+      recordInteraction 
+    }}>
       {children}
     </InteractionContext.Provider>
   );
