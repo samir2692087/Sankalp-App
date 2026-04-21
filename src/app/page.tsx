@@ -16,6 +16,7 @@ import ExportModal from '@/components/modals/ExportModal';
 import InsightsSheet from '@/components/modals/InsightsSheet';
 import EmergencyModal from '@/components/modals/EmergencyModal';
 import CalendarSheet from '@/components/modals/CalendarSheet';
+import ClarityLibrary from '@/components/modals/ClarityLibrary';
 import LaunchScreen from '@/components/layout/LaunchScreen';
 import FAB from '@/components/dashboard/FAB';
 import { UserData, INITIAL_DATA, UrgeIntensity } from '@/lib/types';
@@ -28,7 +29,7 @@ import {
 } from '@/lib/discipline-engine';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
-import { Globe, AlertCircle, ArrowRight } from 'lucide-react';
+import { Globe, AlertCircle, ArrowRight, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Magnetic from '@/components/interactions/Magnetic';
 import Tilt from '@/components/interactions/Tilt';
@@ -57,6 +58,7 @@ export default function IronWillDashboard() {
   const [showInsightsSheet, setShowInsightsSheet] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [showCalendarSheet, setShowCalendarSheet] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
   const [insightsTab, setInsightsTab] = useState('milestones');
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -140,7 +142,7 @@ export default function IronWillDashboard() {
 
   if (!mounted) return null;
 
-  const isAnySheetOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal || showCalendarSheet;
+  const isAnySheetOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal || showCalendarSheet || showLibrary;
 
   return (
     <>
@@ -250,37 +252,38 @@ export default function IronWillDashboard() {
 
               <JourneyTimeline currentStreak={data.currentStreak} />
 
-              <Proximity range={400}>
-                <Magnetic strength={0.2}>
-                  <motion.div 
-                    whileHover={{ scale: 1.02, y: -5 }}
-                    transition={springConfig}
-                    className="perspective-1000"
-                  >
-                    <Button 
-                      onClick={() => {
-                        feedback.tap();
-                        router.push('/browser');
-                      }}
-                      className={cn(
-                        "h-20 rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex items-center justify-between px-8",
-                        mode === 'focus' && 'h-16'
-                      )}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-primary/20 text-primary rounded-2xl flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-all">
-                          <Globe size={24} />
-                        </div>
-                        <div className="text-left">
-                          <p className="text-white font-bold text-base">Focus Browser</p>
-                          <p className="text-white/20 text-[9px] uppercase font-black tracking-[0.2em]">Always protected</p>
-                        </div>
-                      </div>
-                      <ArrowRight size={18} className="text-white/20 group-hover:text-primary transition-colors" />
-                    </Button>
-                  </motion.div>
-                </Magnetic>
-              </Proximity>
+              <div className="grid grid-cols-2 gap-4">
+                <Proximity range={300}>
+                  <Magnetic strength={0.3}>
+                    <motion.div whileHover={{ scale: 1.02, y: -5 }}>
+                      <Button 
+                        onClick={() => {
+                          feedback.tap();
+                          router.push('/browser');
+                        }}
+                        className="h-24 w-full rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex flex-col items-center justify-center gap-2 p-0"
+                      >
+                        <Globe size={24} className="text-primary group-hover:shadow-[0_0_15px_rgba(124,58,237,0.4)]" />
+                        <span className="text-white/80 font-bold text-xs">Browser</span>
+                      </Button>
+                    </motion.div>
+                  </Magnetic>
+                </Proximity>
+
+                <Proximity range={300}>
+                  <Magnetic strength={0.3}>
+                    <motion.div whileHover={{ scale: 1.02, y: -5 }}>
+                      <Button 
+                        onClick={() => handleOpenModal(setShowLibrary)}
+                        className="h-24 w-full rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex flex-col items-center justify-center gap-2 p-0"
+                      >
+                        <BookOpen size={24} className="text-amber-400 group-hover:shadow-[0_0_15px_rgba(251,191,36,0.4)]" />
+                        <span className="text-white/80 font-bold text-xs">Library</span>
+                      </Button>
+                    </motion.div>
+                  </Magnetic>
+                </Proximity>
+              </div>
               
               <ActionCards 
                 onCheckIn={() => {
@@ -357,6 +360,7 @@ export default function IronWillDashboard() {
         {showCalendarSheet && <CalendarSheet isOpen={showCalendarSheet} onClose={() => handleCloseModal(setShowCalendarSheet)} data={data} onToggleDate={() => {}} onSaveNote={() => {}} />}
         {showEmergencyModal && <EmergencyModal isOpen={showEmergencyModal} onClose={() => handleCloseModal(setShowEmergencyModal)} />}
         {showExportModal && <ExportModal isOpen={showExportModal} onClose={() => handleCloseModal(setShowExportModal)} data={data} onDataImport={() => {}} />}
+        {showLibrary && <ClarityLibrary isOpen={showLibrary} onClose={() => handleCloseModal(setShowLibrary)} />}
       </div>
     </>
   );
