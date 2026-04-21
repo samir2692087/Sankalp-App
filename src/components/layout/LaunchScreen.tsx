@@ -7,7 +7,7 @@ import { Shield, CheckCircle2, Cpu, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const BOOT_MESSAGES = [
-  { text: "Setting up your focus...", phase: 0 },
+  { text: "Preparing focus path...", phase: 0 },
   { text: "Grounding your environment...", phase: 20 },
   { text: "Stabilizing inner clarity...", phase: 45 },
   { text: "Finding your rhythm...", phase: 70 },
@@ -15,7 +15,6 @@ const BOOT_MESSAGES = [
   { text: "You're in control.", phase: 100 }
 ];
 
-// Spring config for physics-driven feel
 const springConfig = { type: "spring", stiffness: 100, damping: 20 };
 
 export default function LaunchScreen({ onComplete }: { onComplete: () => void }) {

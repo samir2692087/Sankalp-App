@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/dashboard/Header';
+import ClockBar from '@/components/dashboard/ClockBar';
 import StreakDisplay from '@/components/dashboard/StreakDisplay';
 import ActionCards from '@/components/dashboard/ActionCards';
 import InsightsSummary from '@/components/dashboard/InsightsSummary';
@@ -189,6 +190,8 @@ export default function IronWillDashboard() {
             transition={{ ...springConfig, duration: 1.2 }}
             className="flex flex-col flex-1"
           >
+            <ClockBar />
+            
             <Header 
               focusMode={data.focusMode} 
               theme={data.theme || 'dark'}

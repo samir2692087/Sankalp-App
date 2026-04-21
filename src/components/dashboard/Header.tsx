@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   Settings, 
   Trash2, 
@@ -9,13 +9,13 @@ import {
   Sun, 
   Moon, 
   Sparkles, 
-  Terminal, 
   Shield, 
   Zap, 
   Bell, 
   Database,
   X,
-  ChevronRight
+  ChevronRight,
+  UserCircle
 } from 'lucide-react';
 import {
   Dialog,
@@ -75,7 +75,6 @@ export default function Header({
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // --- PHYSICS ENGINE: SCROLL INERTIA ---
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
   
@@ -88,7 +87,7 @@ export default function Header({
     { id: 'light', name: 'Daylight', icon: Sun, bg: 'bg-white' },
     { id: 'dark', name: 'Eclipse', icon: Moon, bg: 'bg-slate-900' },
     { id: 'purple', name: 'Cosmic', icon: Sparkles, bg: 'bg-purple-950' },
-    { id: 'amoled', name: 'Void', icon: Terminal, bg: 'bg-black' },
+    { id: 'amoled', name: 'Void', icon: Moon, bg: 'bg-black' },
   ];
 
   const handleOpenSettings = () => {
@@ -113,7 +112,7 @@ export default function Header({
               </div>
               <div className="flex flex-col">
                 <h1 className="text-white font-black text-2xl leading-none tracking-tighter">IronWill</h1>
-                <span className="text-white/30 font-black uppercase tracking-[0.3em] text-[8px]">Mastery v2.5</span>
+                <span className="text-white/30 font-black uppercase tracking-[0.3em] text-[8px]">Mastery Focus</span>
               </div>
             </motion.div>
           </Magnetic>
@@ -121,34 +120,36 @@ export default function Header({
 
         <div className="pointer-events-auto">
           <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-            <Magnetic strength={0.5} activeScale={1.1}>
-              <motion.div 
-                style={{ y: lagY }}
-                animate={{ 
-                  scale: [1, 1.05, 1],
-                  rotateZ: [0, 1, -1, 0]
-                }}
-                transition={{
-                  scale: { repeat: Infinity, duration: 4, ease: "easeInOut" },
-                  rotateZ: { repeat: Infinity, duration: 6, ease: "easeInOut" }
-                }}
-              >
-                <DialogTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    onClick={handleOpenSettings}
-                    className="rounded-2xl w-14 h-14 glass-card flex items-center justify-center p-0 border-white/10 relative group overflow-hidden"
+            <DialogTrigger asChild>
+              <div className="inline-block">
+                <Magnetic strength={0.5} activeScale={1.1}>
+                  <motion.div 
+                    style={{ y: lagY }}
+                    animate={{ 
+                      scale: [1, 1.05, 1],
+                      rotateZ: [0, 1, -1, 0]
+                    }}
+                    transition={{
+                      scale: { repeat: Infinity, duration: 4, ease: "easeInOut" },
+                      rotateZ: { repeat: Infinity, duration: 6, ease: "easeInOut" }
+                    }}
                   >
-                    <motion.div
-                      animate={{ opacity: [0.1, 0.3, 0.1] }}
-                      transition={{ duration: 3, repeat: Infinity }}
-                      className="absolute inset-0 bg-primary/20 blur-xl group-hover:bg-primary/40 transition-colors"
-                    />
-                    <Settings size={24} className="text-white/80 relative z-10 group-hover:rotate-45 transition-transform duration-500" />
-                  </Button>
-                </DialogTrigger>
-              </motion.div>
-            </Magnetic>
+                    <Button 
+                      variant="ghost" 
+                      onClick={handleOpenSettings}
+                      className="rounded-2xl w-14 h-14 glass-card flex items-center justify-center p-0 border-white/10 relative group overflow-hidden"
+                    >
+                      <motion.div
+                        animate={{ opacity: [0.1, 0.3, 0.1] }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                        className="absolute inset-0 bg-primary/20 blur-xl group-hover:bg-primary/40 transition-colors"
+                      />
+                      <Settings size={24} className="text-white/80 relative z-10 group-hover:rotate-45 transition-transform duration-500" />
+                    </Button>
+                  </motion.div>
+                </Magnetic>
+              </div>
+            </DialogTrigger>
 
             <AnimatePresence>
               {isSettingsOpen && (
@@ -163,7 +164,7 @@ export default function Header({
                     transition={panelSpring}
                   >
                     <div className="bg-white/[0.03] p-10 text-center border-b border-white/10 relative">
-                      <DialogTitle className="text-2xl font-black text-white tracking-tight">Focus Control</DialogTitle>
+                      <DialogTitle className="text-2xl font-black text-white tracking-tight">Focus Settings</DialogTitle>
                       <DialogDescription className="text-white/30 font-black uppercase tracking-[0.25em] text-[9px] mt-1">Refine your environment</DialogDescription>
                       
                       <div className="absolute top-8 right-8">
@@ -181,9 +182,9 @@ export default function Header({
                     <div className="p-8 space-y-3">
                       {[
                         { label: 'Appearance', sub: 'Change your view', icon: Palette, color: 'bg-purple-500/20 text-purple-400', action: () => { setIsThemeSheetOpen(true); setIsSettingsOpen(false); } },
-                        { label: 'Focus Alert', sub: 'Stay on track', icon: Bell, color: 'bg-blue-500/20 text-blue-400', action: () => { setIsReminderOpen(true); setIsSettingsOpen(false); } },
-                        { label: 'Mastery Ledger', sub: 'Manage your history', icon: Database, color: 'bg-slate-500/20 text-slate-400', action: () => { onShowExport(); setIsSettingsOpen(false); } },
-                        { label: 'Focus Priority', sub: focusMode ? 'Active' : 'Dormant', icon: Zap, color: 'bg-yellow-500/20 text-yellow-400', action: () => { onToggleFocus(); setIsSettingsOpen(false); }, isToggle: true },
+                        { label: 'Reminders', sub: 'Stay on track', icon: Bell, color: 'bg-blue-500/20 text-blue-400', action: () => { setIsReminderOpen(true); setIsSettingsOpen(false); } },
+                        { label: 'Mastery Records', sub: 'Manage your history', icon: Database, color: 'bg-slate-500/20 text-slate-400', action: () => { onShowExport(); setIsSettingsOpen(false); } },
+                        { label: 'Focus Mode', sub: focusMode ? 'Active' : 'Dormant', icon: Zap, color: 'bg-yellow-500/20 text-yellow-400', action: () => { onToggleFocus(); setIsSettingsOpen(false); }, isToggle: true },
                       ].map((item, idx) => (
                         <motion.div 
                           key={item.label}
@@ -290,3 +291,4 @@ export default function Header({
     </>
   );
 }
+

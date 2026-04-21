@@ -35,7 +35,7 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
   const protocols = [
     { name: 'Cold Water', icon: Zap, desc: 'Splash face with cold water.' },
     { name: 'Breath Work', icon: Brain, desc: '4-7-8 Deep Breathing.' },
-    { name: 'Physical', icon: Heart, desc: 'Do 20 fast pushups.' },
+    { name: 'Physical Reset', icon: Heart, desc: 'Do 20 fast pushups.' },
   ];
 
   return (
@@ -78,7 +78,7 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Quick ways to reset</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Ways to reset</h4>
             {protocols.map((p) => (
               <motion.div 
                 whileHover={{ scale: 1.02, x: 5 }}
