@@ -33,7 +33,7 @@ export function getBehavioralInsights(data: UserData) {
     highRiskWindow: "N/A",
     winRate: 100,
     resilienceLevel: 'Steel',
-    riskLevel: 'STABLE',
+    riskLevel: 'STABLE' as const,
     protectionMessage: "Neural paths stabilizing. Keep focus."
   };
 

@@ -153,7 +153,10 @@ function CameraRig() {
 
 function PostProcessingStack({ intensity = 0, mode = 'calm' }: { intensity?: number, mode?: string }) {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   const chromaticOffset = useMemo(() => {
     const val = mode === 'risk' ? 0.008 : 0;
@@ -201,6 +204,7 @@ export default function Scene3D({ isBlurred }: SceneProps) {
           <NeuralParticles intensity={intensity} />
           <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
           <Environment preset="night" />
+          {/* Moving post-processing inside Suspense boundary to synchronize with the scene context */}
           <PostProcessingStack intensity={intensity} mode={mode} />
         </Suspense>
       </Canvas>
