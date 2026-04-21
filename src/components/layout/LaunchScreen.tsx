@@ -3,7 +3,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, CheckCircle2, Cpu, Activity } from 'lucide-react';
+import { CheckCircle2, Cpu, Activity } from 'lucide-react';
+import SankalpIcon from '@/components/icons/SankalpIcon';
 import { cn } from '@/lib/utils';
 
 const BOOT_MESSAGES = [
@@ -117,7 +118,7 @@ export default function LaunchScreen({ onComplete }: { onComplete: () => void })
             transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
             className="w-36 h-36 bg-white/[0.03] backdrop-blur-3xl rounded-full flex items-center justify-center relative border border-white/10"
           >
-            <Shield size={56} className="text-white relative z-10 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]" />
+            <SankalpIcon size={56} className="text-white relative z-10 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]" />
           </motion.div>
         </motion.div>
 

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useCallback, useRef, useMemo } from 'react';
@@ -11,18 +12,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { UserData } from "@/lib/types";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { X, StickyNote, Save, ShieldCheck, AlertCircle, Trash2, Zap, LayoutGrid } from 'lucide-react';
+import { X, StickyNote, Save, AlertCircle, Trash2, Zap, LayoutGrid } from 'lucide-react';
+import SankalpIcon from '@/components/icons/SankalpIcon';
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface CalendarSheetProps {
-  isOpen: boolean;
-  onClose: () => void;
-  data: UserData;
-  onToggleDate: (date: string) => void;
-  onSaveNote: (date: string, content: string) => void;
-}
 
 export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onSaveNote }: CalendarSheetProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -230,7 +224,7 @@ export default function CalendarSheet({ isOpen, onClose, data, onToggleDate, onS
           <div className="sticky bottom-0 left-0 w-full bg-white border-t border-slate-100 p-6 flex flex-col gap-4 z-20">
             <div className="grid grid-cols-3 gap-3 w-full">
               <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-green-500 text-white shadow-lg shadow-green-100">
-                <ShieldCheck size={14} />
+                <SankalpIcon size={14} />
                 <span className="text-[9px] font-black uppercase tracking-widest">Clean</span>
               </div>
               <div className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-red-500 text-white shadow-lg shadow-red-100">

@@ -4,7 +4,8 @@
 import { motion } from 'framer-motion';
 import { JOURNEY_PHASES, getJourneyPhase } from '@/lib/journey-data';
 import { cn } from '@/lib/utils';
-import { ChevronRight, Target, Brain, Activity, ShieldCheck, Sparkles } from 'lucide-react';
+import { Brain, Activity, Sparkles } from 'lucide-react';
+import SankalpIcon from '@/components/icons/SankalpIcon';
 import React, { useRef, useEffect } from 'react';
 
 interface JourneyTimelineProps {
@@ -101,7 +102,7 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <ShieldCheck size={14} className="text-green-500 mt-0.5 shrink-0" />
+                    <SankalpIcon size={14} className="text-green-500 mt-0.5 shrink-0" />
                     <div className="flex flex-col gap-0.5">
                       <span className="text-[8px] font-black uppercase text-white/20 tracking-tighter">Focus</span>
                       <p className="text-[10px] font-medium text-white/60">{phase.guidance}</p>
@@ -116,7 +117,7 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
                     className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between"
                   >
                     <span className="text-[9px] font-black uppercase text-primary tracking-widest animate-pulse">Current Stage</span>
-                    <Target size={14} className="text-primary" />
+                    <SankalpIcon size={14} className="text-primary" />
                   </motion.div>
                 )}
               </motion.div>

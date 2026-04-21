@@ -19,6 +19,7 @@ import CalendarSheet from '@/components/modals/CalendarSheet';
 import ClarityLibrary from '@/components/modals/ClarityLibrary';
 import LaunchScreen from '@/components/layout/LaunchScreen';
 import FAB from '@/components/dashboard/FAB';
+import SankalpIcon from '@/components/icons/SankalpIcon';
 import { UserData, INITIAL_DATA, UrgeIntensity } from '@/lib/types';
 import { getStoredData, saveData, clearData } from '@/lib/storage';
 import { 
@@ -31,7 +32,7 @@ import {
 } from '@/lib/discipline-engine';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
-import { ShieldAlert, BookOpen, Sparkles } from 'lucide-react';
+import { BookOpen, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Magnetic from '@/components/interactions/Magnetic';
 import Tilt from '@/components/interactions/Tilt';
@@ -270,10 +271,10 @@ export default function SankalpOverview() {
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="p-6 rounded-[2.5rem] bg-red-500/10 border border-red-500/20 flex flex-col gap-4 shadow-[0_20px_40px_rgba(239,68,68,0.1)]"
+                  className="p-6 rounded-[2.5rem] bg-red-500/10 border border-red-500/20 flex flex-col gap-4 shadow-[0_20px_40px_rgba(239,68,68,0.15)]"
                 >
                   <div className="flex items-center gap-3 text-red-500">
-                    <ShieldAlert size={24} className="animate-pulse" />
+                    <SankalpIcon size={24} className="animate-pulse" />
                     <h3 className="font-bold uppercase tracking-widest text-sm">Vulnerability High</h3>
                   </div>
                   <p className="text-xs text-white/60 leading-relaxed font-medium">
@@ -298,7 +299,7 @@ export default function SankalpOverview() {
                         onClick={() => handleOpenModal(setShowEmergencyModal)}
                         className="h-24 w-full rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex flex-col items-center justify-center gap-2 p-0"
                       >
-                        <ShieldAlert size={24} className="text-red-500 group-hover:shadow-[0_0_15px_rgba(239,68,68,0.4)]" />
+                        <SankalpIcon size={24} className="text-red-500 group-hover:shadow-[0_0_15px_rgba(239,68,68,0.4)]" />
                         <span className="text-white/80 font-bold text-xs">Control Mode</span>
                       </Button>
                     </motion.div>

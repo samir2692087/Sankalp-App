@@ -14,7 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Bell, BellOff, ShieldCheck, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Bell, BellOff, ArrowLeft, AlertCircle } from 'lucide-react';
+import SankalpIcon from '@/components/icons/SankalpIcon';
 import { useToast } from '@/hooks/use-toast';
 
 interface ReminderModalProps {
@@ -128,7 +129,7 @@ export default function ReminderModal({ isOpen, onClose, enabled, time, onUpdate
             onClick={handleSave}
             className="w-full h-14 rounded-xl font-bold bg-primary text-white shadow-lg shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all"
           >
-            <ShieldCheck className="mr-2" size={20} />
+            <SankalpIcon className="mr-2" size={20} />
             Save Protocol
           </Button>
         </div>

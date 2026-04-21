@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRef } from 'react';
@@ -9,7 +10,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileJson, FileText, FileSpreadsheet, FileBox, Trophy, Shield, Flame, Activity, ArrowLeft, Upload, Share2 } from 'lucide-react';
+import { FileJson, FileText, FileSpreadsheet, FileBox, Trophy, Flame, Activity, ArrowLeft, Upload, Share2 } from 'lucide-react';
+import SankalpIcon from '@/components/icons/SankalpIcon';
 import { UserData } from "@/lib/types";
 import { exportToCSV, exportToText, exportToPDF } from "@/lib/export-utils";
 import { importData } from "@/lib/storage";
@@ -63,7 +65,7 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
 
   const stats = [
     { label: 'Current Streak', val: `${data.currentStreak}D`, icon: Flame, color: 'text-orange-500' },
-    { label: 'Integrity Score', val: data.disciplineScore, icon: Shield, color: 'text-blue-500' },
+    { label: 'Integrity Score', val: data.disciplineScore, icon: SankalpIcon, color: 'text-blue-500' },
   ];
 
   return (

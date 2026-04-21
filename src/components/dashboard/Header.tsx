@@ -9,13 +9,13 @@ import {
   Sun, 
   Moon, 
   Sparkles, 
-  Shield, 
   Zap, 
   Bell, 
   Database,
   X,
   ChevronRight
 } from 'lucide-react';
+import SankalpIcon from '@/components/icons/SankalpIcon';
 import {
   Dialog,
   DialogContent,
@@ -107,7 +107,7 @@ export default function Header({
               className="flex items-center gap-4 group cursor-pointer"
             >
               <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center transition-all group-hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]">
-                <Shield className="text-white" size={26} />
+                <SankalpIcon className="text-white" size={26} />
               </div>
               <div className="flex flex-col">
                 <h1 className="text-white font-black text-2xl leading-none tracking-tighter">Sankalp</h1>

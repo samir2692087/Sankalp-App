@@ -9,7 +9,8 @@ import {
   DialogDescription 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ShieldAlert, Zap, Timer, Brain, Heart, ArrowLeft, Shield } from 'lucide-react';
+import { Zap, Timer, Brain, Heart, ArrowLeft } from 'lucide-react';
+import SankalpIcon from '@/components/icons/SankalpIcon';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -50,7 +51,7 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
             transition={{ repeat: Infinity, duration: 1.5 }}
             className="w-20 h-20 bg-red-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-red-500/40"
           >
-            <ShieldAlert size={40} className="text-white" />
+            <SankalpIcon size={40} className="text-white" />
           </motion.div>
           <DialogTitle className="text-3xl font-bold font-headline mb-2 text-red-500">Control Mode</DialogTitle>
           <DialogDescription className="font-bold text-red-500/60 uppercase tracking-[0.2em] text-[9px]">Pause and reflect</DialogDescription>
@@ -71,7 +72,7 @@ export default function EmergencyModal({ isOpen, onClose }: EmergencyModalProps)
                 </motion.div>
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-red-400 font-bold uppercase text-[10px]">
-                  <Shield size={14} className="animate-pulse" /> Focus active
+                  <SankalpIcon size={14} className="animate-pulse" /> Focus active
                 </motion.div>
               )}
             </AnimatePresence>

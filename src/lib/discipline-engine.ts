@@ -97,7 +97,7 @@ export function getBehavioralInsights(data: UserData) {
     resilienceLevel: winRate > 85 ? 'Fortress' : winRate > 60 ? 'Steady' : 'Vulnerable',
     riskLevel,
     protectionMessage: riskLevel === 'CRITICAL' ? "Take a moment to reset. Your resolve is being tested." :
-                       riskLevel === 'ELEVATED' ? "Stay sharp. Awareness is your primary shield." :
+                       riskLevel === 'ELEVATED' ? "Stay sharp. Awareness is your primary focus." :
                        "Stay focused. Every minute of control is a victory."
   };
 }

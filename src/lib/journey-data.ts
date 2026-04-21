@@ -28,7 +28,7 @@ export const JOURNEY_PHASES: JourneyPhase[] = [
     mentalState: 'Clarity returns, mood swings possible.',
     physicalState: 'Improved sleep, energy stabilizes.',
     challenges: 'Boredom and flatline.',
-    guidance: 'Routine is your primary shield. Stay steady.',
+    guidance: 'Routine is your primary foundation. Stay steady.',
     message: 'Foundations are being laid. Keep building.'
   },
   {

@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import SankalpIcon from '@/components/icons/SankalpIcon';
 import { UrgeIntensity } from '@/lib/types';
-import { ShieldAlert, ShieldCheck, Shield, ArrowLeft, Zap, Sparkles } from 'lucide-react';
+import { ArrowLeft, Zap, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -40,14 +41,6 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
       case 'Low': return 'text-green-400 border-green-400/30 shadow-green-400/20';
       case 'Medium': return 'text-blue-400 border-blue-400/30 shadow-blue-400/20';
       case 'High': return 'text-red-400 border-red-400/30 shadow-red-400/20';
-    }
-  };
-
-  const getIntensityIcon = () => {
-    switch(intensity) {
-      case 'Low': return <ShieldCheck size={52} />;
-      case 'Medium': return <Shield size={52} />;
-      case 'High': return <ShieldAlert size={52} />;
     }
   };
 
@@ -95,7 +88,7 @@ export default function UrgeModal({ isOpen, onClose, onSubmit }: UrgeModalProps)
                     transition={{ duration: 2, repeat: Infinity }}
                     className="drop-shadow-[0_0_20px_currentColor]"
                   >
-                      {getIntensityIcon()}
+                      <SankalpIcon size={52} />
                   </motion.div>
                   <span className="text-2xl font-black font-headline mt-2 text-white">
                       {intensity}

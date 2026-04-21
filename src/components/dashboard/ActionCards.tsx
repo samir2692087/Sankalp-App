@@ -1,7 +1,9 @@
 
 "use client";
 
-import { CheckCircle2, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
+import SankalpIcon from '@/components/icons/SankalpIcon';
+import { AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import Magnetic from './Magnetic';
@@ -48,7 +50,7 @@ export default function ActionCards({ onCheckIn, onUrge, onRelapse, checkedInTod
           className="glass-card w-full p-6 rounded-[2.2rem] flex flex-col items-center gap-3 hover:border-blue-500/40 hover:shadow-[0_10px_30px_rgba(59,130,246,0.15)] perspective-1000"
         >
           <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
-            <ShieldCheck size={26} />
+            <SankalpIcon size={26} />
           </div>
           <span className="text-white/80 font-black text-[9px] uppercase tracking-widest">Victory</span>
         </motion.button>

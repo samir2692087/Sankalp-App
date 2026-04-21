@@ -7,10 +7,9 @@ import {
   Target, 
   BarChart3, 
   Calendar, 
-  Shield, 
-  X,
-  Sparkles
+  X
 } from 'lucide-react';
+import SankalpIcon from '@/components/icons/SankalpIcon';
 import { cn } from '@/lib/utils';
 import { 
   motion, 
@@ -52,7 +51,7 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
     { label: 'Resolve', icon: Target, tab: 'milestones', color: 'bg-purple-600', shadow: 'shadow-purple-500/40' },
     { label: 'Pulse', icon: BarChart3, tab: 'weekly', color: 'bg-blue-500', shadow: 'shadow-blue-500/40' },
     { label: 'History', icon: Calendar, tab: 'history', color: 'bg-green-500', shadow: 'shadow-green-500/40' },
-    { label: 'Control', icon: Shield, isEmergency: true, color: 'bg-red-500', shadow: 'shadow-red-500/40' },
+    { label: 'Control', icon: SankalpIcon, isEmergency: true, color: 'bg-red-500', shadow: 'shadow-red-500/40' },
   ];
 
   const handleAction = (item: any) => {

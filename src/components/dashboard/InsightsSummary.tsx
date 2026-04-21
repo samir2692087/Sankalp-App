@@ -1,7 +1,8 @@
 
 "use client";
 
-import { TrendingUp, ShieldCheck, AlertTriangle, Activity } from 'lucide-react';
+import { TrendingUp, Activity } from 'lucide-react';
+import SankalpIcon from '@/components/icons/SankalpIcon';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -97,9 +98,9 @@ export default function InsightsSummary({
             "bg-white/5 border-white/5 text-white/60"
           )}
         >
-          {riskLevel === 'CRITICAL' ? <AlertTriangle size={20} className="shrink-0 animate-pulse" /> : 
-           riskLevel === 'ELEVATED' ? <AlertTriangle size={20} className="shrink-0" /> : 
-           <ShieldCheck size={20} className="shrink-0 text-primary" />}
+          {riskLevel === 'CRITICAL' ? <SankalpIcon size={20} className="shrink-0 animate-pulse text-red-500" /> : 
+           riskLevel === 'ELEVATED' ? <SankalpIcon size={20} className="shrink-0 text-amber-500" /> : 
+           <SankalpIcon size={20} className="shrink-0 text-primary" />}
           <p className="text-[11px] font-bold uppercase tracking-tight leading-snug">{message}</p>
         </motion.div>
       )}
