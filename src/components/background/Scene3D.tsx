@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useRef, useMemo, useEffect, useState } from 'react';
@@ -91,9 +90,12 @@ function NeuralParticles({ intensity }: { intensity: number }) {
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    if (!pointsRef.current?.geometry?.attributes?.position) return;
+    const points = pointsRef.current;
+    if (!points || !points.geometry) return;
     
-    const posAttr = pointsRef.current.geometry.attributes.position;
+    const posAttr = points.geometry.getAttribute('position') as THREE.BufferAttribute;
+    if (!posAttr || !posAttr.array) return;
+    
     const array = posAttr.array as Float32Array;
     const safeIntensity = intensity || 0;
     
@@ -113,7 +115,7 @@ function NeuralParticles({ intensity }: { intensity: number }) {
       }
     }
     posAttr.needsUpdate = true;
-    pointsRef.current.rotation.y = t * 0.02;
+    points.rotation.y = t * 0.02;
   });
 
   return (
