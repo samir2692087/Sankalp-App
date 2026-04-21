@@ -69,7 +69,7 @@ function EnergyCore({ intensity, mode }: { intensity: number, mode: string }) {
           opacity={0.9}
         />
       </mesh>
-    </group>
+ group>
   );
 }
 
@@ -191,7 +191,7 @@ export default function Scene3D({ isBlurred }: SceneProps) {
             />
             <Noise opacity={0.04} />
             <Vignette offset={0.1} darkness={1.2} />
-            <ChromaticAberration offset={chromaticOffset} opacity={mode === 'risk' ? 1 : 0} />
+            <ChromaticAberration offset={chromaticOffset} />
           </EffectComposer>
           
           <Environment preset="night" />
