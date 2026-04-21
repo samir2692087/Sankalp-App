@@ -12,13 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 import { UserProfile } from '@/lib/types';
 import { useLanguage } from '@/context/LanguageContext';
 import { User, ShieldCheck, ArrowLeft, CheckCircle2 } from 'lucide-react';
@@ -33,8 +26,6 @@ interface ProfileModalProps {
   profile: UserProfile;
   onUpdate: (profile: UserProfile) => void;
 }
-
-const springConfig = { type: "spring", stiffness: 200, damping: 20 };
 
 export default function ProfileModal({ isOpen, onClose, profile, onUpdate }: ProfileModalProps) {
   const { t } = useLanguage();
@@ -156,28 +147,31 @@ export default function ProfileModal({ isOpen, onClose, profile, onUpdate }: Pro
               </div>
             </div>
 
-            {/* Age Group Selection */}
+            {/* Age Group Selection Chips (Fixed Visibility Issue) */}
             <div className="space-y-4">
               <Label className="font-black text-[10px] uppercase tracking-[0.2em] text-white/30 ml-2">{t('age_label')}</Label>
-              <Select 
-                value={localProfile.ageGroup} 
-                onValueChange={(v) => setLocalProfile({ ...localProfile, ageGroup: v as any })}
-              >
-                <SelectTrigger className="h-16 rounded-[1.8rem] bg-white/[0.03] border-white/5 font-bold px-8 focus:ring-primary/20">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="glass-card border-white/10 rounded-[2rem] p-2">
-                  {AGE_GROUPS.map(a => (
-                    <SelectItem 
-                      key={a.key} 
-                      value={a.key!} 
-                      className="rounded-xl p-4 font-bold text-sm focus:bg-primary/20 focus:text-white"
+              <div className="grid grid-cols-2 gap-3">
+                {AGE_GROUPS.map((a) => {
+                  const isActive = localProfile.ageGroup === a.key;
+                  return (
+                    <motion.button
+                      key={a.key}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      type="button"
+                      onClick={() => setLocalProfile({ ...localProfile, ageGroup: a.key })}
+                      className={cn(
+                        "h-14 rounded-2xl border font-bold text-xs transition-all flex items-center justify-center px-4",
+                        isActive 
+                          ? "bg-primary text-white border-primary shadow-[0_0_20px_rgba(168,85,247,0.3)]" 
+                          : "bg-white/[0.03] border-white/5 text-white/40 hover:border-white/10 hover:bg-white/[0.05]"
+                      )}
                     >
                       {a.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    </motion.button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Privacy Shield */}
