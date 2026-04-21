@@ -45,7 +45,7 @@ export function getBehavioralInsights(data: UserData) {
       )
     : "N/A";
 
-  const totalBattles = urges.length + relapses.length;
+  const totalBattles = (urges.length || 0) + (relapses.length || 0);
   const winRate = totalBattles > 0 ? Math.round((urges.length / totalBattles) * 100) : 100;
 
   // Streak Protection: Risk Detection
