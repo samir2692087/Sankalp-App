@@ -1,4 +1,3 @@
-
 "use client";
 
 import { motion } from 'framer-motion';
@@ -7,17 +6,18 @@ import { cn } from '@/lib/utils';
 import { Brain, Activity, Sparkles } from 'lucide-react';
 import SankalpIcon from '@/components/icons/SankalpIcon';
 import React, { useRef, useEffect } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface JourneyTimelineProps {
   currentStreak: number;
 }
 
 export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps) {
+  const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentPhase = getJourneyPhase(currentStreak);
   const progressPercent = Math.min((currentStreak / 365) * 100, 100);
 
-  // Auto-scroll to current phase
   useEffect(() => {
     if (scrollRef.current) {
       const activeCard = scrollRef.current.querySelector('[data-active="true"]');
@@ -31,10 +31,10 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
     <div className="w-full flex flex-col gap-6">
       <div className="flex items-center justify-between px-2">
         <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 flex items-center gap-2">
-          <Sparkles size={14} className="text-primary" /> Resolve Path
+          <Sparkles size={14} className="text-primary" /> {t('resolve_path')}
         </h3>
         <span className="text-[10px] font-bold text-white/20">
-          Day {currentStreak} of 365
+          {t('days')} {currentStreak} {t('of')} 365
         </span>
       </div>
 
@@ -66,10 +66,10 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
                     "px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest",
                     isActive ? "bg-primary text-white" : "bg-white/5 text-white/40"
                   )}>
-                    Stage {idx + 1}
+                    {t('stage')} {idx + 1}
                   </div>
                   <div className="text-[9px] font-bold text-white/20">
-                    {phase.range[0]}-{phase.range[1]} Days
+                    {phase.range[0]}-{phase.range[1]} {t('days')}
                   </div>
                 </div>
 
@@ -116,7 +116,7 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between"
                   >
-                    <span className="text-[9px] font-black uppercase text-primary tracking-widest animate-pulse">Current Stage</span>
+                    <span className="text-[9px] font-black uppercase text-primary tracking-widest animate-pulse">{t('current_stage')}</span>
                     <SankalpIcon size={14} className="text-primary" />
                   </motion.div>
                 )}

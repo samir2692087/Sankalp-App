@@ -1,4 +1,3 @@
-
 "use client";
 
 import { CheckCircle2 } from 'lucide-react';
@@ -7,6 +6,7 @@ import { AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import Magnetic from './Magnetic';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ActionCardsProps {
   onCheckIn: () => void;
@@ -18,6 +18,8 @@ interface ActionCardsProps {
 const physicsConfig = { type: "spring", stiffness: 150, damping: 15, mass: 1 };
 
 export default function ActionCards({ onCheckIn, onUrge, onRelapse, checkedInToday }: ActionCardsProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="grid grid-cols-3 gap-4 w-full px-1">
       <Magnetic strength={0.3}>
@@ -37,7 +39,7 @@ export default function ActionCards({ onCheckIn, onUrge, onRelapse, checkedInTod
           <div className="w-14 h-14 rounded-2xl bg-green-500/10 text-green-400 flex items-center justify-center">
             <CheckCircle2 size={26} />
           </div>
-          <span className="text-white/80 font-black text-[9px] uppercase tracking-widest">Protocol</span>
+          <span className="text-white/80 font-black text-[9px] uppercase tracking-widest">{t('protocol')}</span>
         </motion.button>
       </Magnetic>
 
@@ -52,7 +54,7 @@ export default function ActionCards({ onCheckIn, onUrge, onRelapse, checkedInTod
           <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
             <SankalpIcon size={26} />
           </div>
-          <span className="text-white/80 font-black text-[9px] uppercase tracking-widest">Victory</span>
+          <span className="text-white/80 font-black text-[9px] uppercase tracking-widest">{t('victory')}</span>
         </motion.button>
       </Magnetic>
 
@@ -67,7 +69,7 @@ export default function ActionCards({ onCheckIn, onUrge, onRelapse, checkedInTod
           <div className="w-14 h-14 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center">
             <AlertTriangle size={26} />
           </div>
-          <span className="text-white/80 font-black text-[9px] uppercase tracking-widest">Reset</span>
+          <span className="text-white/80 font-black text-[9px] uppercase tracking-widest">{t('reset')}</span>
         </motion.button>
       </Magnetic>
     </div>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo } from 'react';
@@ -24,6 +23,7 @@ import { getWeeklyData, getAchievements } from "@/lib/discipline-engine";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface InsightsSheetProps {
   isOpen: boolean;
@@ -33,6 +33,7 @@ interface InsightsSheetProps {
 }
 
 export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'milestones' }: InsightsSheetProps) {
+  const { t } = useLanguage();
   const weeklyData = useMemo(() => getWeeklyData(data), [data]);
   const achievements = useMemo(() => getAchievements(data?.currentStreak || 0, data?.disciplineScore || 0), [data?.currentStreak, data?.disciplineScore]);
 
@@ -61,17 +62,17 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
               <ArrowLeft size={24} />
             </Button>
             <div>
-              <SheetTitle className="text-2xl font-bold text-slate-900 tracking-tight">Insights</SheetTitle>
-              <SheetDescription className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">Pattern Analysis</SheetDescription>
+              <SheetTitle className="text-2xl font-bold text-slate-900 tracking-tight">{t('insights')}</SheetTitle>
+              <SheetDescription className="text-[10px] font-black uppercase tracking-widest text-slate-500 mt-1">{t('pattern_analysis')}</SheetDescription>
             </div>
           </div>
         </SheetHeader>
 
         <Tabs defaultValue={defaultTab} className="flex-1 flex flex-col px-6 pb-6 overflow-hidden">
           <TabsList className="w-full bg-slate-100 p-1.5 rounded-2xl h-14 mb-6 shrink-0 border border-slate-200">
-            <TabsTrigger value="milestones" className="flex-1 rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest text-slate-500 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-md transition-all"><Target size={14}/> Goals</TabsTrigger>
-            <TabsTrigger value="weekly" className="flex-1 rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest text-slate-500 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-md transition-all"><TrendingUp size={14}/> Timeline</TabsTrigger>
-            <TabsTrigger value="achievements" className="flex-1 rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest text-slate-500 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-md transition-all"><Trophy size={14}/> Mastery</TabsTrigger>
+            <TabsTrigger value="milestones" className="flex-1 rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest text-slate-500 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-md transition-all"><Target size={14}/> {t('goals')}</TabsTrigger>
+            <TabsTrigger value="weekly" className="flex-1 rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest text-slate-500 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-md transition-all"><TrendingUp size={14}/> {t('timeline')}</TabsTrigger>
+            <TabsTrigger value="achievements" className="flex-1 rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest text-slate-500 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-md transition-all"><Trophy size={14}/> {t('mastery')}</TabsTrigger>
           </TabsList>
 
           <div className="flex-1 overflow-y-auto pb-20 no-scrollbar">
@@ -85,9 +86,9 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
                       className="bg-white border border-slate-200 p-6 rounded-[2rem] flex flex-col gap-4 shadow-sm"
                     >
                       <div className="flex justify-between items-center">
-                        <span className="text-lg font-bold text-slate-900">{goal} Day Resolve</span>
+                        <span className="text-lg font-bold text-slate-900">{goal} {t('day_resolve')}</span>
                         <span className={cn("text-[9px] font-black px-3 py-1 rounded-full uppercase", progress === 100 ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-700")}>
-                          {progress === 100 ? "Ascended" : `${Math.round(progress)}% Stable`}
+                          {progress === 100 ? t('ascended') : `${Math.round(progress)}% ${t('stable')}`}
                         </span>
                       </div>
                       <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
@@ -106,7 +107,7 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
 
             <TabsContent value="weekly" className="mt-0 outline-none space-y-6">
               <div className="bg-slate-900 p-8 rounded-[2.5rem] h-64 shadow-2xl">
-                <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-6">Resilience Path</h4>
+                <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-6">{t('resilience_path')}</h4>
                 <div className="h-40 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={timelineData}>
@@ -127,11 +128,11 @@ export default function InsightsSheet({ isOpen, onClose, data, defaultTab = 'mil
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white border border-slate-200 p-6 rounded-[2rem] text-center shadow-sm">
-                  <p className="text-[9px] font-black uppercase text-slate-400 mb-1">Total Conflicts</p>
+                  <p className="text-[9px] font-black uppercase text-slate-400 mb-1">{t('total_conflicts')}</p>
                   <p className="text-2xl font-bold text-slate-900">{(data?.urges?.length || 0) + (data?.relapses?.length || 0)}</p>
                 </div>
                 <div className="bg-white border border-slate-200 p-6 rounded-[2rem] text-center shadow-sm">
-                  <p className="text-[9px] font-black uppercase text-slate-400 mb-1">Victory Rate</p>
+                  <p className="text-[9px] font-black uppercase text-slate-400 mb-1">{t('victory_rate')}</p>
                   <p className="text-2xl font-bold text-slate-900">{winRate}%</p>
                 </div>
               </div>

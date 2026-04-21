@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Flame, Trophy, Snowflake } from 'lucide-react';
@@ -6,6 +5,7 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import React, { useRef } from 'react';
 import { useInteraction } from '@/context/InteractionContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface StreakDisplayProps {
   current: number;
@@ -18,6 +18,7 @@ interface StreakDisplayProps {
 const physicsConfig = { type: "spring", stiffness: 120, damping: 14, mass: 1 };
 
 export default function StreakDisplay({ current, best, focusMode, freezes, onUseFreeze }: StreakDisplayProps) {
+  const { t } = useLanguage();
   const cardRef = useRef<HTMLDivElement>(null);
   const { intensity, mode } = useInteraction();
   const mouseX = useMotionValue(0);
@@ -111,7 +112,7 @@ export default function StreakDisplay({ current, best, focusMode, freezes, onUse
                 mode === 'risk' ? "text-red-500" : "text-white/40"
               )}
             >
-              {mode === 'risk' ? 'Stay aware' : 'Commitment path'}
+              {mode === 'risk' ? t('stay_aware_msg') : t('commitment_path')}
             </motion.span>
             <motion.h2 
               key={current}
@@ -125,7 +126,7 @@ export default function StreakDisplay({ current, best, focusMode, freezes, onUse
             >
               {current}
             </motion.h2>
-            <span className="text-white/60 font-bold uppercase tracking-widest text-sm">Days</span>
+            <span className="text-white/60 font-bold uppercase tracking-widest text-sm">{t('days')}</span>
           </div>
           
           <motion.div 
@@ -154,8 +155,8 @@ export default function StreakDisplay({ current, best, focusMode, freezes, onUse
           >
              <Trophy size={18} className="text-yellow-400" />
              <div className="flex flex-col">
-                <span className="text-white/20 text-[8px] font-black uppercase tracking-widest leading-none mb-1">Personal Best</span>
-                <span className="text-white font-bold text-sm">{best} Days</span>
+                <span className="text-white/20 text-[8px] font-black uppercase tracking-widest leading-none mb-1">{t('personal_best')}</span>
+                <span className="text-white font-bold text-sm">{best} {t('days')}</span>
              </div>
           </motion.div>
 
@@ -174,8 +175,8 @@ export default function StreakDisplay({ current, best, focusMode, freezes, onUse
           >
              <Snowflake size={18} className={cn("text-blue-400", freezes > 0 && "animate-spin-slow")} />
              <div className="flex flex-col text-left">
-                <span className="text-white/20 text-[8px] font-black uppercase tracking-widest leading-none mb-1">Pauses</span>
-                <span className="text-white font-bold text-sm">{freezes} Available</span>
+                <span className="text-white/20 text-[8px] font-black uppercase tracking-widest leading-none mb-1">{t('pauses')}</span>
+                <span className="text-white font-bold text-sm">{freezes} {t('available')}</span>
              </div>
           </motion.button>
         </div>

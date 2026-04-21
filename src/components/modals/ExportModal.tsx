@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useRef } from 'react';
@@ -18,6 +17,7 @@ import { importData } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from 'framer-motion';
 import { cn } from "@/lib/utils";
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -27,6 +27,7 @@ interface ExportModalProps {
 }
 
 export default function ExportModal({ isOpen, onClose, data, onDataImport }: ExportModalProps) {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -36,10 +37,10 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `ironwill-backup-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `sankalp-backup-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    toast({ title: "Neural Snapshot Saved", description: "JSON archive encrypted and stored." });
+    toast({ title: t('stay_steady'), description: "Backup saved successfully." });
   };
 
   const handleJSONImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,11 +53,11 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
       if (typeof result === 'string') {
         const success = importData(result);
         if (success) {
-          toast({ title: "Protocol Restored", description: "All mastery logs have been successfully imported." });
+          toast({ title: t('victory'), description: "Protocol restored successfully." });
           onDataImport();
           onClose();
         } else {
-          toast({ variant: "destructive", title: "Import Error", description: "Incompatible backup format." });
+          toast({ variant: "destructive", title: "Error", description: "Incompatible backup format." });
         }
       }
     };
@@ -64,8 +65,8 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
   };
 
   const stats = [
-    { label: 'Current Streak', val: `${data.currentStreak}D`, icon: Flame, color: 'text-orange-500' },
-    { label: 'Integrity Score', val: data.disciplineScore, icon: SankalpIcon, color: 'text-blue-500' },
+    { label: t('streak'), val: `${data.currentStreak}D`, icon: Flame, color: 'text-orange-500' },
+    { label: t('discipline_score'), val: data.disciplineScore, icon: SankalpIcon, color: 'text-blue-500' },
   ];
 
   return (
@@ -83,8 +84,8 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
           <div className="w-14 h-14 bg-primary/20 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Share2 size={28} />
           </div>
-          <DialogTitle className="text-2xl font-bold font-headline">Archive Center</DialogTitle>
-          <DialogDescription className="text-muted-foreground/60 font-medium uppercase tracking-[0.2em] text-[8px] mt-1">Neural Data Management</DialogDescription>
+          <DialogTitle className="text-2xl font-bold font-headline">{t('archive_center')}</DialogTitle>
+          <DialogDescription className="text-muted-foreground/60 font-medium uppercase tracking-[0.2em] text-[8px] mt-1">{t('data_management')}</DialogDescription>
         </div>
         
         <div className="flex-1 overflow-y-auto p-8 sm:p-10 space-y-10 no-scrollbar">
@@ -103,13 +104,13 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
           </div>
 
           <div className="space-y-4">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Export Protocol</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 ml-2">{t('export_protocol')}</h4>
             <div className="grid grid-cols-2 gap-4">
               {[
-                { label: 'PDF Report', icon: FileBox, color: 'text-red-400', action: () => exportToPDF(data) },
-                { label: 'CSV Ledger', icon: FileSpreadsheet, color: 'text-green-400', action: () => exportToCSV(data) },
-                { label: 'Text Log', icon: FileText, color: 'text-primary', action: () => exportToText(data) },
-                { label: 'JSON Backup', icon: FileJson, color: 'text-blue-400', action: handleJSONExport }
+                { label: t('pdf_report'), icon: FileBox, color: 'text-red-400', action: () => exportToPDF(data) },
+                { label: t('csv_ledger'), icon: FileSpreadsheet, color: 'text-green-400', action: () => exportToCSV(data) },
+                { label: t('text_log'), icon: FileText, color: 'text-primary', action: () => exportToText(data) },
+                { label: t('json_backup'), icon: FileJson, color: 'text-blue-400', action: handleJSONExport }
               ].map((item) => (
                 <motion.button 
                   key={item.label}
@@ -141,7 +142,7 @@ export default function ExportModal({ isOpen, onClose, data, onDataImport }: Exp
               className="w-full h-16 rounded-2xl border border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-all flex items-center justify-center gap-4 font-bold text-muted-foreground/80 hover:text-primary"
             >
               <Upload size={22} />
-              Restore Mastery Logs
+              {t('restore_logs')}
             </Button>
           </div>
           <div className="h-10" /> {/* Mobile safety spacer */}

@@ -1,12 +1,13 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ClockBar() {
+  const { t } = useLanguage();
   const [time, setTime] = useState<string | null>(null);
   const [date, setDate] = useState<string | null>(null);
 
@@ -45,7 +46,7 @@ export default function ClockBar() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-[8px] font-black uppercase tracking-[0.15em] text-white/20">Active Resolve</span>
+          <span className="text-[8px] font-black uppercase tracking-[0.15em] text-white/20">{t('active_resolve')}</span>
         </div>
       </div>
     </div>

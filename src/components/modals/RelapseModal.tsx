@@ -1,11 +1,9 @@
-
 "use client";
 
 import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
@@ -17,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, BrainCircuit } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface RelapseModalProps {
   isOpen: boolean;
@@ -28,6 +27,7 @@ const REASONS = ["Stress", "Boredom", "Social Media", "Late Night", "Loneliness"
 const TIMES = ["Morning", "Afternoon", "Evening", "Late Night"];
 
 export default function RelapseModal({ isOpen, onClose, onSubmit }: RelapseModalProps) {
+  const { t } = useLanguage();
   const [reason, setReason] = useState("Boredom");
   const [time, setTime] = useState("Late Night");
 
@@ -46,13 +46,13 @@ export default function RelapseModal({ isOpen, onClose, onSubmit }: RelapseModal
           <div className="w-14 h-14 bg-destructive/20 text-destructive rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <BrainCircuit size={28} />
           </div>
-          <DialogTitle className="text-xl font-bold font-headline">Starting Over</DialogTitle>
-          <DialogDescription className="text-muted-foreground/60 font-medium uppercase tracking-[0.2em] text-[8px] mt-1">Reflect on what happened</DialogDescription>
+          <DialogTitle className="text-xl font-bold font-headline">{t('starting_over')}</DialogTitle>
+          <DialogDescription className="text-muted-foreground/60 font-medium uppercase tracking-[0.2em] text-[8px] mt-1">{t('reflect_happened')}</DialogDescription>
         </div>
 
         <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
           <div className="space-y-4">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">What triggered it?</Label>
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t('trigger_question')}</Label>
             <RadioGroup value={reason} onValueChange={setReason} className="grid grid-cols-2 gap-3">
               {REASONS.map((r) => (
                 <motion.div key={r} whileTap={{ scale: 0.98 }}>
@@ -74,10 +74,10 @@ export default function RelapseModal({ isOpen, onClose, onSubmit }: RelapseModal
           </div>
 
           <div className="space-y-4">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">When did it happen?</Label>
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t('when_question')}</Label>
             <Select value={time} onValueChange={setTime}>
               <SelectTrigger className="h-14 rounded-2xl bg-white/5 border-white/5 font-bold focus:ring-1 focus:ring-primary/20">
-                <SelectValue placeholder="Select window" />
+                <SelectValue placeholder={t('select_window')} />
               </SelectTrigger>
               <SelectContent className="glass-card border-white/10 rounded-2xl">
                 {TIMES.map(t => <SelectItem key={t} value={t} className="rounded-xl p-3 font-bold">{t}</SelectItem>)}
@@ -93,7 +93,7 @@ export default function RelapseModal({ isOpen, onClose, onSubmit }: RelapseModal
             className="w-full h-16 rounded-2xl font-bold bg-gradient-to-r from-primary to-secondary hover:scale-[1.02] active:scale-95 transition-all text-base shadow-[0_10px_30px_rgba(124,58,237,0.3)]"
             onClick={() => onSubmit(reason, time)}
           >
-            Reset focus
+            {t('reset_focus')}
           </Button>
         </DialogFooter>
       </DialogContent>
