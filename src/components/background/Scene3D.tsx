@@ -40,14 +40,14 @@ function EnergyCore({ intensity, mode }: { intensity: number, mode: string }) {
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    const safeIntensity = intensity || 0;
+    if (!meshRef.current) return;
     
-    if (meshRef.current) {
-      meshRef.current.rotation.y = t * 0.1 * (1 + safeIntensity * 2);
-      meshRef.current.rotation.z = t * 0.05;
-      const pulse = 1 + Math.sin(t * 2) * 0.05 + safeIntensity * 0.2;
-      meshRef.current.scale.set(pulse, pulse, pulse);
-    }
+    const safeIntensity = intensity || 0;
+    meshRef.current.rotation.y = t * 0.1 * (1 + safeIntensity * 2);
+    meshRef.current.rotation.z = t * 0.05;
+    const pulse = 1 + Math.sin(t * 2) * 0.05 + safeIntensity * 0.2;
+    meshRef.current.scale.set(pulse, pulse, pulse);
+
     if (lightRef.current) {
       lightRef.current.intensity = (50 + safeIntensity * 200) * (mode === 'risk' ? 1.5 : 1);
     }
@@ -103,11 +103,9 @@ function NeuralParticles({ intensity }: { intensity: number }) {
       const iy = i * 3 + 1;
       const iz = i * 3 + 2;
       
-      // Drift motion
       array[ix] = initialPositions[ix] + Math.sin(t * 0.5 + initialPositions[iz]) * 0.5;
       array[iy] = initialPositions[iy] + Math.cos(t * 0.3 + initialPositions[ix]) * 0.5;
       
-      // Interaction scatter effect
       if (safeIntensity > 0.1) {
         array[ix] += (Math.random() - 0.5) * safeIntensity * 2;
         array[iy] += (Math.random() - 0.5) * safeIntensity * 2;
@@ -155,8 +153,10 @@ export default function Scene3D({ isBlurred }: SceneProps) {
   const [mounted, setMounted] = useState(false);
   const { mode, intensity } = useInteraction();
 
+  // Stable effect parameters to avoid EffectComposer re-aggregation crashes
   const riskOffset = useMemo(() => new THREE.Vector2(0.008, 0.008), []);
   const zeroOffset = useMemo(() => new THREE.Vector2(0, 0), []);
+  const currentOffset = mode === 'risk' ? riskOffset : zeroOffset;
 
   useEffect(() => {
     setMounted(true);
@@ -183,9 +183,7 @@ export default function Scene3D({ isBlurred }: SceneProps) {
           />
           <Noise opacity={0.04} />
           <Vignette offset={0.1} darkness={1.2} />
-          <ChromaticAberration 
-            offset={mode === 'risk' ? riskOffset : zeroOffset} 
-          />
+          <ChromaticAberration offset={currentOffset} />
         </EffectComposer>
         
         <Environment preset="night" />
