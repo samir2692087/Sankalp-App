@@ -12,6 +12,7 @@ import {
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { useInteraction } from '@/context/InteractionContext';
+import { cn } from '@/lib/utils';
 
 interface SceneProps {
   streak: number;
