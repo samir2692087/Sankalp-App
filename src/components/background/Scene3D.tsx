@@ -27,7 +27,7 @@ interface SceneProps {
   isBlurred?: boolean;
 }
 
-function EnergyCore({ intensity = 0, mode = 'calm' }: { intensity: number, mode: string }) {
+function EnergyCore({ intensity = 0, mode = 'calm' }: { intensity?: number, mode?: string }) {
   const meshRef = useRef<THREE.Mesh>(null!);
   const lightRef = useRef<THREE.PointLight>(null!);
   
@@ -72,7 +72,7 @@ function EnergyCore({ intensity = 0, mode = 'calm' }: { intensity: number, mode:
   );
 }
 
-function NeuralParticles({ intensity = 0 }: { intensity: number }) {
+function NeuralParticles({ intensity = 0 }: { intensity?: number }) {
   const pointsRef = useRef<THREE.Points>(null!);
   const count = 2000;
   
