@@ -39,8 +39,6 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
       </div>
 
       <div className="relative">
-        <div className="absolute top-1/2 left-0 w-full h-px bg-white/5 -translate-y-1/2" />
-        
         <div 
           ref={scrollRef}
           className="flex gap-4 overflow-x-auto no-scrollbar pb-6 px-2 snap-x snap-mandatory"
@@ -114,7 +112,7 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between"
+                    className="mt-6 flex items-center justify-between"
                   >
                     <span className="text-[9px] font-black uppercase text-primary tracking-widest animate-pulse">{t('current_stage')}</span>
                     <SankalpIcon size={14} className="text-primary" />
