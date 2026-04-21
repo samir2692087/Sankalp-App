@@ -2,7 +2,7 @@
 import { UserData } from './types';
 
 export function calculateStreak(lastRelapseTimestamp: number | null): number {
-  if (!lastRelapseTimestamp || typeof lastRelapseTimestamp !== 'number') return 0;
+  if (!lastRelapseTimestamp || typeof lastRelapseTimestamp !== 'number' || isNaN(lastRelapseTimestamp)) return 0;
   try {
     const diff = Date.now() - lastRelapseTimestamp;
     return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
