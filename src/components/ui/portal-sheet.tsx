@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
@@ -31,24 +32,17 @@ export default function PortalSheet({
     return () => setMounted(false);
   }, []);
 
-  // Prevent background scroll and input propagation
+  // Prevent background scroll
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      document.body.style.touchAction = 'none';
     } else {
       document.body.style.overflow = 'unset';
-      document.body.style.touchAction = 'unset';
     }
     return () => {
       document.body.style.overflow = 'unset';
-      document.body.style.touchAction = 'unset';
     };
   }, [isOpen]);
-
-  const stopPropagation = useCallback((e: React.UIEvent) => {
-    e.stopPropagation();
-  }, []);
 
   if (!mounted) return null;
 
@@ -56,17 +50,19 @@ export default function PortalSheet({
     <AnimatePresence>
       {isOpen && (
         <div 
-          className="fixed inset-0 z-[10000] flex items-end justify-center pointer-events-auto"
-          onWheel={stopPropagation}
-          onTouchMove={stopPropagation}
+          className="fixed inset-0 z-[10000] flex items-end justify-center pointer-events-none"
         >
-          {/* Backdrop */}
+          {/* Backdrop - Explicit pointer-events-auto for close handler */}
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0 bg-black/70 backdrop-blur-md pointer-events-auto"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+            className="absolute inset-0 bg-black/70 backdrop-blur-md pointer-events-auto cursor-pointer"
           />
 
           {/* Sheet Container */}
@@ -74,16 +70,25 @@ export default function PortalSheet({
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent backdrop trigger
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
             className={cn(
-              "relative w-full max-w-2xl bg-[#0a0a0f] border-t border-white/10 rounded-t-[3rem] shadow-[0_-20px_60px_rgba(0,0,0,0.5)] flex flex-col max-h-[85vh] outline-none pointer-events-auto",
+              "relative w-full max-w-2xl bg-[#0a0a0f] border-t border-white/10 rounded-t-[3rem] shadow-[0_-20px_60px_rgba(0,0,0,0.8)] flex flex-col max-h-[85vh] outline-none pointer-events-auto",
               className
             )}
-            onClick={stopPropagation}
           >
             {/* Drag Handle */}
-            <div className="w-full pt-4 pb-2 flex justify-center shrink-0 cursor-pointer" onClick={onClose}>
-              <div className="w-12 h-1 bg-white/20 rounded-full" />
+            <div 
+              className="w-full pt-4 pb-2 flex justify-center shrink-0 cursor-pointer" 
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+            >
+              <div className="w-12 h-1 bg-white/20 rounded-full hover:bg-white/40 transition-colors" />
             </div>
 
             {/* Header */}
@@ -96,7 +101,10 @@ export default function PortalSheet({
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  onClick={onClose} 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClose();
+                  }} 
                   className="rounded-full bg-white/5 hover:bg-white/10 text-white/40"
                 >
                   <X size={20} />
@@ -106,8 +114,8 @@ export default function PortalSheet({
 
             {/* Content Area - Scrollable */}
             <div 
-              className="flex-1 overflow-y-auto no-scrollbar overscroll-contain overscroll-y-contain touch-pan-y"
-              onScroll={stopPropagation}
+              className="flex-1 overflow-y-auto no-scrollbar overscroll-contain touch-pan-y"
+              onScroll={(e) => e.stopPropagation()}
             >
               <div className="p-8 pt-4 pb-32">
                 {children}

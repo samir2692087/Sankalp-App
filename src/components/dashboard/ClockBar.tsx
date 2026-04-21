@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -35,7 +36,7 @@ export default function ClockBar() {
   return (
     <div className={cn(
       "w-full bg-black/40 backdrop-blur-xl border-b border-white/5 py-2 px-8 flex items-center justify-between z-[60] sticky top-0 transition-opacity duration-300",
-      isUiLocked ? "pointer-events-none opacity-40" : "pointer-events-auto opacity-100"
+      isUiLocked ? "opacity-40" : "opacity-100"
     )}>
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">

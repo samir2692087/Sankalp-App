@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -111,7 +112,6 @@ export default function SankalpOverview() {
     triggerPulse(0.3);
     feedback.tap();
     setIsUiLocked(true);
-    window.history.pushState({ modalOpen: true }, "");
     setter(true);
   }, [triggerPulse, setIsUiLocked]);
 
@@ -119,7 +119,6 @@ export default function SankalpOverview() {
     triggerPulse(0.2);
     feedback.tap();
     setIsUiLocked(false);
-    if (window.history.state?.modalOpen) window.history.back();
     setter(false);
   }, [triggerPulse, setIsUiLocked]);
 

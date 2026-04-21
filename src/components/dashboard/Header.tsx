@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -73,7 +74,7 @@ export default function Header({
   onUpdateProfile
 }: HeaderProps) {
   const { t, language, setLanguage } = useLanguage();
-  const { setIsUiLocked, isUiLocked } = useInteraction();
+  const { isUiLocked } = useInteraction();
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -95,12 +96,6 @@ export default function Header({
     { id: 'amoled', nameKey: 'theme_amoled', icon: Moon, bg: 'bg-black' },
   ];
 
-  useEffect(() => {
-    const isAnyInternalModalOpen = isThemeSheetOpen || isReminderOpen || isProfileOpen || isInfoOpen || isSettingsOpen;
-    // We only trigger setIsUiLocked if it's not already handled by the parent
-    // to avoid potential recursive updates.
-  }, [isThemeSheetOpen, isReminderOpen, isProfileOpen, isInfoOpen, isSettingsOpen]);
-
   const handleOpenSettings = () => {
     feedback.tap();
     setIsSettingsOpen(true);
@@ -112,13 +107,10 @@ export default function Header({
 
   return (
     <>
-      <header className={cn(
-        "w-full flex items-center justify-between p-8 sticky top-0 z-[50] shrink-0 transition-opacity duration-300",
-        isUiLocked ? "pointer-events-none opacity-40" : "pointer-events-auto opacity-100"
-      )}>
+      <header className="w-full flex items-center justify-between p-8 sticky top-0 z-[50] shrink-0 transition-opacity duration-300">
         <div className="absolute inset-0 bg-[#0B0F14]/60 backdrop-blur-2xl border-b border-white/5 pointer-events-none -z-10" />
         
-        <div className="pointer-events-auto">
+        <div className={cn(isUiLocked ? "pointer-events-none opacity-40" : "pointer-events-auto")}>
           <Magnetic strength={0.2}>
             <motion.div 
               whileHover={{ scale: 1.05 }}
@@ -136,7 +128,7 @@ export default function Header({
           </Magnetic>
         </div>
 
-        <div className="pointer-events-auto flex items-center gap-4">
+        <div className={cn("flex items-center gap-4", isUiLocked ? "pointer-events-none opacity-40" : "pointer-events-auto")}>
           <Magnetic strength={0.5}>
             <Button 
               variant="ghost" 
