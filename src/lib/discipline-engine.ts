@@ -19,9 +19,9 @@ export function calculateDisciplineScore(data: UserData): number {
   
   const currentStreak = data.currentStreak || 0;
   const streakFactor = Math.min(currentStreak * 2, 50);
-  const urgeFactor = Math.min(urges.length * 3, 40);
-  const checkInFactor = Math.min(checkIns.length * 0.5, 20);
-  const relapsePenalty = Math.min(relapses.length * 15, 90);
+  const urgeFactor = Math.min((urges?.length || 0) * 3, 40);
+  const checkInFactor = Math.min((checkIns?.length || 0) * 0.5, 20);
+  const relapsePenalty = Math.min((relapses?.length || 0) * 15, 90);
   
   const rawScore = 40 + streakFactor + urgeFactor + checkInFactor - relapsePenalty;
   return Math.max(0, Math.min(100, Math.round(rawScore)));
@@ -61,8 +61,8 @@ export function getBehavioralInsights(data: UserData) {
   const times = relapses.map(r => r?.timeOfDay).filter((t): t is string => !!t);
   const highRiskWindow = getMostFrequent(times) || "N/A";
 
-  const totalBattles = (urges.length) + (relapses.length);
-  const winRate = totalBattles > 0 ? Math.round((urges.length / totalBattles) * 100) : 100;
+  const totalBattles = (urges?.length || 0) + (relapses?.length || 0);
+  const winRate = totalBattles > 0 ? Math.round(((urges?.length || 0) / totalBattles) * 100) : 100;
 
   const now = Date.now();
   const recentUrges = urges.filter(u => u?.timestamp && (now - u.timestamp < 1000 * 60 * 60 * 48)).length;
@@ -153,5 +153,5 @@ export function getDailyChallenge(streak: number) {
   const pool = s >= 90 ? highStreak : s >= 30 ? midStreak : lowStreak;
   const now = Date.now();
   const dayOfYear = Math.floor((now - new Date(new Date(now).getFullYear(), 0, 0).getTime()) / 86400000);
-  return pool[Math.max(0, dayOfYear % (pool.length || 1))];
+  return pool[Math.max(0, dayOfYear % (pool?.length || 1))];
 }
