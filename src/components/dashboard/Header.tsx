@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -13,7 +12,8 @@ import {
   Bell, 
   Database,
   X,
-  ChevronRight
+  ChevronRight,
+  Languages
 } from 'lucide-react';
 import SankalpIcon from '@/components/icons/SankalpIcon';
 import {
@@ -45,6 +45,7 @@ import {
 } from 'framer-motion';
 import Magnetic from './Magnetic';
 import { feedback } from '@/lib/feedback-engine';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface HeaderProps {
   focusMode: boolean;
@@ -70,6 +71,7 @@ export default function Header({
   onShowExport,
   onUpdateReminder
 }: HeaderProps) {
+  const { t, language, setLanguage } = useLanguage();
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -110,14 +112,26 @@ export default function Header({
                 <SankalpIcon className="text-white" size={26} />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-white font-black text-2xl leading-none tracking-tighter">Sankalp</h1>
-                <span className="text-white/30 font-black uppercase tracking-[0.3em] text-[8px]">Inner Strength</span>
+                <h1 className="text-white font-black text-2xl leading-none tracking-tighter">{t('app_name')}</h1>
+                <span className="text-white/30 font-black uppercase tracking-[0.3em] text-[8px]">{t('tagline')}</span>
               </div>
             </motion.div>
           </Magnetic>
         </div>
 
-        <div className="pointer-events-auto">
+        <div className="pointer-events-auto flex items-center gap-4">
+          <Magnetic strength={0.5}>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
+              className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white font-black text-[10px] uppercase tracking-widest gap-2"
+            >
+              <Languages size={14} />
+              {language === 'en' ? 'EN' : 'हिन्दी'}
+            </Button>
+          </Magnetic>
+
           <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <DialogTrigger asChild>
               <div className="inline-block">
@@ -160,8 +174,8 @@ export default function Header({
                 transition={panelSpring}
               >
                 <div className="bg-white/[0.03] p-10 text-center border-b border-white/10 relative">
-                  <DialogTitle className="text-2xl font-black text-white tracking-tight">Preferences</DialogTitle>
-                  <DialogDescription className="text-white/30 font-black uppercase tracking-[0.25em] text-[9px] mt-1">Refine your resolve</DialogDescription>
+                  <DialogTitle className="text-2xl font-black text-white tracking-tight">{t('preferences')}</DialogTitle>
+                  <DialogDescription className="text-white/30 font-black uppercase tracking-[0.25em] text-[9px] mt-1">{t('refine_resolve')}</DialogDescription>
                   
                   <div className="absolute top-8 right-8">
                      <Button 
@@ -177,10 +191,11 @@ export default function Header({
 
                 <div className="p-8 space-y-3">
                   {[
-                    { label: 'Appearance', sub: 'Change your view', icon: Palette, color: 'bg-purple-500/20 text-purple-400', action: () => { setIsThemeSheetOpen(true); setIsSettingsOpen(false); } },
-                    { label: 'Reminders', sub: 'Stay steady', icon: Bell, color: 'bg-blue-500/20 text-blue-400', action: () => { setIsReminderOpen(true); setIsSettingsOpen(false); } },
-                    { label: 'Archive', sub: 'Manage your history', icon: Database, color: 'bg-slate-500/20 text-slate-400', action: () => { onShowExport(); setIsSettingsOpen(false); } },
-                    { label: 'Focus Mode', sub: focusMode ? 'Active' : 'Dormant', icon: Zap, color: 'bg-yellow-500/20 text-yellow-400', action: () => { onToggleFocus(); setIsSettingsOpen(false); }, isToggle: true },
+                    { label: t('appearance'), sub: t('choose_view'), icon: Palette, color: 'bg-purple-500/20 text-purple-400', action: () => { setIsThemeSheetOpen(true); setIsSettingsOpen(false); } },
+                    { label: t('reminders'), sub: t('stay_steady'), icon: Bell, color: 'bg-blue-500/20 text-blue-400', action: () => { setIsReminderOpen(true); setIsSettingsOpen(false); } },
+                    { label: t('archive'), sub: t('preferences'), icon: Database, color: 'bg-slate-500/20 text-slate-400', action: () => { onShowExport(); setIsSettingsOpen(false); } },
+                    { label: t('focus_mode'), sub: focusMode ? t('active') : t('dormant'), icon: Zap, color: 'bg-yellow-500/20 text-yellow-400', action: () => { onToggleFocus(); setIsSettingsOpen(false); }, isToggle: true },
+                    { label: t('language'), sub: language === 'en' ? 'English' : 'हिन्दी', icon: Languages, color: 'bg-green-500/20 text-green-400', action: () => setLanguage(language === 'en' ? 'hi' : 'en') },
                   ].map((item, idx) => (
                     <motion.div 
                       key={item.label}
@@ -227,8 +242,8 @@ export default function Header({
                         <Trash2 size={22} />
                       </div>
                       <div className="text-left flex-1">
-                        <p className="font-bold text-sm">Reset Path</p>
-                        <p className="text-red-500/30 text-[9px] uppercase font-black tracking-widest mt-1">Start over</p>
+                        <p className="font-bold text-sm">{t('reset_path')}</p>
+                        <p className="text-red-500/30 text-[9px] uppercase font-black tracking-widest mt-1">{t('reset')}</p>
                       </div>
                     </Button>
                   </motion.div>
@@ -242,8 +257,8 @@ export default function Header({
       <Sheet open={isThemeSheetOpen} onOpenChange={setIsThemeSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-[4rem] bg-[#07070a]/95 backdrop-blur-3xl border-white/10 p-10 pb-16 outline-none">
           <SheetHeader className="mb-10">
-            <SheetTitle className="text-white font-black text-3xl text-center tracking-tighter">Choose your view</SheetTitle>
-            <SheetDescription className="text-white/30 text-center uppercase tracking-[0.3em] text-[10px] font-black">Find the style that fits you</SheetDescription>
+            <SheetTitle className="text-white font-black text-3xl text-center tracking-tighter">{t('choose_view')}</SheetTitle>
+            <SheetDescription className="text-white/30 text-center uppercase tracking-[0.3em] text-[10px] font-black">{t('stay_steady')}</SheetDescription>
           </SheetHeader>
           <div className="grid grid-cols-2 gap-5 max-w-xl mx-auto">
             {themes.map((t) => (
