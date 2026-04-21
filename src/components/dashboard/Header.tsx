@@ -15,7 +15,8 @@ import {
   X,
   ChevronRight,
   Languages,
-  User
+  User,
+  Info
 } from 'lucide-react';
 import SankalpIcon from '@/components/icons/SankalpIcon';
 import {
@@ -38,6 +39,7 @@ import { AppTheme, UserData, UserProfile } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import ReminderModal from '@/components/modals/ReminderModal';
 import ProfileModal from '@/components/modals/ProfileModal';
+import InfoModal from '@/components/modals/InfoModal';
 import { 
   motion, 
   AnimatePresence, 
@@ -80,6 +82,7 @@ export default function Header({
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const { scrollY } = useScroll();
@@ -205,6 +208,7 @@ export default function Header({
                     { label: t('appearance'), sub: t('choose_view'), icon: Palette, color: 'bg-purple-500/20 text-purple-400', action: () => { setIsThemeSheetOpen(true); setIsSettingsOpen(false); } },
                     { label: t('reminders'), sub: t('stay_steady'), icon: Bell, color: 'bg-blue-500/20 text-blue-400', action: () => { setIsReminderOpen(true); setIsSettingsOpen(false); } },
                     { label: t('archive'), sub: t('preferences'), icon: Database, color: 'bg-slate-500/20 text-slate-400', action: () => { onShowExport(); setIsSettingsOpen(false); } },
+                    { label: t('legal_info'), sub: t('legal_desc'), icon: Info, color: 'bg-amber-500/20 text-amber-400', action: () => { setIsInfoOpen(true); setIsSettingsOpen(false); } },
                     { label: t('focus_mode'), sub: focusMode ? t('active') : t('dormant'), icon: Zap, color: 'bg-yellow-500/20 text-yellow-400', action: () => { onToggleFocus(); setIsSettingsOpen(false); }, isToggle: true },
                   ].map((item, idx) => (
                     <motion.div 
@@ -314,6 +318,19 @@ export default function Header({
           onClose={() => setIsProfileOpen(false)} 
           profile={data.profile} 
           onUpdate={onUpdateProfile} 
+        />
+      )}
+
+      {isInfoOpen && (
+        <InfoModal 
+          isOpen={isInfoOpen} 
+          onClose={() => setIsInfoOpen(false)} 
+          onDeleteData={() => {
+            if(confirm(t('delete_confirm'))) {
+              onReset();
+              setIsInfoOpen(false);
+            }
+          }}
         />
       )}
     </>

@@ -191,7 +191,19 @@ export const translations = {
     age_45p: "45+",
     save_profile: "Save Profile",
     greeting_default: "Stay steady",
-    greeting_named: "Stay steady, {{name}}"
+    greeting_named: "Stay steady, {{name}}",
+    legal_info: "Legal & Info",
+    about_app: "About Sankalp",
+    privacy_policy: "Privacy Policy",
+    terms_of_use: "Terms of Use",
+    contact_us: "Contact Us",
+    legal_desc: "Transparency and trust",
+    about_content: "Sankalp is your silent companion on the journey to self-mastery. Designed for focus, it helps you build resolve through consistent discipline without distractions or data harvesting.",
+    privacy_content: "Your privacy is our core foundation. Every byte of your mastery data—from streaks to personal reflections—is stored exclusively on your local device. We have no servers, no tracking, and no access to your identity. Your progress is yours alone.",
+    terms_content: "By using Sankalp, you agree that your progress is a result of your own dedication. The application is a tool to assist you, provided without warranties. All interactions are processed locally.",
+    contact_content: "Sankalp is a distraction-free experience. For feedback or support, please reflect on your progress and continue your journey. Your inner strength is the best support.",
+    delete_data: "Delete All Data",
+    delete_confirm: "Are you sure? This action is irreversible and will wipe all your progress."
   },
   hi: {
     app_name: "संकल्प",
@@ -378,6 +390,18 @@ export const translations = {
     age_45p: "45+",
     save_profile: "प्रोफ़ाइल सहेजें",
     greeting_default: "स्थिर रहें",
-    greeting_named: "स्थिर रहें, {{name}}"
+    greeting_named: "स्थिर रहें, {{name}}",
+    legal_info: "कानूनी और जानकारी",
+    about_app: "संकल्प के बारे में",
+    privacy_policy: "गोपनीयता नीति",
+    terms_of_use: "उपयोग की शर्तें",
+    contact_us: "संपर्क करें",
+    legal_desc: "पारदर्शिता और विश्वास",
+    about_content: "संकल्प आत्म-महारत की यात्रा में आपका शांत साथी है। फोकस के लिए डिज़ाइन किया गया, यह आपको बिना किसी व्याकुलता या डेटा संग्रह के निरंतर अनुशासन के माध्यम से संकल्प बनाने में मदद करता है।",
+    privacy_content: "आपकी गोपनीयता हमारी मुख्य नींव है। आपके मास्टरी डेटा का हर बाइट—सिलसिले से लेकर व्यक्तिगत चिंतन तक—विशेष रूप से आपके स्थानीय डिवाइस पर संग्रहीत किया जाता है। हमारे पास कोई सर्वर, कोई ट्रैकिंग और आपकी पहचान तक कोई पहुंच नहीं है। आपकी प्रगति केवल आपकी है।",
+    terms_content: "संकल्प का उपयोग करके, आप सहमत होते हैं कि आपकी प्रगति आपके अपने समर्पण का परिणाम है। एप्लिकेशन आपकी सहायता के लिए एक उपकरण है, जो बिना किसी वारंटी के प्रदान किया गया है। सभी इंटरैक्शन स्थानीय स्तर पर संसाधित किए जाते हैं।",
+    contact_content: "संकल्प एक व्याकुलता-मुक्त अनुभव है। प्रतिक्रिया या सहायता के लिए, कृपया अपनी प्रगति पर विचार करें और अपनी यात्रा जारी रखें। आपकी आंतरिक शक्ति सबसे अच्छा समर्थन है।",
+    delete_data: "सभी डेटा हटाएं",
+    delete_confirm: "क्या आप निश्चित हैं? यह क्रिया अपरिवर्तनीय है और आपकी सभी प्रगति को मिटा देगी।"
   }
 };
