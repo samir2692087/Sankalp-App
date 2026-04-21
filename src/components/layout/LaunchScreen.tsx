@@ -1,26 +1,26 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, Cpu, Activity } from 'lucide-react';
 import SankalpIcon from '@/components/icons/SankalpIcon';
+import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
-
-const BOOT_MESSAGES = [
-  { text: "Preparing resolve path...", phase: 0 },
-  { text: "Grounding your environment...", phase: 20 },
-  { text: "Stabilizing clarity...", phase: 45 },
-  { text: "Finding your balance...", phase: 70 },
-  { text: "Ready for today.", phase: 90 },
-  { text: "You're in control.", phase: 100 }
-];
 
 const springConfig = { type: "spring", stiffness: 100, damping: 20 };
 
 export default function LaunchScreen({ onComplete }: { onComplete: () => void }) {
+  const { t } = useLanguage();
   const [progress, setProgress] = useState(0);
   const [isFinishing, setIsFinishing] = useState(false);
+
+  const BOOT_MESSAGES = useMemo(() => [
+    { text: t('loading_resolve'), phase: 0 },
+    { text: t('loading_environment'), phase: 20 },
+    { text: t('loading_clarity'), phase: 45 },
+    { text: t('loading_balance'), phase: 70 },
+    { text: t('loading_ready'), phase: 90 },
+    { text: t('loading_control'), phase: 100 }
+  ], [t]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,7 +40,7 @@ export default function LaunchScreen({ onComplete }: { onComplete: () => void })
 
   const currentMessage = useMemo(() => {
     return [...BOOT_MESSAGES].reverse().find(m => progress >= m.phase)?.text || BOOT_MESSAGES[0].text;
-  }, [progress]);
+  }, [progress, BOOT_MESSAGES]);
 
   const particles = useMemo(() => {
     return Array.from({ length: 30 }).map((_, i) => ({
@@ -128,7 +128,7 @@ export default function LaunchScreen({ onComplete }: { onComplete: () => void })
           transition={{ ...springConfig, delay: 0.5 }}
           className="mt-12 text-center"
         >
-          <h1 className="text-4xl font-black tracking-tighter text-white mb-2">SANKALP</h1>
+          <h1 className="text-4xl font-black tracking-tighter text-white mb-2">{t('app_name').toUpperCase()}</h1>
           <div className="h-6">
             <AnimatePresence mode="wait">
               <motion.p
@@ -137,7 +137,7 @@ export default function LaunchScreen({ onComplete }: { onComplete: () => void })
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={springConfig}
-                className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/80"
+                className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/80 px-6"
               >
                 {currentMessage}
               </motion.p>
@@ -146,21 +146,16 @@ export default function LaunchScreen({ onComplete }: { onComplete: () => void })
         </motion.div>
       </div>
 
-      <div className="absolute bottom-16 left-0 right-0 flex justify-center gap-16">
-        {[CheckCircle2, Activity, Cpu].map((Icon, idx) => (
-          <motion.div 
-            key={idx}
-            animate={{ 
-              opacity: progress > (30 + idx * 30) ? 1 : 0.2,
-              scale: progress > (30 + idx * 30) ? 1.1 : 1
-            }}
-            transition={springConfig}
-            className="flex flex-col items-center gap-2"
-          >
-            <Icon size={20} className={cn("transition-colors", progress > (30 + idx * 30) ? "text-primary" : "text-white/20")} />
-          </motion.div>
-        ))}
-      </div>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.3 }}
+        transition={{ delay: 1, duration: 2 }}
+        className="absolute bottom-16 text-center"
+      >
+        <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white">
+          {t('tagline')}
+        </p>
+      </motion.div>
     </motion.div>
   );
 }
