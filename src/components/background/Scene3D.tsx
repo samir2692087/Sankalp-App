@@ -197,8 +197,10 @@ export default function Scene3D({ isBlurred }: SceneProps) {
           <NeuralParticles intensity={intensity} />
           <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
           <Environment preset="night" />
-          <PostProcessingStack intensity={intensity} mode={mode} />
         </Suspense>
+
+        {/* Post-processing moved outside Suspense for React 19 stability */}
+        <PostProcessingStack intensity={intensity} mode={mode} />
       </Canvas>
     </div>
   );
