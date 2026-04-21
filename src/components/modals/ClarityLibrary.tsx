@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   Sheet, 
   SheetContent, 
@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LIBRARY, MoodState, Book } from '@/lib/books';
+import { MoodState, Book, getLocalRecommendations, fetchBooksByMood } from '@/lib/books';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BookOpen, 
@@ -25,9 +25,12 @@ import {
   X,
   Languages,
   ArrowLeft,
-  CheckCircle2
+  CheckCircle2,
+  ExternalLink,
+  RefreshCw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 interface ClarityLibraryProps {
   isOpen: boolean;
@@ -47,20 +50,39 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
   const [selectedMood, setSelectedMood] = useState<MoodState | null>(null);
   const [languageFilter, setLanguageFilter] = useState<'All' | 'English' | 'Hindi'>('All');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [apiBooks, setApiBooks] = useState<Book[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const filteredBooks = useMemo(() => {
+  useEffect(() => {
+    if (selectedMood) {
+      setIsLoading(true);
+      setApiBooks([]);
+      fetchBooksByMood(selectedMood).then(books => {
+        setApiBooks(books);
+        setIsLoading(false);
+      });
+    }
+  }, [selectedMood]);
+
+  const allBooks = useMemo(() => {
     if (!selectedMood) return [];
-    return LIBRARY.filter(book => {
-      const moodMatch = book.moods.includes(selectedMood);
+    const local = getLocalRecommendations(selectedMood);
+    const combined = [...local, ...apiBooks];
+    
+    return combined.filter(book => {
       const langMatch = languageFilter === 'All' || book.language === languageFilter;
-      return moodMatch && langMatch;
+      return langMatch;
     });
-  }, [selectedMood, languageFilter]);
+  }, [selectedMood, apiBooks, languageFilter]);
 
   const handleClose = () => {
     setSelectedMood(null);
     setSelectedBook(null);
     onClose();
+  };
+
+  const handleOpenSource = (url?: string) => {
+    if (url) window.open(url, '_blank');
   };
 
   return (
@@ -111,7 +133,7 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                       <p className="text-white/40 text-sm font-medium">{selectedBook.author}</p>
                     </div>
                     <Badge variant="outline" className="border-primary/30 text-primary text-[10px] font-black uppercase px-3 py-1">
-                      {selectedBook.readingTime} READ
+                      {selectedBook.readingTime}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-4">
@@ -121,6 +143,17 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                     </div>
                   </div>
                 </div>
+
+                {selectedBook.coverUrl && (
+                  <div className="relative w-full aspect-[2/3] max-w-[200px] mx-auto rounded-2xl overflow-hidden shadow-2xl">
+                    <Image 
+                      src={selectedBook.coverUrl} 
+                      alt={selectedBook.title} 
+                      fill 
+                      className="object-cover"
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-6">
                   <div className="p-8 rounded-[2.5rem] bg-white/[0.03] border border-white/5 space-y-4">
@@ -151,12 +184,22 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                   </div>
                 </div>
 
-                <Button 
-                  onClick={() => setSelectedBook(null)}
-                  className="w-full h-16 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] text-white font-bold text-sm border border-white/5"
-                >
-                  Return to Library
-                </Button>
+                <div className="flex flex-col gap-3">
+                  {selectedBook.sourceUrl && (
+                    <Button 
+                      onClick={() => handleOpenSource(selectedBook.sourceUrl)}
+                      className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-sm gap-2"
+                    >
+                      <ExternalLink size={18} /> Open Source in Library
+                    </Button>
+                  )}
+                  <Button 
+                    onClick={() => setSelectedBook(null)}
+                    className="w-full h-16 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] text-white font-bold text-sm border border-white/5"
+                  >
+                    Return to Results
+                  </Button>
+                </div>
               </motion.div>
             ) : !selectedMood ? (
               <motion.div 
@@ -226,52 +269,65 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                   <div className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest", MOODS.find(m => m.id === selectedMood)?.color)}>
                     {MOODS.find(m => m.id === selectedMood)?.label}
                   </div>
-                  <span className="text-white/20 text-[10px] font-bold uppercase">{filteredBooks.length} Recommendations</span>
+                  <span className="text-white/20 text-[10px] font-bold uppercase">
+                    {isLoading ? "Fetching knowledge..." : `${allBooks.length} Recommendations`}
+                  </span>
                 </div>
 
                 <div className="flex flex-col gap-4 pb-20">
-                  <AnimatePresence mode="popLayout">
-                    {filteredBooks.map((book, idx) => (
-                      <motion.div
-                        key={book.id}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.1 }}
-                        className="group glass-card p-6 rounded-[2.5rem] border border-white/5 hover:border-primary/30 transition-all"
-                      >
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="space-y-1">
-                            <h4 className="text-lg font-bold text-white group-hover:text-primary transition-colors">{book.title}</h4>
-                            <p className="text-white/40 text-xs font-medium">{book.author}</p>
+                  {isLoading ? (
+                    <div className="py-20 flex flex-col items-center gap-4">
+                      <RefreshCw size={32} className="text-primary animate-spin" />
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Scanning Open Library...</p>
+                    </div>
+                  ) : (
+                    <AnimatePresence mode="popLayout">
+                      {allBooks.map((book, idx) => (
+                        <motion.div
+                          key={book.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.05 }}
+                          className="group glass-card p-6 rounded-[2.5rem] border border-white/5 hover:border-primary/30 transition-all"
+                        >
+                          <div className="flex gap-4">
+                            {book.coverUrl && (
+                              <div className="relative w-16 h-24 rounded-lg overflow-hidden shrink-0 shadow-lg group-hover:scale-105 transition-transform">
+                                <Image src={book.coverUrl} alt={book.title} fill className="object-cover" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between items-start mb-2">
+                                <div className="space-y-1 min-w-0">
+                                  <h4 className="text-lg font-bold text-white group-hover:text-primary transition-colors truncate">{book.title}</h4>
+                                  <p className="text-white/40 text-xs font-medium truncate">{book.author}</p>
+                                </div>
+                              </div>
+                              <p className="text-white/50 text-xs leading-relaxed mb-4 font-medium line-clamp-2">
+                                {book.description}
+                              </p>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 text-[9px] font-black uppercase text-white/20 tracking-tighter">
+                                  <Languages size={12} className="text-primary/50" />
+                                  {book.language}
+                                </div>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => setSelectedBook(book)}
+                                  className="text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 rounded-lg group"
+                                >
+                                  Explore <ChevronRight size={14} className="ml-1 transition-transform group-hover:translate-x-1" />
+                                </Button>
+                              </div>
+                            </div>
                           </div>
-                          <Badge variant="outline" className="border-white/10 text-[9px] text-white/30 font-bold uppercase px-2 py-0.5">
-                            {book.readingTime}
-                          </Badge>
-                        </div>
-                        
-                        <p className="text-white/50 text-xs leading-relaxed mb-6 font-medium line-clamp-2">
-                          {book.description}
-                        </p>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-[9px] font-black uppercase text-white/20 tracking-tighter">
-                            <Languages size={12} className="text-primary/50" />
-                            {book.language}
-                          </div>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => setSelectedBook(book)}
-                            className="text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 rounded-lg group"
-                          >
-                            Explore <ChevronRight size={14} className="ml-1 transition-transform group-hover:translate-x-1" />
-                          </Button>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  )}
 
-                  {filteredBooks.length === 0 && (
+                  {!isLoading && allBooks.length === 0 && (
                     <div className="py-20 text-center space-y-4">
                       <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto">
                         <Sparkles size={24} className="text-white/20" />
@@ -287,10 +343,10 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
 
         <div className="bg-[#0b0b0f] border-t border-white/5 px-8 py-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2 text-[9px] font-bold text-white/20 uppercase tracking-widest">
-            <Sparkles size={12} className="text-amber-500/50" /> Curated Mastery Library
+            <Sparkles size={12} className="text-amber-500/50" /> Intelligence Hub Active
           </div>
           <div className="text-[9px] font-black uppercase text-white/10 tracking-widest">
-            Control Maintained
+            Knowledge Maintained
           </div>
         </div>
       </SheetContent>
