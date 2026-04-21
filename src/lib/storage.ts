@@ -1,4 +1,3 @@
-
 import { UserData, INITIAL_DATA } from './types';
 
 const STORAGE_KEY = 'ironwill_v1_data';
