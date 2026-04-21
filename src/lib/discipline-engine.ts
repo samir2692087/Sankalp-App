@@ -61,8 +61,8 @@ export function getBehavioralInsights(data: UserData) {
   const times = relapses.map(r => r?.timeOfDay).filter((t): t is string => !!t);
   const highRiskWindow = getMostFrequent(times) || "N/A";
 
-  const totalBattles = urges.length + relapses.length;
-  const winRate = totalBattles > 0 ? Math.round((urges.length / totalBattles) * 100) : 100;
+  const totalBattles = (urges?.length || 0) + (relapses?.length || 0);
+  const winRate = totalBattles > 0 ? Math.round(((urges?.length || 0) / totalBattles) * 100) : 100;
 
   const now = Date.now();
   const recentUrges = urges.filter(u => u?.timestamp && (now - u.timestamp < 1000 * 60 * 60 * 48)).length;

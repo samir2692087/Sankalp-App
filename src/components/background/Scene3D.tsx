@@ -98,6 +98,8 @@ function NeuralParticles({ intensity }: { intensity: number }) {
     const array = posAttr.array as Float32Array;
     const safeIntensity = intensity || 0;
     
+    if (!array || !initialPositions) return;
+
     for (let i = 0; i < count; i++) {
       const ix = i * 3;
       const iy = i * 3 + 1;
@@ -153,7 +155,6 @@ export default function Scene3D({ isBlurred }: SceneProps) {
   const [mounted, setMounted] = useState(false);
   const interaction = useInteraction();
   
-  // High-resilience parameters to avoid post-processing crashes in React 19/Fiber 9
   const intensity = interaction?.intensity ?? 0;
   const mode = interaction?.mode ?? 'calm';
   
@@ -178,7 +179,6 @@ export default function Scene3D({ isBlurred }: SceneProps) {
         <NeuralParticles intensity={intensity} />
         <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
         
-        {/* Stable effects stack for React 19 compatibility */}
         <EffectComposer disableNormalPass multisampling={0}>
           <Bloom 
             luminanceThreshold={0.2} 
