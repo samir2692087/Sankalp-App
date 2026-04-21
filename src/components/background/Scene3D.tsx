@@ -155,7 +155,7 @@ export default function Scene3D({ isBlurred }: SceneProps) {
   const [mounted, setMounted] = useState(false);
   const { mode = 'calm', intensity = 0 } = useInteraction() || {};
 
-  // Stable effect parameters to avoid EffectComposer re-aggregation crashes
+  // Stable effect parameters to avoid EffectComposer re-aggregation crashes in React 19/Fiber 9
   const zeroOffset = useMemo(() => new THREE.Vector2(0, 0), []);
   const riskOffset = useMemo(() => new THREE.Vector2(0.008, 0.008), []);
   
@@ -179,6 +179,7 @@ export default function Scene3D({ isBlurred }: SceneProps) {
         <NeuralParticles intensity={intensity} />
         <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
         
+        {/* Stable Effects Stack: No conditional children to prevent aggregation length errors */}
         <EffectComposer disableNormalPass multisampling={0}>
           <Bloom 
             luminanceThreshold={0.2} 

@@ -64,7 +64,6 @@ export function getBehavioralInsights(data: UserData) {
   const totalBattles = (urges.length) + (relapses.length);
   const winRate = totalBattles > 0 ? Math.round((urges.length / totalBattles) * 100) : 100;
 
-  // Streak Protection: Risk Detection
   const now = Date.now();
   const recentUrges = urges.filter(u => u?.timestamp && (now - u.timestamp < 1000 * 60 * 60 * 48)).length;
   const riskLevel = recentUrges >= 3 ? 'CRITICAL' : recentUrges >= 1 ? 'ELEVATED' : 'STABLE';
