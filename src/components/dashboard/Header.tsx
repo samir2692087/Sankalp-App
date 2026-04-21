@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Settings, 
   Trash2, 
@@ -73,7 +73,7 @@ export default function Header({
   onUpdateProfile
 }: HeaderProps) {
   const { t, language, setLanguage } = useLanguage();
-  const { isUiLocked } = useInteraction();
+  const { isUiLocked, setIsUiLocked } = useInteraction();
   const [isThemeSheetOpen, setIsThemeSheetOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -94,6 +94,12 @@ export default function Header({
     { id: 'purple', nameKey: 'theme_purple', icon: Sparkles, bg: 'bg-purple-950' },
     { id: 'amoled', nameKey: 'theme_amoled', icon: Moon, bg: 'bg-black' },
   ];
+
+  // Sync global UI lock with local modal states
+  useEffect(() => {
+    const isAnyModalOpen = isSettingsOpen || isThemeSheetOpen || isReminderOpen || isProfileOpen || isInfoOpen;
+    setIsUiLocked(isAnyModalOpen);
+  }, [isSettingsOpen, isThemeSheetOpen, isReminderOpen, isProfileOpen, isInfoOpen, setIsUiLocked]);
 
   const handleOpenSettings = () => {
     feedback.tap();
@@ -173,11 +179,11 @@ export default function Header({
             </DialogTrigger>
 
             <DialogContent 
-              className="max-w-[440px] glass-card border-white/10 p-0 outline-none overflow-hidden rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)] z-[10000]"
+              className="max-w-[440px] glass-card border-white/10 p-0 outline-none overflow-hidden rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)] z-[10001]"
             >
               <motion.div
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
+                animate={{ 1: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.95 }}
                 transition={panelSpring}
               >
@@ -269,7 +275,7 @@ export default function Header({
         title={t('choose_view')}
         description={t('stay_steady')}
       >
-        <div className="grid grid-cols-2 gap-5 max-w-xl mx-auto">
+        <div className="grid grid-cols-2 gap-5 max-w-xl mx-auto pb-12">
           {themes.map((t_item) => (
             <motion.button 
               key={t_item.id}
