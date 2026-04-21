@@ -2,7 +2,7 @@
 import { UserData } from './types';
 
 export function calculateStreak(lastRelapseTimestamp: number | null): number {
-  if (!lastRelapseTimestamp) return 0;
+  if (!lastRelapseTimestamp || typeof lastRelapseTimestamp !== 'number') return 0;
   try {
     const diff = Date.now() - lastRelapseTimestamp;
     return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
@@ -17,7 +17,7 @@ export function calculateDisciplineScore(data: UserData): number {
   const relapses = Array.isArray(data.relapses) ? data.relapses : [];
   const checkIns = Array.isArray(data.checkIns) ? data.checkIns : [];
   
-  const currentStreak = data.currentStreak || 0;
+  const currentStreak = typeof data.currentStreak === 'number' ? data.currentStreak : 0;
   const streakFactor = Math.min(currentStreak * 2, 50);
   const urgeFactor = Math.min(urges.length * 3, 40);
   const checkInFactor = Math.min(checkIns.length * 0.5, 20);
@@ -44,15 +44,19 @@ export function getBehavioralInsights(data: UserData) {
 
   const getMostFrequent = (arr: string[]) => {
     if (!Array.isArray(arr) || arr.length === 0) return null;
-    const counts = arr.reduce((acc, val) => {
-      if (val) acc[val] = (acc[val] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    const entries = Object.entries(counts);
-    if (entries.length === 0) return null;
-    
-    return entries.reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+    try {
+      const counts = arr.reduce((acc, val) => {
+        if (val) acc[val] = (acc[val] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      const entries = Object.entries(counts);
+      if (entries.length === 0) return null;
+      
+      return entries.reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+    } catch (e) {
+      return null;
+    }
   };
 
   const reasons = relapses.map(r => r?.reason).filter((r): r is string => !!r);
@@ -61,8 +65,8 @@ export function getBehavioralInsights(data: UserData) {
   const times = relapses.map(r => r?.timeOfDay).filter((t): t is string => !!t);
   const highRiskWindow = getMostFrequent(times) || "N/A";
 
-  const totalBattles = (urges?.length || 0) + (relapses?.length || 0);
-  const winRate = totalBattles > 0 ? Math.round(((urges?.length || 0) / totalBattles) * 100) : 100;
+  const totalBattles = urges.length + relapses.length;
+  const winRate = totalBattles > 0 ? Math.round((urges.length / totalBattles) * 100) : 100;
 
   const now = Date.now();
   const recentUrges = urges.filter(u => u?.timestamp && (now - u.timestamp < 1000 * 60 * 60 * 48)).length;
@@ -119,8 +123,8 @@ export function getWeeklyData(data: UserData) {
 }
 
 export function getAchievements(streak: number, score: number) {
-  const s = streak || 0;
-  const sc = score || 0;
+  const s = typeof streak === 'number' ? streak : 0;
+  const sc = typeof score === 'number' ? score : 0;
   return [
     { id: '1', name: 'Initiate', desc: 'First 24 hours clean', unlocked: s >= 1 },
     { id: '2', name: 'Warrior', desc: '7 Day Streak reached', unlocked: s >= 7 },
@@ -131,7 +135,7 @@ export function getAchievements(streak: number, score: number) {
 }
 
 export function getDailyChallenge(streak: number) {
-  const s = streak || 0;
+  const s = typeof streak === 'number' ? streak : 0;
   const lowStreak = [
     "Identify one trigger and remove it.",
     "Do 10 pushups when an urge hits.",
@@ -155,5 +159,5 @@ export function getDailyChallenge(streak: number) {
   const poolLength = Array.isArray(pool) ? pool.length : 1;
   const now = Date.now();
   const dayOfYear = Math.floor((now - new Date(new Date(now).getFullYear(), 0, 0).getTime()) / 86400000);
-  return pool[Math.max(0, dayOfYear % poolLength)];
+  return pool[Math.max(0, dayOfYear % (poolLength || 1))];
 }

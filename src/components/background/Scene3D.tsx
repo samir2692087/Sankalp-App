@@ -42,7 +42,7 @@ function EnergyCore({ intensity, mode }: { intensity: number, mode: string }) {
     const t = state.clock.getElapsedTime();
     if (!meshRef.current) return;
     
-    const safeIntensity = intensity || 0;
+    const safeIntensity = typeof intensity === 'number' && !isNaN(intensity) ? intensity : 0;
     meshRef.current.rotation.y = t * 0.1 * (1 + safeIntensity * 2);
     meshRef.current.rotation.z = t * 0.05;
     const pulse = 1 + Math.sin(t * 2) * 0.05 + safeIntensity * 0.2;
@@ -93,13 +93,11 @@ function NeuralParticles({ intensity }: { intensity: number }) {
     if (!points || !points.geometry) return;
     
     const posAttr = points.geometry.getAttribute('position') as THREE.BufferAttribute;
-    if (!posAttr || !posAttr.array) return;
+    if (!posAttr || !posAttr.array || !initialPositions) return;
     
     const array = posAttr.array as Float32Array;
-    const safeIntensity = intensity || 0;
+    const safeIntensity = typeof intensity === 'number' && !isNaN(intensity) ? intensity : 0;
     
-    if (!array || !initialPositions) return;
-
     for (let i = 0; i < count; i++) {
       const ix = i * 3;
       const iy = i * 3 + 1;
@@ -155,12 +153,12 @@ export default function Scene3D({ isBlurred }: SceneProps) {
   const [mounted, setMounted] = useState(false);
   const interaction = useInteraction();
   
-  const intensity = interaction?.intensity ?? 0;
+  const intensity = typeof interaction?.intensity === 'number' ? interaction.intensity : 0;
   const mode = interaction?.mode ?? 'calm';
   
   const currentOffset = useMemo(() => {
-    const offset = mode === 'risk' ? 0.008 : 0;
-    return new THREE.Vector2(offset, offset);
+    const val = mode === 'risk' ? 0.008 : 0;
+    return new THREE.Vector2(val, val);
   }, [mode]);
 
   useEffect(() => {
