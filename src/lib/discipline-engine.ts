@@ -1,3 +1,4 @@
+
 import { UserData } from './types';
 
 export function calculateStreak(lastRelapseTimestamp: number | null): number {

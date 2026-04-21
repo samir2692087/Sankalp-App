@@ -93,7 +93,7 @@ function NeuralParticles({ intensity }: { intensity: number }) {
     if (!points || !points.geometry) return;
     
     const posAttr = points.geometry.getAttribute('position') as THREE.BufferAttribute;
-    if (!posAttr || !posAttr.array) return;
+    if (!posAttr || !posAttr.array || posAttr.array.length === 0) return;
     
     const array = posAttr.array as Float32Array;
     const safeIntensity = intensity || 0;
@@ -103,12 +103,14 @@ function NeuralParticles({ intensity }: { intensity: number }) {
       const iy = i * 3 + 1;
       const iz = i * 3 + 2;
       
-      array[ix] = initialPositions[ix] + Math.sin(t * 0.5 + initialPositions[iz]) * 0.5;
-      array[iy] = initialPositions[iy] + Math.cos(t * 0.3 + initialPositions[ix]) * 0.5;
-      
-      if (safeIntensity > 0.1) {
-        array[ix] += (Math.random() - 0.5) * safeIntensity * 2;
-        array[iy] += (Math.random() - 0.5) * safeIntensity * 2;
+      if (array[ix] !== undefined) {
+        array[ix] = initialPositions[ix] + Math.sin(t * 0.5 + initialPositions[iz]) * 0.5;
+        array[iy] = initialPositions[iy] + Math.cos(t * 0.3 + initialPositions[ix]) * 0.5;
+        
+        if (safeIntensity > 0.1) {
+          array[ix] += (Math.random() - 0.5) * safeIntensity * 2;
+          array[iy] += (Math.random() - 0.5) * safeIntensity * 2;
+        }
       }
     }
     posAttr.needsUpdate = true;
@@ -151,12 +153,15 @@ function CameraRig() {
 
 export default function Scene3D({ isBlurred }: SceneProps) {
   const [mounted, setMounted] = useState(false);
-  const { mode, intensity } = useInteraction();
+  const { mode = 'calm', intensity = 0 } = useInteraction() || {};
 
   // Stable effect parameters to avoid EffectComposer re-aggregation crashes
-  const riskOffset = useMemo(() => new THREE.Vector2(0.008, 0.008), []);
   const zeroOffset = useMemo(() => new THREE.Vector2(0, 0), []);
-  const currentOffset = mode === 'risk' ? riskOffset : zeroOffset;
+  const riskOffset = useMemo(() => new THREE.Vector2(0.008, 0.008), []);
+  
+  const currentOffset = useMemo(() => {
+    return mode === 'risk' ? riskOffset : zeroOffset;
+  }, [mode, riskOffset, zeroOffset]);
 
   useEffect(() => {
     setMounted(true);
@@ -174,7 +179,7 @@ export default function Scene3D({ isBlurred }: SceneProps) {
         <NeuralParticles intensity={intensity} />
         <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
         
-        <EffectComposer disableNormalPass>
+        <EffectComposer disableNormalPass multisampling={0}>
           <Bloom 
             luminanceThreshold={0.2} 
             mipmapBlur 
