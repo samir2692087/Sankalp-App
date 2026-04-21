@@ -13,7 +13,7 @@ interface JourneyTimelineProps {
 }
 
 export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentPhase = getJourneyPhase(currentStreak);
   const progressPercent = Math.min((currentStreak / 365) * 100, 100);
@@ -77,11 +77,11 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
                   "text-xl font-bold mb-3 tracking-tight",
                   isActive ? "text-white" : "text-white/60"
                 )}>
-                  {phase.name}
+                  {phase.name[language]}
                 </h4>
 
                 <p className="text-[10px] font-medium text-white/40 leading-relaxed mb-6 italic">
-                  "{phase.message}"
+                  "{phase.message[language]}"
                 </p>
 
                 <div className="space-y-4">
@@ -89,7 +89,7 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
                     <Brain size={14} className="text-primary mt-0.5 shrink-0" />
                     <div className="flex flex-col gap-0.5">
                       <span className="text-[8px] font-black uppercase text-white/20 tracking-tighter">Mind</span>
-                      <p className="text-[10px] font-medium text-white/60">{phase.mentalState}</p>
+                      <p className="text-[10px] font-medium text-white/60">{phase.mentalState[language]}</p>
                     </div>
                   </div>
                   
@@ -97,7 +97,7 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
                     <Activity size={14} className="text-secondary mt-0.5 shrink-0" />
                     <div className="flex flex-col gap-0.5">
                       <span className="text-[8px] font-black uppercase text-white/20 tracking-tighter">Body</span>
-                      <p className="text-[10px] font-medium text-white/60">{phase.physicalState}</p>
+                      <p className="text-[10px] font-medium text-white/60">{phase.physicalState[language]}</p>
                     </div>
                   </div>
 
@@ -105,7 +105,7 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
                     <SankalpIcon size={14} className="text-green-500 mt-0.5 shrink-0" />
                     <div className="flex flex-col gap-0.5">
                       <span className="text-[8px] font-black uppercase text-white/20 tracking-tighter">Focus</span>
-                      <p className="text-[10px] font-medium text-white/60">{phase.guidance}</p>
+                      <p className="text-[10px] font-medium text-white/60">{phase.guidance[language]}</p>
                     </div>
                   </div>
                 </div>

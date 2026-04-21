@@ -1,24 +1,21 @@
-/**
- * @fileOverview Curated and dynamic library of discipline and growth literature.
- */
+import { Language } from './translations';
 
 export type MoodState = 'distracted' | 'low-energy' | 'motivated' | 'anxious' | 'bored' | 'focused' | 'relapse-risk';
 
 export interface Book {
   id: string;
-  title: string;
-  author: string;
+  title: Record<Language, string> | string;
+  author: Record<Language, string> | string;
   language: 'English' | 'Hindi';
-  description: string;
+  description: Record<Language, string>;
   moods: MoodState[];
-  readingTime: string;
-  insight: string;
-  nextStep: string;
+  readingTime: Record<Language, string>;
+  insight: Record<Language, string>;
+  nextStep: Record<Language, string>;
   sourceUrl?: string;
   coverUrl?: string;
 }
 
-// Maps user moods to Open Library Subjects
 const MOOD_SUBJECTS: Record<MoodState, string> = {
   'relapse-risk': 'self-help',
   'anxious': 'stoicism',
@@ -32,36 +29,43 @@ const MOOD_SUBJECTS: Record<MoodState, string> = {
 export const LIBRARY: Book[] = [
   {
     id: '1',
-    title: 'Man\'s Search for Meaning',
-    author: 'Viktor Frankl',
+    title: { en: "Man's Search for Meaning", hi: "जीने की इच्छा" },
+    author: { en: "Viktor Frankl", hi: "विक्टर फ्रैंकल" },
     language: 'English',
-    description: 'A powerful testament to the human spirit\'s ability to find purpose in the darkest times.',
+    description: { 
+      en: "A powerful testament to the human spirit's ability to find purpose in the darkest times.",
+      hi: "अंधेरे समय में उद्देश्य खोजने की मानवीय आत्मा की क्षमता का एक शक्तिशाली प्रमाण।"
+    },
     moods: ['relapse-risk', 'anxious'],
-    readingTime: 'Medium',
-    insight: 'Between stimulus and response there is a space. In that space is our power to choose our response.',
-    nextStep: 'Pause for 60 seconds. Observe the urge without acting on it. Realize you are the observer, not the impulse.'
+    readingTime: { en: "Medium", hi: "मध्यम" },
+    insight: { 
+      en: "Between stimulus and response there is a space. In that space is our power to choose our response.",
+      hi: "उत्तेजना और प्रतिक्रिया के बीच एक स्थान है। उस स्थान में हमारी प्रतिक्रिया चुनने की शक्ति है।"
+    },
+    nextStep: {
+      en: "Pause for 60 seconds. Observe the urge without acting on it. Realize you are the observer, not the impulse.",
+      hi: "60 सेकंड के लिए रुकें। उस पर कार्रवाई किए बिना इच्छा का निरीक्षण करें। महसूस करें कि आप निरीक्षक हैं, आवेग नहीं।"
+    }
   },
   {
     id: '2',
-    title: 'Apne Bhitar Base Bhagwan Ko Pehchane',
-    author: 'Pandit Shriram Sharma Acharya',
+    title: { en: "Identify the God Within", hi: "अपने भीतर बसे भगवान को पहचानें" },
+    author: { en: "Pandit Shriram Sharma Acharya", hi: "पंडित श्रीराम शर्मा आचार्य" },
     language: 'Hindi',
-    description: 'A spiritual guide to inner strength and identifying one\'s higher purpose.',
+    description: {
+      en: "A spiritual guide to inner strength and identifying one's higher purpose.",
+      hi: "आंतरिक शक्ति और अपने उच्च उद्देश्य की पहचान करने के लिए एक आध्यात्मिक मार्गदर्शिका।"
+    },
     moods: ['relapse-risk', 'low-energy'],
-    readingTime: 'Short',
-    insight: 'Inner strength comes from recognizing the divine spark within that is untainted by temporary desires.',
-    nextStep: 'Sit in silence for 5 minutes. Visualize a light at your center that remains calm even as waves of desire pass over it.'
-  },
-  {
-    id: '3',
-    title: 'Can\'t Hurt Me',
-    author: 'David Goggins',
-    language: 'English',
-    description: 'Master your mind and defy the odds with extreme mental toughness.',
-    moods: ['motivated', 'low-energy'],
-    readingTime: 'Long',
-    insight: 'The 40% Rule: When your mind tells you that you are done, you are only at 40% of your potential.',
-    nextStep: 'Do one difficult task right now that you were planning to skip. Push past the initial "no" of your mind.'
+    readingTime: { en: "Short", hi: "लघु" },
+    insight: {
+      en: "Inner strength comes from recognizing the divine spark within that is untainted by temporary desires.",
+      hi: "आंतरिक शक्ति उस भीतर की दिव्य चिंगारी को पहचानने से आती है जो अस्थायी इच्छाओं से अछूती है।"
+    },
+    nextStep: {
+      en: "Sit in silence for 5 minutes. Visualize a light at your center that remains calm even as waves of desire pass over it.",
+      hi: "5 मिनट के लिए मौन में बैठें। अपने केंद्र में एक प्रकाश की कल्पना करें जो इच्छा की लहरों के गुजरने पर भी शांत रहता है।"
+    }
   }
 ];
 
@@ -80,12 +84,21 @@ export async function fetchBooksByMood(mood: MoodState): Promise<Book[]> {
       id: work.key,
       title: work.title,
       author: work.authors && work.authors.length > 0 ? work.authors[0].name : 'Various Authors',
-      language: 'English', // Subjects API usually returns English metadata
-      description: `Explore the core principles of ${subject.replace('_', ' ')} through this work.`,
+      language: 'English',
+      description: { 
+        en: `Explore the core principles of ${subject.replace('_', ' ')} through this work.`,
+        hi: `इस कार्य के माध्यम से ${subject.replace('_', ' ')} के मूल सिद्धांतों का अन्वेषण करें।`
+      },
       moods: [mood],
-      readingTime: 'Variable',
-      insight: "This work offers a disciplined perspective on maintaining focus and building character.",
-      nextStep: "Analyze the foundational arguments in the first chapter to ground your current state.",
+      readingTime: { en: "Variable", hi: "परिवर्तनीय" },
+      insight: {
+        en: "This work offers a disciplined perspective on maintaining focus and building character.",
+        hi: "यह कार्य फोकस बनाए रखने और चरित्र निर्माण पर एक अनुशासित दृष्टिकोण प्रदान करता है।"
+      },
+      nextStep: {
+        en: "Analyze the foundational arguments in the first chapter to ground your current state.",
+        hi: "अपनी वर्तमान स्थिति को स्थिर करने के लिए पहले अध्याय में मूलभूत तर्कों का विश्लेषण करें।"
+      },
       sourceUrl: `https://openlibrary.org${work.key}`,
       coverUrl: work.cover_id ? `https://covers.openlibrary.org/b/id/${work.cover_id}-M.jpg` : undefined
     }));

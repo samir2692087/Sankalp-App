@@ -1,5 +1,5 @@
-
 import { UserData } from './types';
+import { Language } from './translations';
 
 export function calculateStreak(lastRelapseTimestamp: number | null): number {
   if (!lastRelapseTimestamp || typeof lastRelapseTimestamp !== 'number' || isNaN(lastRelapseTimestamp)) return 0;
@@ -38,40 +38,23 @@ export function calculateDisciplineScore(data: UserData): number {
   return Math.max(0, Math.min(100, Math.round(rawScore)));
 }
 
-export function getBehavioralInsights(data: UserData) {
-  const defaultInsights = {
-    mostCommonTrigger: "Data required",
-    highRiskWindow: "N/A",
-    winRate: 100,
-    resilienceLevel: 'Steady',
-    riskLevel: 'STABLE' as const,
-    protectionMessage: "Stay steady. Keep going."
-  };
-
-  if (!data) return defaultInsights;
-
+export function getBehavioralInsights(data: UserData, lang: Language = 'en') {
   const relapses = Array.isArray(data.relapses) ? data.relapses : [];
   const urges = Array.isArray(data.urges) ? data.urges : [];
 
   const getMostFrequent = (arr: string[]) => {
     if (!Array.isArray(arr) || arr.length === 0) return null;
-    try {
-      const counts = arr.reduce((acc, val) => {
-        if (val) acc[val] = (acc[val] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      
-      const entries = Object.entries(counts);
-      if (entries.length === 0) return null;
-      
-      return entries.reduce((a, b) => (b[1] > a[1] ? b : a))[0];
-    } catch (e) {
-      return null;
-    }
+    const counts = arr.reduce((acc, val) => {
+      if (val) acc[val] = (acc[val] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    const entries = Object.entries(counts);
+    if (entries.length === 0) return null;
+    return entries.reduce((a, b) => (b[1] > a[1] ? b : a))[0];
   };
 
   const reasons = relapses.map(r => r?.reason).filter((r): r is string => !!r);
-  const mostCommonTrigger = getMostFrequent(reasons) || "Consistent data required";
+  const mostCommonTrigger = getMostFrequent(reasons) || (lang === 'en' ? "Consistent data required" : "लगातार डेटा की आवश्यकता है");
 
   const times = relapses.map(r => r?.timeOfDay).filter((t): t is string => !!t);
   const highRiskWindow = getMostFrequent(times) || "N/A";
@@ -90,15 +73,19 @@ export function getBehavioralInsights(data: UserData) {
     riskLevel = 'ELEVATED';
   }
 
+  const messages = {
+    STABLE: { en: "Stay focused. Every minute of control is a victory.", hi: "केंद्रित रहें। नियंत्रण का हर मिनट एक जीत है।" },
+    ELEVATED: { en: "Stay sharp. Awareness is your primary focus.", hi: "सतर्क रहें। जागरूकता आपका प्राथमिक फोकस है।" },
+    CRITICAL: { en: "Take a moment to reset. Your resolve is being tested.", hi: "रीसेट करने के लिए कुछ समय लें। आपके संकल्प की परीक्षा ली जा रही है।" }
+  };
+
   return { 
     mostCommonTrigger, 
     highRiskWindow,
     winRate,
     resilienceLevel: winRate > 85 ? 'Fortress' : winRate > 60 ? 'Steady' : 'Vulnerable',
     riskLevel,
-    protectionMessage: riskLevel === 'CRITICAL' ? "Take a moment to reset. Your resolve is being tested." :
-                       riskLevel === 'ELEVATED' ? "Stay sharp. Awareness is your primary focus." :
-                       "Stay focused. Every minute of control is a victory."
+    protectionMessage: messages[riskLevel][lang]
   };
 }
 
@@ -111,38 +98,20 @@ export function getWeeklyData(data: UserData) {
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
-    try {
-      return d.toISOString().split('T')[0];
-    } catch (e) {
-      return new Date().toISOString().split('T')[0];
-    }
+    return d.toISOString().split('T')[0];
   });
 
   return last7Days.map(date => ({
     name: date.split('-').slice(1).join('/') || date,
-    urges: urges.filter(u => {
-      if (!u?.timestamp) return false;
-      try {
-        return new Date(u.timestamp).toISOString().split('T')[0] === date;
-      } catch (e) {
-        return false;
-      }
-    }).length,
-    relapses: relapses.filter(r => {
-      if (!r?.timestamp) return false;
-      try {
-        return new Date(r.timestamp).toISOString().split('T')[0] === date;
-      } catch (e) {
-        return false;
-      }
-    }).length,
+    urges: urges.filter(u => u?.timestamp && new Date(u.timestamp).toISOString().split('T')[0] === date).length,
+    relapses: relapses.filter(r => r?.timestamp && new Date(r.timestamp).toISOString().split('T')[0] === date).length,
     checkins: checkIns.filter(c => c?.date === date).length
   }));
 }
 
 export function getAchievements(streak: number, score: number) {
-  const s = typeof streak === 'number' && !isNaN(streak) ? streak : 0;
-  const sc = typeof score === 'number' && !isNaN(score) ? score : 0;
+  const s = streak || 0;
+  const sc = score || 0;
   return [
     { id: '1', name: 'Starting', desc: 'First 24 hours held', unlocked: s >= 1 },
     { id: '2', name: 'Steady', desc: '7 Day path reached', unlocked: s >= 7 },
@@ -152,30 +121,31 @@ export function getAchievements(streak: number, score: number) {
   ];
 }
 
-export function getDailyChallenge(streak: number) {
-  const s = typeof streak === 'number' && !isNaN(streak) ? streak : 0;
-  const lowStreak = [
-    "Identify one distraction and remove it.",
-    "Do 10 pushups if you feel restless.",
-    "Drink a glass of cold water now.",
-    "Write 1 goal for tomorrow."
-  ];
-  const midStreak = [
-    "Reflect quietly for 10 minutes.",
-    "Take a quick 2-minute cold shower.",
-    "Unplug for 2 hours.",
-    "Read 10 pages for growth."
-  ];
-  const highStreak = [
-    "Complete a 24-hour focus fast.",
-    "Go for a run for clarity.",
-    "Help someone else stay disciplined.",
-    "Reflect on your 90-day growth."
-  ];
+export function getDailyChallenge(streak: number, lang: Language = 'en') {
+  const s = streak || 0;
+  const challenges = {
+    low: [
+      { en: "Identify one distraction and remove it.", hi: "एक व्याकुलता को पहचानें और उसे हटा दें।" },
+      { en: "Do 10 pushups if you feel restless.", hi: "यदि आप बेचैन महसूस करते हैं तो 10 पुशअप्स करें।" },
+      { en: "Drink a glass of cold water now.", hi: "अभी एक गिलास ठंडा पानी पियें।" },
+      { en: "Write 1 goal for tomorrow.", hi: "कल के लिए 1 लक्ष्य लिखें।" }
+    ],
+    mid: [
+      { en: "Reflect quietly for 10 minutes.", hi: "10 मिनट के लिए शांति से चिंतन करें।" },
+      { en: "Take a quick 2-minute cold shower.", hi: "जल्दी से 2 मिनट का ठंडा शॉवर लें।" },
+      { en: "Unplug for 2 hours.", hi: "2 घंटे के लिए अनप्लग करें।" },
+      { en: "Read 10 pages for growth.", hi: "विकास के लिए 10 पृष्ठ पढ़ें।" }
+    ],
+    high: [
+      { en: "Complete a 24-hour focus fast.", hi: "24 घंटे का फोकस फास्ट पूरा करें।" },
+      { en: "Go for a run for clarity.", hi: "स्पष्टता के लिए दौड़ें।" },
+      { en: "Help someone else stay disciplined.", hi: "किसी और को अनुशासित रहने में मदद करें।" },
+      { en: "Reflect on your 90-day growth.", hi: "अपने 90 दिनों के विकास पर विचार करें।" }
+    ]
+  };
 
-  const pool = s >= 90 ? highStreak : s >= 30 ? midStreak : lowStreak;
-  const poolLength = Array.isArray(pool) ? pool.length : 1;
+  const pool = s >= 90 ? challenges.high : s >= 30 ? challenges.mid : challenges.low;
   const now = Date.now();
   const dayOfYear = Math.floor((now - new Date(new Date(now).getFullYear(), 0, 0).getTime()) / 86400000);
-  return pool[Math.max(0, dayOfYear % (poolLength || 1))];
+  return pool[dayOfYear % pool.length][lang];
 }

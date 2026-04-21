@@ -53,7 +53,7 @@ const springConfig = { type: "spring", stiffness: 100, damping: 20 };
 export default function SankalpOverview() {
   const { toast } = useToast();
   const { triggerPulse, setMode, mode, recordInteraction } = useInteraction();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [data, setData] = useState<UserData>(INITIAL_DATA);
   const [showRelapseModal, setShowRelapseModal] = useState(false);
   const [showUrgeModal, setShowUrgeModal] = useState(false);
@@ -123,7 +123,7 @@ export default function SankalpOverview() {
     };
     updateState(newData);
     handleCloseModal(setShowRelapseModal);
-    toast({ title: t('stay_steady'), description: "Return to your resolve." });
+    toast({ title: t('stay_steady'), description: t('hold_control') });
   };
 
   const handleUrgeSubmit = (intensity: UrgeIntensity) => {
@@ -137,11 +137,11 @@ export default function SankalpOverview() {
     };
     updateState(newData);
     handleCloseModal(setShowUrgeModal);
-    toast({ title: t('victory'), description: "You are in control. Resolve earned." });
+    toast({ title: t('victory'), description: t('good_job') });
   };
 
-  const insights = useMemo(() => getBehavioralInsights(data), [data]);
-  const challenge = useMemo(() => getDailyChallenge(data.currentStreak), [data.currentStreak]);
+  const insights = useMemo(() => getBehavioralInsights(data, language), [data, language]);
+  const challenge = useMemo(() => getDailyChallenge(data.currentStreak, language), [data.currentStreak, language]);
 
   useEffect(() => {
     if (insights.riskLevel === 'CRITICAL') {
@@ -192,14 +192,14 @@ export default function SankalpOverview() {
               focusMode={data.focusMode} 
               theme={data.theme || 'dark'}
               data={data}
-              onThemeChange={(t) => {
+              onThemeChange={(t_val) => {
                 feedback.tap();
                 recordInteraction('theme');
-                updateState({ ...data, theme: t });
+                updateState({ ...data, theme: t_val });
               }}
               onReset={() => { 
                 feedback.warning();
-                if(confirm("Erase all progress and return to Day 0?")) { clearData(); setData(INITIAL_DATA); } 
+                if(confirm(t('reset_path') + "?")) { clearData(); setData(INITIAL_DATA); } 
               }}
               onToggleFocus={() => {
                 feedback.tap();
@@ -207,9 +207,9 @@ export default function SankalpOverview() {
                 updateState({ ...data, focusMode: !data.focusMode });
               }}
               onShowExport={() => handleOpenModal(setShowExportModal)}
-              onUpdateReminder={(e, t) => {
+              onUpdateReminder={(e, t_time) => {
                 feedback.tap();
-                updateState({ ...data, notificationsEnabled: e, reminderTime: t });
+                updateState({ ...data, notificationsEnabled: e, reminderTime: t_time });
               }}
             />
 
@@ -261,7 +261,7 @@ export default function SankalpOverview() {
                         triggerPulse(0.5);
                         recordInteraction('freeze');
                         updateState({ ...data, streakFreezes: data.streakFreezes - 1 });
-                        toast({ title: t('stay_steady'), description: "Resolve held for 24 hours." });
+                        toast({ title: t('stay_steady'), description: t('hold_control') });
                       }
                     }}
                   />
@@ -333,7 +333,7 @@ export default function SankalpOverview() {
                       ...data, 
                       checkIns: [{ date: today, timestamp: Date.now() }, ...(Array.isArray(data.checkIns) ? data.checkIns : [])] 
                     });
-                    toast({ title: t('checked_in'), description: "Commitment held. Strength earned." });
+                    toast({ title: t('checked_in'), description: t('good_job') });
                   }
                 }} 
                 onUrge={() => handleOpenModal(setShowUrgeModal)} 

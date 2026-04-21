@@ -31,27 +31,29 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ClarityLibraryProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const MOODS: { id: MoodState; label: string; icon: any; color: string }[] = [
-  { id: 'relapse-risk', label: 'Struggling', icon: AlertCircle, color: 'text-red-500 bg-red-500/10 border-red-500/20' },
-  { id: 'anxious', label: 'Anxious', icon: Heart, color: 'text-blue-400 bg-blue-400/10 border-blue-400/20' },
-  { id: 'distracted', label: 'Distracted', icon: Brain, color: 'text-amber-400 bg-amber-400/10 border-amber-400/20' },
-  { id: 'low-energy', label: 'Low Energy', icon: Coffee, color: 'text-slate-400 bg-slate-400/10 border-slate-400/20' },
-  { id: 'motivated', label: 'Motivated', icon: Zap, color: 'text-primary bg-primary/10 border-primary/20' },
-  { id: 'focused', label: 'Focused', icon: Target, color: 'text-green-400 bg-green-400/10 border-green-400/20' },
-];
-
 export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps) {
+  const { t, language } = useLanguage();
   const [selectedMood, setSelectedMood] = useState<MoodState | null>(null);
   const [languageFilter, setLanguageFilter] = useState<'All' | 'English' | 'Hindi'>('All');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [apiBooks, setApiBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const MOODS: { id: MoodState; label: string; icon: any; color: string }[] = useMemo(() => [
+    { id: 'relapse-risk', label: t('mood_struggling'), icon: AlertCircle, color: 'text-red-500 bg-red-500/10 border-red-500/20' },
+    { id: 'anxious', label: t('mood_anxious'), icon: Heart, color: 'text-blue-400 bg-blue-400/10 border-blue-400/20' },
+    { id: 'distracted', label: t('mood_distracted'), icon: Brain, color: 'text-amber-400 bg-amber-400/10 border-amber-400/20' },
+    { id: 'low-energy', label: t('mood_low_energy'), icon: Coffee, color: 'text-slate-400 bg-slate-400/10 border-slate-400/20' },
+    { id: 'motivated', label: t('mood_motivated'), icon: Zap, color: 'text-primary bg-primary/10 border-primary/20' },
+    { id: 'focused', label: t('mood_focused'), icon: Target, color: 'text-green-400 bg-green-400/10 border-green-400/20' },
+  ], [t]);
 
   useEffect(() => {
     if (selectedMood) {
@@ -85,6 +87,11 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
     if (url) window.open(url, '_blank');
   };
 
+  const getBookField = (field: any) => {
+    if (typeof field === 'string') return field;
+    return field[language] || field['en'];
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={handleClose}>
       <SheetContent side="bottom" className="h-[90vh] rounded-t-[3rem] p-0 border-t border-white/5 bg-[#07070a] backdrop-blur-3xl outline-none flex flex-col overflow-hidden">
@@ -103,10 +110,10 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
               </Button>
               <div className="text-left">
                 <SheetTitle className="text-2xl font-bold text-white tracking-tight">
-                  {selectedBook ? "Wisdom Detail" : "Clarity Library"}
+                  {selectedBook ? t('wisdom_detail') : t('clarity_hub')}
                 </SheetTitle>
                 <SheetDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
-                  {selectedBook ? selectedBook.title : "Targeted Guidance"}
+                  {selectedBook ? getBookField(selectedBook.title) : t('targeted_guidance')}
                 </SheetDescription>
               </div>
             </div>
@@ -129,11 +136,11 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                 <div className="space-y-4">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1">
-                      <h3 className="text-3xl font-bold text-white leading-tight">{selectedBook.title}</h3>
-                      <p className="text-white/40 text-sm font-medium">{selectedBook.author}</p>
+                      <h3 className="text-3xl font-bold text-white leading-tight">{getBookField(selectedBook.title)}</h3>
+                      <p className="text-white/40 text-sm font-medium">{getBookField(selectedBook.author)}</p>
                     </div>
                     <Badge variant="outline" className="border-primary/30 text-primary text-[10px] font-black uppercase px-3 py-1">
-                      {selectedBook.readingTime}
+                      {getBookField(selectedBook.readingTime)}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-4">
@@ -148,7 +155,7 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                   <div className="relative w-full aspect-[2/3] max-w-[200px] mx-auto rounded-2xl overflow-hidden shadow-2xl">
                     <Image 
                       src={selectedBook.coverUrl} 
-                      alt={selectedBook.title} 
+                      alt={getBookField(selectedBook.title)} 
                       fill 
                       className="object-cover"
                     />
@@ -157,29 +164,29 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
 
                 <div className="space-y-6">
                   <div className="p-8 rounded-[2.5rem] bg-white/[0.03] border border-white/5 space-y-4">
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Overview</h4>
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t('overview_text')}</h4>
                     <p className="text-white/60 text-sm leading-relaxed font-medium">
-                      {selectedBook.description}
+                      {getBookField(selectedBook.description)}
                     </p>
                   </div>
 
                   <div className="p-8 rounded-[2.5rem] bg-primary/5 border border-primary/20 space-y-4">
                     <div className="flex items-center gap-2">
                       <Sparkles size={16} className="text-primary" />
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Core Insight</h4>
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t('core_insight')}</h4>
                     </div>
                     <p className="text-white/80 text-base font-bold leading-relaxed italic">
-                      "{selectedBook.insight}"
+                      "{getBookField(selectedBook.insight)}"
                     </p>
                   </div>
 
                   <div className="p-8 rounded-[2.5rem] bg-green-500/5 border border-green-500/20 space-y-4">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 size={16} className="text-green-500" />
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-green-500">Next Step</h4>
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-green-500">{t('next_step')}</h4>
                     </div>
                     <p className="text-white/60 text-sm leading-relaxed font-medium">
-                      {selectedBook.nextStep}
+                      {getBookField(selectedBook.nextStep)}
                     </p>
                   </div>
                 </div>
@@ -190,14 +197,14 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                       onClick={() => handleOpenSource(selectedBook.sourceUrl)}
                       className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-sm gap-2"
                     >
-                      <ExternalLink size={18} /> Open Source in Library
+                      <ExternalLink size={18} /> {t('open_source')}
                     </Button>
                   )}
                   <Button 
                     onClick={() => setSelectedBook(null)}
                     className="w-full h-16 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] text-white font-bold text-sm border border-white/5"
                   >
-                    Return to Results
+                    {t('return_results')}
                   </Button>
                 </div>
               </motion.div>
@@ -210,8 +217,8 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                 className="space-y-8"
               >
                 <div className="text-center space-y-2 mb-8">
-                  <p className="text-white/60 text-sm font-medium">How are you feeling right now?</p>
-                  <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Select a state for targeted wisdom</p>
+                  <p className="text-white/60 text-sm font-medium">{t('mood_question')}</p>
+                  <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{t('select_state')}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -246,22 +253,25 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                     onClick={() => setSelectedMood(null)}
                     className="h-10 px-4 rounded-xl bg-white/5 text-white/60 hover:text-white"
                   >
-                    Change State
+                    {t('change_state')}
                   </Button>
                   
                   <div className="flex bg-white/5 rounded-xl p-1 border border-white/5">
-                    {['All', 'English', 'Hindi'].map((l) => (
-                      <button
-                        key={l}
-                        onClick={() => setLanguageFilter(l as any)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all",
-                          languageFilter === l ? "bg-primary text-white" : "text-white/30 hover:text-white/50"
-                        )}
-                      >
-                        {l}
-                      </button>
-                    ))}
+                    {[t('lang_all'), t('lang_en'), t('lang_hi')].map((l, i) => {
+                      const filters = ['All', 'English', 'Hindi'];
+                      return (
+                        <button
+                          key={l}
+                          onClick={() => setLanguageFilter(filters[i] as any)}
+                          className={cn(
+                            "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all",
+                            languageFilter === filters[i] ? "bg-primary text-white" : "text-white/30 hover:text-white/50"
+                          )}
+                        >
+                          {l}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -270,7 +280,7 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                     {MOODS.find(m => m.id === selectedMood)?.label}
                   </div>
                   <span className="text-white/20 text-[10px] font-bold uppercase">
-                    {isLoading ? "Fetching knowledge..." : `${allBooks.length} Recommendations`}
+                    {isLoading ? t('fetching_knowledge') : `${allBooks.length} ${t('recommendations')}`}
                   </span>
                 </div>
 
@@ -278,7 +288,7 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                   {isLoading ? (
                     <div className="py-20 flex flex-col items-center gap-4">
                       <RefreshCw size={32} className="text-primary animate-spin" />
-                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Scanning Open Library...</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">{t('fetching_knowledge')}</p>
                     </div>
                   ) : (
                     <AnimatePresence mode="popLayout">
@@ -293,18 +303,18 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                           <div className="flex gap-4">
                             {book.coverUrl && (
                               <div className="relative w-16 h-24 rounded-lg overflow-hidden shrink-0 shadow-lg group-hover:scale-105 transition-transform">
-                                <Image src={book.coverUrl} alt={book.title} fill className="object-cover" />
+                                <Image src={book.coverUrl} alt={getBookField(book.title)} fill className="object-cover" />
                               </div>
                             )}
                             <div className="flex-1 min-w-0">
                               <div className="flex justify-between items-start mb-2">
                                 <div className="space-y-1 min-w-0">
-                                  <h4 className="text-lg font-bold text-white group-hover:text-primary transition-colors truncate">{book.title}</h4>
-                                  <p className="text-white/40 text-xs font-medium truncate">{book.author}</p>
+                                  <h4 className="text-lg font-bold text-white group-hover:text-primary transition-colors truncate">{getBookField(book.title)}</h4>
+                                  <p className="text-white/40 text-xs font-medium truncate">{getBookField(book.author)}</p>
                                 </div>
                               </div>
                               <p className="text-white/50 text-xs leading-relaxed mb-4 font-medium line-clamp-2">
-                                {book.description}
+                                {getBookField(book.description)}
                               </p>
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2 text-[9px] font-black uppercase text-white/20 tracking-tighter">
@@ -317,7 +327,7 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                                   onClick={() => setSelectedBook(book)}
                                   className="text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 rounded-lg group"
                                 >
-                                  Explore <ChevronRight size={14} className="ml-1 transition-transform group-hover:translate-x-1" />
+                                  {t('explore')} <ChevronRight size={14} className="ml-1 transition-transform group-hover:translate-x-1" />
                                 </Button>
                               </div>
                             </div>
@@ -325,15 +335,6 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
                         </motion.div>
                       ))}
                     </AnimatePresence>
-                  )}
-
-                  {!isLoading && allBooks.length === 0 && (
-                    <div className="py-20 text-center space-y-4">
-                      <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto">
-                        <Sparkles size={24} className="text-white/20" />
-                      </div>
-                      <p className="text-white/40 text-sm font-medium">No matches found for this preference.</p>
-                    </div>
                   )}
                 </div>
               </motion.div>
@@ -343,10 +344,10 @@ export default function ClarityLibrary({ isOpen, onClose }: ClarityLibraryProps)
 
         <div className="bg-[#0b0b0f] border-t border-white/5 px-8 py-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2 text-[9px] font-bold text-white/20 uppercase tracking-widest">
-            <Sparkles size={12} className="text-amber-500/50" /> Intelligence Hub Active
+            <Sparkles size={12} className="text-amber-500/50" /> {t('active_resolve')}
           </div>
           <div className="text-[9px] font-black uppercase text-white/10 tracking-widest">
-            Knowledge Maintained
+            Sankalp
           </div>
         </div>
       </SheetContent>

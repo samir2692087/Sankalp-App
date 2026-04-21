@@ -84,11 +84,11 @@ export default function Header({
     damping: 30
   });
 
-  const themes: { id: AppTheme, name: string, icon: any, bg: string }[] = [
-    { id: 'light', name: 'Daylight', icon: Sun, bg: 'bg-white' },
-    { id: 'dark', name: 'Eclipse', icon: Moon, bg: 'bg-slate-900' },
-    { id: 'purple', name: 'Cosmic', icon: Sparkles, bg: 'bg-purple-950' },
-    { id: 'amoled', name: 'Void', icon: Moon, bg: 'bg-black' },
+  const themes: { id: AppTheme, nameKey: keyof typeof translations['en'], icon: any, bg: string }[] = [
+    { id: 'light', nameKey: 'theme_light', icon: Sun, bg: 'bg-white' },
+    { id: 'dark', nameKey: 'theme_dark', icon: Moon, bg: 'bg-slate-900' },
+    { id: 'purple', nameKey: 'theme_purple', icon: Sparkles, bg: 'bg-purple-950' },
+    { id: 'amoled', nameKey: 'theme_amoled', icon: Moon, bg: 'bg-black' },
   ];
 
   const handleOpenSettings = () => {
@@ -98,7 +98,7 @@ export default function Header({
 
   return (
     <>
-      <header className="w-full flex items-center justify-between p-8 sticky top-0 z-[50] shrink-0 pointer-events-none">
+      <header className="w-full flex items-center justify-between p-8 sticky top-0 z-[50] shrink-0 pointer-events-auto">
         <div className="absolute inset-0 bg-[#0B0F14]/60 backdrop-blur-2xl border-b border-white/5 pointer-events-none -z-10" />
         
         <div className="pointer-events-auto">
@@ -261,27 +261,27 @@ export default function Header({
             <SheetDescription className="text-white/30 text-center uppercase tracking-[0.3em] text-[10px] font-black">{t('stay_steady')}</SheetDescription>
           </SheetHeader>
           <div className="grid grid-cols-2 gap-5 max-w-xl mx-auto">
-            {themes.map((t) => (
+            {themes.map((t_item) => (
               <motion.button 
-                key={t.id}
+                key={t_item.id}
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95 }}
                 transition={springConfig}
                 onClick={() => {
                   feedback.tap();
-                  onThemeChange(t.id);
+                  onThemeChange(t_item.id);
                 }}
                 className={cn(
                   "p-6 rounded-[2.2rem] flex flex-col gap-4 text-left border-2 transition-all group",
-                  theme === t.id 
+                  theme === t_item.id 
                     ? 'border-primary bg-primary/10 shadow-[0_0_30px_rgba(168,85,247,0.3)]' 
                     : 'border-white/5 bg-white/[0.03] hover:border-white/20'
                 )}
               >
-                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:rotate-12", t.bg)}>
-                  <t.icon size={20} className={cn(t.id === 'light' ? 'text-blue-500' : 'text-white')} />
+                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:rotate-12", t_item.bg)}>
+                  <t_item.icon size={20} className={cn(t_item.id === 'light' ? 'text-blue-500' : 'text-white')} />
                 </div>
-                <span className="text-white font-black text-xs uppercase tracking-[0.2em]">{t.name}</span>
+                <span className="text-white font-black text-xs uppercase tracking-[0.2em]">{t(t_item.nameKey)}</span>
               </motion.button>
             ))}
           </div>

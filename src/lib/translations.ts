@@ -126,7 +126,13 @@ export const translations = {
     lang_hi: "Hindi",
     fetching_knowledge: "Fetching knowledge...",
     recommendations: "Recommendations",
-    explore: "Explore"
+    explore: "Explore",
+    theme_light: "Daylight",
+    theme_dark: "Eclipse",
+    theme_purple: "Cosmic",
+    theme_amoled: "Void",
+    ascended: "Ascended",
+    stable: "Stable"
   },
   hi: {
     app_name: "संकल्प",
@@ -249,6 +255,12 @@ export const translations = {
     lang_hi: "हिंदी",
     fetching_knowledge: "ज्ञान प्राप्त कर रहा है...",
     recommendations: "सिफारिशें",
-    explore: "अन्वेषण"
+    explore: "अन्वेषण",
+    theme_light: "दिवस",
+    theme_dark: "ग्रहण",
+    theme_purple: "ब्रह्मांड",
+    theme_amoled: "शून्य",
+    ascended: "सफल",
+    stable: "स्थिर"
   }
 };
