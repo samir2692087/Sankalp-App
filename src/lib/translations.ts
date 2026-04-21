@@ -183,7 +183,7 @@ export const translations = {
     gender_male: "Male",
     gender_female: "Female",
     gender_other: "Other",
-    gender_none: "Prefer not to say",
+    gender_none: "None",
     age_u18: "Under 18",
     age_18_24: "18 - 24",
     age_25_34: "25 - 34",
@@ -200,6 +200,8 @@ export const translations = {
     contact_us: "Contact & Support",
     delete_data: "Delete My Data",
     delete_confirm: "Are you sure? This action is irreversible and will wipe all your progress.",
+    error_name_required: "Please enter your name to proceed.",
+    profile_updated: "Profile updated successfully.",
 
     /* Legal Detailed Content - English */
     legal_effective_date: "Effective Date: May 20, 2024",
@@ -407,7 +409,7 @@ export const translations = {
     gender_male: "पुरुष",
     gender_female: "महिला",
     gender_other: "अन्य",
-    gender_none: "बताना नहीं चाहते",
+    gender_none: "कोई नहीं",
     age_u18: "18 से कम",
     age_18_24: "18 - 24",
     age_25_34: "25 - 34",
@@ -424,6 +426,8 @@ export const translations = {
     contact_us: "संपर्क और सहायता",
     delete_data: "मेरा डेटा हटाएं",
     delete_confirm: "क्या आप निश्चित हैं? यह क्रिया अपरिवर्तनीय है और आपकी सभी प्रगति को मिटा देगी।",
+    error_name_required: "आगे बढ़ने के लिए कृपया अपना नाम दर्ज करें।",
+    profile_updated: "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई।",
 
     /* Legal Detailed Content - Hindi */
     legal_effective_date: "प्रभावी तिथि: 20 मई, 2024",
