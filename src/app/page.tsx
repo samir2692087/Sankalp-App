@@ -9,6 +9,7 @@ import Header from '@/components/dashboard/Header';
 import StreakDisplay from '@/components/dashboard/StreakDisplay';
 import ActionCards from '@/components/dashboard/ActionCards';
 import InsightsSummary from '@/components/dashboard/InsightsSummary';
+import JourneyTimeline from '@/components/dashboard/JourneyTimeline';
 import RelapseModal from '@/components/modals/RelapseModal';
 import UrgeModal from '@/components/modals/UrgeModal';
 import ExportModal from '@/components/modals/ExportModal';
@@ -113,7 +114,7 @@ export default function IronWillDashboard() {
     };
     updateState(newData);
     handleCloseModal(setShowRelapseModal);
-    toast({ title: "Focus reset", description: "Day one. Stay grounded." });
+    toast({ title: "Focus reset", description: "Stay grounded." });
   };
 
   const handleUrgeSubmit = (intensity: UrgeIntensity) => {
@@ -182,7 +183,7 @@ export default function IronWillDashboard() {
               }}
               onReset={() => { 
                 feedback.warning();
-                if(confirm("Erase all your progress?")) { clearData(); setData(INITIAL_DATA); } 
+                if(confirm("Erase all progress?")) { clearData(); setData(INITIAL_DATA); } 
               }}
               onToggleFocus={() => {
                 feedback.tap();
@@ -247,6 +248,8 @@ export default function IronWillDashboard() {
                 </motion.div>
               )}
 
+              <JourneyTimeline currentStreak={data.currentStreak} />
+
               <Proximity range={400}>
                 <Magnetic strength={0.2}>
                   <motion.div 
@@ -269,7 +272,7 @@ export default function IronWillDashboard() {
                           <Globe size={24} />
                         </div>
                         <div className="text-left">
-                          <p className="text-white font-bold text-base">Safe Browser</p>
+                          <p className="text-white font-bold text-base">Focus Browser</p>
                           <p className="text-white/20 text-[9px] uppercase font-black tracking-[0.2em]">Always protected</p>
                         </div>
                       </div>
