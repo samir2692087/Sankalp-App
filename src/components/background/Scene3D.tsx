@@ -93,7 +93,7 @@ function NeuralParticles({ intensity }: { intensity: number }) {
     if (!points || !points.geometry) return;
     
     const posAttr = points.geometry.getAttribute('position') as THREE.BufferAttribute;
-    if (!posAttr || !posAttr.array || posAttr.array.length === 0) return;
+    if (!posAttr || !posAttr.array) return;
     
     const array = posAttr.array as Float32Array;
     const safeIntensity = intensity || 0;
@@ -103,14 +103,12 @@ function NeuralParticles({ intensity }: { intensity: number }) {
       const iy = i * 3 + 1;
       const iz = i * 3 + 2;
       
-      if (array[ix] !== undefined) {
-        array[ix] = initialPositions[ix] + Math.sin(t * 0.5 + initialPositions[iz]) * 0.5;
-        array[iy] = initialPositions[iy] + Math.cos(t * 0.3 + initialPositions[ix]) * 0.5;
-        
-        if (safeIntensity > 0.1) {
-          array[ix] += (Math.random() - 0.5) * safeIntensity * 2;
-          array[iy] += (Math.random() - 0.5) * safeIntensity * 2;
-        }
+      array[ix] = initialPositions[ix] + Math.sin(t * 0.5 + initialPositions[iz]) * 0.5;
+      array[iy] = initialPositions[iy] + Math.cos(t * 0.3 + initialPositions[ix]) * 0.5;
+      
+      if (safeIntensity > 0.1) {
+        array[ix] += (Math.random() - 0.5) * safeIntensity * 2;
+        array[iy] += (Math.random() - 0.5) * safeIntensity * 2;
       }
     }
     posAttr.needsUpdate = true;
@@ -154,16 +152,15 @@ function CameraRig() {
 export default function Scene3D({ isBlurred }: SceneProps) {
   const [mounted, setMounted] = useState(false);
   const interaction = useInteraction();
-  const mode = interaction?.mode || 'calm';
-  const intensity = interaction?.intensity || 0;
-
-  // Stable effect parameters to avoid EffectComposer aggregation crashes in Fiber 9
-  const zeroOffset = useMemo(() => new THREE.Vector2(0, 0), []);
-  const riskOffset = useMemo(() => new THREE.Vector2(0.008, 0.008), []);
+  
+  // High-resilience parameters to avoid post-processing crashes in React 19/Fiber 9
+  const intensity = interaction?.intensity ?? 0;
+  const mode = interaction?.mode ?? 'calm';
   
   const currentOffset = useMemo(() => {
-    return mode === 'risk' ? riskOffset : zeroOffset;
-  }, [mode, riskOffset, zeroOffset]);
+    const offset = mode === 'risk' ? 0.008 : 0;
+    return new THREE.Vector2(offset, offset);
+  }, [mode]);
 
   useEffect(() => {
     setMounted(true);
@@ -181,12 +178,12 @@ export default function Scene3D({ isBlurred }: SceneProps) {
         <NeuralParticles intensity={intensity} />
         <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
         
-        {/* Stable Effects Stack: No conditional children to prevent aggregation length errors in Fiber 9 */}
+        {/* Stable effects stack for React 19 compatibility */}
         <EffectComposer disableNormalPass multisampling={0}>
           <Bloom 
             luminanceThreshold={0.2} 
             mipmapBlur 
-            intensity={1.2 + (intensity || 0) * 4} 
+            intensity={1.2 + intensity * 4} 
             radius={0.5} 
           />
           <Noise opacity={0.04} />
