@@ -25,12 +25,15 @@ import {
   calculateStreak, 
   calculateDisciplineScore, 
   getBehavioralInsights,
-  getDailyChallenge
+  getDailyChallenge,
+  calculateXP,
+  calculateLevel
 } from '@/lib/discipline-engine';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
-import { Globe, AlertCircle, ArrowRight, BookOpen } from 'lucide-react';
+import { Globe, AlertCircle, ArrowRight, BookOpen, Sparkles, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import Magnetic from '@/components/interactions/Magnetic';
 import Tilt from '@/components/interactions/Tilt';
 import Parallax from '@/components/interactions/Parallax';
@@ -73,6 +76,8 @@ export default function IronWillDashboard() {
         newData.bestStreak = newData.currentStreak;
       }
       newData.disciplineScore = calculateDisciplineScore(newData);
+      newData.xp = calculateXP(newData);
+      newData.level = calculateLevel(newData.xp);
       setData(newData);
     };
     syncData();
@@ -85,6 +90,8 @@ export default function IronWillDashboard() {
       updatedData.bestStreak = updatedData.currentStreak;
     }
     updatedData.disciplineScore = calculateDisciplineScore(updatedData);
+    updatedData.xp = calculateXP(updatedData);
+    updatedData.level = calculateLevel(updatedData.xp);
     setData(updatedData);
     saveData(updatedData);
   };
@@ -116,7 +123,7 @@ export default function IronWillDashboard() {
     };
     updateState(newData);
     handleCloseModal(setShowRelapseModal);
-    toast({ title: "Focus reset", description: "Stay grounded." });
+    toast({ title: "Focus reset", description: "Stay grounded. Return to clarity." });
   };
 
   const handleUrgeSubmit = (intensity: UrgeIntensity) => {
@@ -130,19 +137,27 @@ export default function IronWillDashboard() {
     };
     updateState(newData);
     handleCloseModal(setShowUrgeModal);
-    toast({ title: "Stayed firm", description: "You are in control." });
+    toast({ title: "Stayed firm", description: "You are in control. XP earned." });
   };
 
   const insights = useMemo(() => getBehavioralInsights(data), [data]);
   const challenge = useMemo(() => getDailyChallenge(data.currentStreak), [data.currentStreak]);
 
   useEffect(() => {
-    if (data.focusMode && mode !== 'risk') setMode('focus');
-  }, [data.focusMode, mode, setMode]);
+    if (insights.riskLevel === 'CRITICAL') {
+      setMode('risk');
+    } else if (data.focusMode) {
+      setMode('focus');
+    } else {
+      setMode('calm');
+    }
+  }, [insights.riskLevel, data.focusMode, setMode]);
 
   if (!mounted) return null;
 
   const isAnySheetOpen = showRelapseModal || showUrgeModal || showExportModal || showInsightsSheet || showEmergencyModal || showCalendarSheet || showLibrary;
+
+  const xpProgress = (data.xp % 100);
 
   return (
     <>
@@ -185,7 +200,7 @@ export default function IronWillDashboard() {
               }}
               onReset={() => { 
                 feedback.warning();
-                if(confirm("Erase all progress?")) { clearData(); setData(INITIAL_DATA); } 
+                if(confirm("Erase all progress and return to Day 0?")) { clearData(); setData(INITIAL_DATA); } 
               }}
               onToggleFocus={() => {
                 feedback.tap();
@@ -208,6 +223,33 @@ export default function IronWillDashboard() {
                 mode === 'focus' ? 'gap-4' : 'gap-8'
               )}
             >
+              {/* Mastery Level HUD */}
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full flex items-center justify-between px-2 mb-2"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                    <Sparkles size={18} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Fortitude Level</span>
+                    <span className="text-sm font-black text-white">Level {data.level}</span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-1.5">
+                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{data.xp} Total XP</span>
+                  <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${xpProgress}%` }}
+                      className="h-full bg-primary shadow-[0_0_10px_rgba(168,85,247,0.5)]" 
+                    />
+                  </div>
+                </div>
+              </motion.div>
+
               <Draggable>
                 <Parallax offset={15}>
                   <StreakDisplay 
@@ -221,7 +263,7 @@ export default function IronWillDashboard() {
                         triggerPulse(0.5);
                         recordInteraction('freeze');
                         updateState({ ...data, streakFreezes: data.streakFreezes - 1 });
-                        toast({ title: "Pause used", description: "Clarity maintained." });
+                        toast({ title: "Pause used", description: "Clarity maintained for 24 hours." });
                       }
                     }}
                   />
@@ -232,20 +274,20 @@ export default function IronWillDashboard() {
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="p-6 rounded-[2rem] bg-red-500/10 border border-red-500/20 flex flex-col gap-4"
+                  className="p-6 rounded-[2.5rem] bg-red-500/10 border border-red-500/20 flex flex-col gap-4 shadow-[0_20px_40px_rgba(239,68,68,0.1)]"
                 >
                   <div className="flex items-center gap-3 text-red-500">
                     <AlertCircle size={24} className="animate-pulse" />
-                    <h3 className="font-bold uppercase tracking-widest text-sm">Stay aware</h3>
+                    <h3 className="font-bold uppercase tracking-widest text-sm">Vulnerability High</h3>
                   </div>
                   <p className="text-xs text-white/60 leading-relaxed font-medium">
-                    You've noted a few urges lately. Take a breath, stay sharp, and return to focus.
+                    Our analysis shows a high risk of relapse. Pause, breathe, and step away from any triggers immediately.
                   </p>
                   <Button 
                     onClick={() => handleOpenModal(setShowEmergencyModal)}
                     className="w-full bg-red-500 hover:bg-red-600 text-white font-bold h-12 rounded-xl"
                   >
-                    Breathe and reset
+                    Enter Emergency Protocol
                   </Button>
                 </motion.div>
               )}
@@ -264,7 +306,7 @@ export default function IronWillDashboard() {
                         className="h-24 w-full rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex flex-col items-center justify-center gap-2 p-0"
                       >
                         <Globe size={24} className="text-primary group-hover:shadow-[0_0_15px_rgba(124,58,237,0.4)]" />
-                        <span className="text-white/80 font-bold text-xs">Browser</span>
+                        <span className="text-white/80 font-bold text-xs">Safe Browser</span>
                       </Button>
                     </motion.div>
                   </Magnetic>
@@ -278,7 +320,7 @@ export default function IronWillDashboard() {
                         className="h-24 w-full rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex flex-col items-center justify-center gap-2 p-0"
                       >
                         <BookOpen size={24} className="text-amber-400 group-hover:shadow-[0_0_15px_rgba(251,191,36,0.4)]" />
-                        <span className="text-white/80 font-bold text-xs">Library</span>
+                        <span className="text-white/80 font-bold text-xs">Clarity Library</span>
                       </Button>
                     </motion.div>
                   </Magnetic>
@@ -296,7 +338,7 @@ export default function IronWillDashboard() {
                       ...data, 
                       checkIns: [{ date: today, timestamp: Date.now() }, ...(Array.isArray(data.checkIns) ? data.checkIns : [])] 
                     });
-                    toast({ title: "Checked in", description: "Consistency is strength." });
+                    toast({ title: "Checked in", description: "Protocol maintained. XP earned." });
                   }
                 }} 
                 onUrge={() => handleOpenModal(setShowUrgeModal)} 
@@ -327,7 +369,7 @@ export default function IronWillDashboard() {
                       transition={springConfig}
                       className="glass-card p-8 rounded-[3rem] bg-card/20 border-white/5 perspective-1000"
                     >
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 opacity-60">Focus Task</h4>
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 opacity-60">Mastery Task</h4>
                       <p className="text-lg font-bold leading-relaxed text-foreground/90">{challenge}</p>
                     </motion.div>
                   </Draggable>

@@ -11,6 +11,18 @@ export function calculateStreak(lastRelapseTimestamp: number | null): number {
   }
 }
 
+export function calculateLevel(xp: number): number {
+  // Simple level curve: Level = sqrt(XP / 100) + 1
+  return Math.floor(Math.sqrt(xp / 100)) + 1;
+}
+
+export function calculateXP(data: UserData): number {
+  const checkInPoints = (data.checkIns?.length || 0) * 50;
+  const urgePoints = (data.urges?.length || 0) * 30;
+  const streakPoints = (data.currentStreak || 0) * 10;
+  return checkInPoints + urgePoints + streakPoints;
+}
+
 export function calculateDisciplineScore(data: UserData): number {
   if (!data) return 0;
   const urges = Array.isArray(data.urges) ? data.urges : [];
@@ -68,9 +80,17 @@ export function getBehavioralInsights(data: UserData) {
   const totalBattles = urges.length + relapses.length;
   const winRate = totalBattles > 0 ? Math.round((urges.length / totalBattles) * 100) : 100;
 
+  // Risk Prediction Logic
   const now = Date.now();
   const recentUrges = urges.filter(u => u?.timestamp && (now - u.timestamp < 1000 * 60 * 60 * 48)).length;
-  const riskLevel = recentUrges >= 3 ? 'CRITICAL' : recentUrges >= 1 ? 'ELEVATED' : 'STABLE';
+  const streak = data.currentStreak || 0;
+  
+  let riskLevel: 'STABLE' | 'ELEVATED' | 'CRITICAL' = 'STABLE';
+  if (recentUrges >= 3 || (recentUrges >= 1 && streak < 3)) {
+    riskLevel = 'CRITICAL';
+  } else if (recentUrges >= 1) {
+    riskLevel = 'ELEVATED';
+  }
 
   return { 
     mostCommonTrigger, 
@@ -78,9 +98,9 @@ export function getBehavioralInsights(data: UserData) {
     winRate,
     resilienceLevel: winRate > 85 ? 'Fortress' : winRate > 60 ? 'Steady' : 'Vulnerable',
     riskLevel,
-    protectionMessage: riskLevel === 'CRITICAL' ? "Take a moment to reset. Reach out for support." :
-                       riskLevel === 'ELEVATED' ? "Stay sharp. Temptation is high." :
-                       "Staying focused. Keep going."
+    protectionMessage: riskLevel === 'CRITICAL' ? "Take a moment to reset. Your control is being tested." :
+                       riskLevel === 'ELEVATED' ? "Stay sharp. Awareness is your primary shield right now." :
+                       "Staying focused. Every minute of control is a victory."
   };
 }
 

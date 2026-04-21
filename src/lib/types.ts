@@ -18,6 +18,8 @@ export interface RelapseLog {
 export interface CheckInLog {
   date: string; // YYYY-MM-DD
   timestamp: number;
+  mood?: string;
+  energy?: number; // 1-10
 }
 
 export interface DayNote {
@@ -41,6 +43,8 @@ export interface UserData {
   checkIns: CheckInLog[];
   notes: DayNote[];
   disciplineScore: number;
+  xp: number;
+  level: number;
   focusMode: boolean;
   theme: AppTheme;
   notificationsEnabled: boolean;
@@ -60,6 +64,8 @@ export const INITIAL_DATA: UserData = {
   checkIns: [],
   notes: [],
   disciplineScore: 0,
+  xp: 0,
+  level: 1,
   focusMode: false,
   theme: 'dark',
   notificationsEnabled: false,

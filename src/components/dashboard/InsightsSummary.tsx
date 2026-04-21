@@ -1,7 +1,7 @@
 
 "use client";
 
-import { TrendingUp, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { TrendingUp, ShieldCheck, AlertTriangle, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -50,7 +50,7 @@ export default function InsightsSummary({
       <div className="flex items-center justify-between mb-6">
         <div className="flex flex-col gap-1">
           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 flex items-center gap-2">
-            <TrendingUp size={14} className="text-primary" /> Inner Clarity
+            <Activity size={14} className="text-primary" /> Behavioral Insight
           </h3>
           <span className={cn(
             "text-4xl font-black text-white",
@@ -81,8 +81,8 @@ export default function InsightsSummary({
           />
         </div>
         <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-[0.2em] text-white/20">
-           <span>Focus is steady</span>
-           <span>90 Day Path</span>
+           <span>Clarity Level</span>
+           <span>Risk: {riskLevel}</span>
         </div>
       </div>
 
@@ -93,10 +93,13 @@ export default function InsightsSummary({
           className={cn(
             "p-5 rounded-[1.8rem] flex items-center gap-4 border",
             riskLevel === 'CRITICAL' ? "bg-red-500/10 border-red-500/30 text-red-400" :
+            riskLevel === 'ELEVATED' ? "bg-amber-500/10 border-amber-500/30 text-amber-400" :
             "bg-white/5 border-white/5 text-white/60"
           )}
         >
-          {isHighRisk ? <AlertTriangle size={20} className="shrink-0 animate-pulse" /> : <ShieldCheck size={20} className="shrink-0 text-primary" />}
+          {riskLevel === 'CRITICAL' ? <AlertTriangle size={20} className="shrink-0 animate-pulse" /> : 
+           riskLevel === 'ELEVATED' ? <AlertTriangle size={20} className="shrink-0" /> : 
+           <ShieldCheck size={20} className="shrink-0 text-primary" />}
           <p className="text-[11px] font-bold uppercase tracking-tight leading-snug">{message}</p>
         </motion.div>
       )}

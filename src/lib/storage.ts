@@ -5,7 +5,6 @@ const STORAGE_KEY = 'ironwill_v1_data';
 
 /**
  * Deep merges stored data with INITIAL_DATA to ensure all arrays and fields are present.
- * Uses explicit checks for array types to prevent corrupted data from crashing the app.
  */
 const migrateData = (parsed: any): UserData => {
   if (!parsed || typeof parsed !== 'object') return INITIAL_DATA;
@@ -21,6 +20,8 @@ const migrateData = (parsed: any): UserData => {
     currentStreak: typeof parsed?.currentStreak === 'number' && !isNaN(parsed.currentStreak) ? parsed.currentStreak : 0,
     bestStreak: typeof parsed?.bestStreak === 'number' && !isNaN(parsed.bestStreak) ? parsed.bestStreak : 0,
     disciplineScore: typeof parsed?.disciplineScore === 'number' && !isNaN(parsed.disciplineScore) ? parsed.disciplineScore : 0,
+    xp: typeof parsed?.xp === 'number' && !isNaN(parsed.xp) ? parsed.xp : 0,
+    level: typeof parsed?.level === 'number' && !isNaN(parsed.level) ? parsed.level : 1,
     streakFreezes: typeof parsed?.streakFreezes === 'number' && !isNaN(parsed.streakFreezes) ? parsed.streakFreezes : 3,
     maxFreezes: typeof parsed?.maxFreezes === 'number' && !isNaN(parsed.maxFreezes) ? parsed.maxFreezes : 3,
     theme: ['light', 'dark', 'purple', 'amoled'].includes(parsed?.theme) ? parsed.theme : 'dark',
