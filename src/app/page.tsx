@@ -19,7 +19,7 @@ import ClarityLibrary from '@/components/modals/ClarityLibrary';
 import LaunchScreen from '@/components/layout/LaunchScreen';
 import FAB from '@/components/dashboard/FAB';
 import SankalpIcon from '@/components/icons/SankalpIcon';
-import { UserData, INITIAL_DATA, UrgeIntensity } from '@/lib/types';
+import { UserData, INITIAL_DATA, UrgeIntensity, AppTheme } from '@/lib/types';
 import { getStoredData, saveData, clearData } from '@/lib/storage';
 import { 
   calculateStreak, 
@@ -40,6 +40,7 @@ import Proximity from '@/components/interactions/Proximity';
 import Draggable from '@/components/interactions/Draggable';
 import { useInteraction } from '@/context/InteractionContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useTheme } from '@/context/ThemeContext';
 import { feedback } from '@/lib/feedback-engine';
 import { cn } from '@/lib/utils';
 
@@ -54,6 +55,8 @@ export default function SankalpOverview() {
   const { toast } = useToast();
   const { triggerPulse, setMode, mode, recordInteraction } = useInteraction();
   const { t, language } = useLanguage();
+  const { theme, setTheme } = useTheme();
+  
   const [data, setData] = useState<UserData>(INITIAL_DATA);
   const [showRelapseModal, setShowRelapseModal] = useState(false);
   const [showUrgeModal, setShowUrgeModal] = useState(false);
@@ -79,6 +82,11 @@ export default function SankalpOverview() {
       newData.xp = calculateXP(newData);
       newData.level = calculateLevel(newData.xp);
       setData(newData);
+      
+      // Sync global theme state from stored user data if different
+      if (newData.theme && newData.theme !== theme) {
+        setTheme(newData.theme);
+      }
     };
     syncData();
   }, []);
@@ -94,6 +102,11 @@ export default function SankalpOverview() {
     updatedData.level = calculateLevel(updatedData.xp);
     setData(updatedData);
     saveData(updatedData);
+    
+    // Sync context theme if data changes
+    if (updatedData.theme) {
+      setTheme(updatedData.theme);
+    }
   };
 
   const handleOpenModal = useCallback((setter: (v: boolean) => void) => {
@@ -167,10 +180,12 @@ export default function SankalpOverview() {
 
       <div className={cn(
         "min-h-screen relative flex flex-col selection:bg-primary/30 overflow-x-hidden no-scrollbar transition-all duration-1000",
+        `theme-${theme}`,
         mode === 'risk' ? 'bg-red-950/20' : 'bg-transparent'
       )}>
         <Scene3D 
           isBlurred={isAnySheetOpen || isLoading}
+          theme={theme}
         />
         
         <div className={cn(
@@ -190,7 +205,7 @@ export default function SankalpOverview() {
             
             <Header 
               focusMode={data.focusMode} 
-              theme={data.theme || 'dark'}
+              theme={theme}
               data={data}
               onThemeChange={(t_val) => {
                 feedback.tap();
@@ -232,13 +247,13 @@ export default function SankalpOverview() {
                     <Sparkles size={18} />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">{t('resolve_level')}</span>
-                    <span className="text-sm font-black text-white">{t('level')} {data.level}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40">{t('resolve_level')}</span>
+                    <span className="text-sm font-black text-foreground">{t('level')} {data.level}</span>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1.5">
-                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{data.xp} {t('xp')}</span>
-                  <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                  <span className="text-[10px] font-bold text-foreground/20 uppercase tracking-widest">{data.xp} {t('xp')}</span>
+                  <div className="w-32 h-1.5 bg-foreground/5 rounded-full overflow-hidden">
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: `${xpProgress}%` }}
@@ -278,7 +293,7 @@ export default function SankalpOverview() {
                     <SankalpIcon size={24} className="animate-pulse" />
                     <h3 className="font-bold uppercase tracking-widest text-sm">{t('vulnerability_high')}</h3>
                   </div>
-                  <p className="text-xs text-white/60 leading-relaxed font-medium">
+                  <p className="text-xs text-foreground/60 leading-relaxed font-medium">
                     {t('stay_aware')}
                   </p>
                   <Button 
@@ -298,10 +313,10 @@ export default function SankalpOverview() {
                     <motion.div whileHover={{ scale: 1.02, y: -5 }}>
                       <Button 
                         onClick={() => handleOpenModal(setShowEmergencyModal)}
-                        className="h-24 w-full rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex flex-col items-center justify-center gap-2 p-0"
+                        className="h-24 w-full rounded-[2.5rem] bg-foreground/[0.03] border border-foreground/10 hover:bg-foreground/[0.06] transition-all group flex flex-col items-center justify-center gap-2 p-0"
                       >
                         <SankalpIcon size={24} className="text-red-500 group-hover:shadow-[0_0_15px_rgba(239,68,68,0.4)]" />
-                        <span className="text-white/80 font-bold text-xs">{t('control_mode')}</span>
+                        <span className="text-foreground/80 font-bold text-xs">{t('control_mode')}</span>
                       </Button>
                     </motion.div>
                   </Magnetic>
@@ -312,10 +327,10 @@ export default function SankalpOverview() {
                     <motion.div whileHover={{ scale: 1.02, y: -5 }}>
                       <Button 
                         onClick={() => handleOpenModal(setShowLibrary)}
-                        className="h-24 w-full rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex flex-col items-center justify-center gap-2 p-0"
+                        className="h-24 w-full rounded-[2.5rem] bg-foreground/[0.03] border border-foreground/10 hover:bg-foreground/[0.06] transition-all group flex flex-col items-center justify-center gap-2 p-0"
                       >
                         <BookOpen size={24} className="text-amber-400 group-hover:shadow-[0_0_15px_rgba(251,191,36,0.4)]" />
-                        <span className="text-white/80 font-bold text-xs">{t('clarity_hub')}</span>
+                        <span className="text-foreground/80 font-bold text-xs">{t('clarity_hub')}</span>
                       </Button>
                     </motion.div>
                   </Magnetic>
@@ -362,7 +377,7 @@ export default function SankalpOverview() {
                     <motion.div 
                       whileHover={{ scale: 1.02, y: -10, rotateX: 2 }}
                       transition={springConfig}
-                      className="glass-card p-8 rounded-[3rem] bg-card/20 border-white/5 perspective-1000"
+                      className="glass-card p-8 rounded-[3rem] bg-card/20 border-foreground/5 perspective-1000"
                     >
                       <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 opacity-60">{t('mastery_action')}</h4>
                       <p className="text-lg font-bold leading-relaxed text-foreground/90">{challenge}</p>

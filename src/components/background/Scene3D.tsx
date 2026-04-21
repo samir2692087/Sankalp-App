@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useRef, useMemo, useEffect, useState, Suspense } from 'react';
@@ -12,6 +11,7 @@ import {
 import * as THREE from 'three';
 import { useInteraction } from '@/context/InteractionContext';
 import { cn } from '@/lib/utils';
+import { AppTheme } from '@/lib/types';
 
 // --- ASTRONOMICAL DATA (Scaled for visual clarity) ---
 const PLANET_DATA = [
@@ -24,8 +24,10 @@ const PLANET_DATA = [
 
 // --- COMPONENTS ---
 
-function Sun() {
+function Sun({ theme }: { theme: AppTheme }) {
   const meshRef = useRef<THREE.Mesh>(null!);
+  const sunColor = theme === 'purple' ? '#a855f7' : '#ffcc33';
+  const emissiveColor = theme === 'purple' ? '#d8b4fe' : '#ffaa00';
   
   useFrame((state) => {
     meshRef.current.rotation.y += 0.005;
@@ -37,18 +39,18 @@ function Sun() {
       <mesh ref={meshRef}>
         <sphereGeometry args={[2.2, 64, 64]} />
         <meshStandardMaterial 
-          emissive="#ffaa00" 
-          emissiveIntensity={2} 
-          color="#ffcc33" 
+          emissive={emissiveColor} 
+          emissiveIntensity={theme === 'light' ? 1 : 2} 
+          color={sunColor} 
         />
       </mesh>
-      <pointLight intensity={150} distance={100} color="#ffcc33" decay={2} />
+      <pointLight intensity={theme === 'light' ? 50 : 150} distance={100} color={sunColor} decay={2} />
       
       {/* Subtle Corona / Atmosphere */}
       <mesh scale={1.15}>
         <sphereGeometry args={[2.2, 32, 32]} />
         <meshBasicMaterial 
-          color="#ffaa00" 
+          color={emissiveColor} 
           transparent 
           opacity={0.15} 
           side={THREE.BackSide}
@@ -95,19 +97,29 @@ function Planet({ data, scrollVelocity }: { data: typeof PLANET_DATA[0], scrollV
   );
 }
 
-function StarField({ scrollVelocity }: { scrollVelocity: number }) {
+function StarField({ scrollVelocity, theme }: { scrollVelocity: number, theme: AppTheme }) {
   const ref = useRef<THREE.Group>(null!);
+  const starOpacity = theme === 'light' ? 0.1 : 1;
+
   useFrame(() => {
     ref.current.rotation.y += 0.0002 + Math.abs(scrollVelocity) * 0.002;
   });
   return (
     <group ref={ref}>
-      <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={0.5} />
+      <Stars 
+        radius={100} 
+        depth={50} 
+        count={theme === 'amoled' ? 4000 : 3000} 
+        factor={4} 
+        saturation={0} 
+        fade 
+        speed={0.5} 
+      />
     </group>
   );
 }
 
-export default function Scene3D({ isBlurred }: { isBlurred?: boolean }) {
+export default function Scene3D({ isBlurred, theme }: { isBlurred?: boolean, theme: AppTheme }) {
   const [mounted, setMounted] = useState(false);
   const [scroll, setScroll] = useState({ velocity: 0 });
   const lastScrollY = useRef(0);
@@ -132,15 +144,27 @@ export default function Scene3D({ isBlurred }: { isBlurred?: boolean }) {
     return () => clearInterval(timer);
   }, []);
 
+  const getBgColor = () => {
+    switch(theme) {
+      case 'light': return '#f8fafc';
+      case 'purple': return '#0f0714';
+      case 'amoled': return '#000000';
+      default: return '#020205';
+    }
+  };
+
   if (!mounted) return <div className="fixed inset-0 -z-10 bg-[#020205]" />;
 
   return (
     <div className={cn(
-      "fixed inset-0 -z-10 bg-[#020205] transition-all duration-1000",
+      "fixed inset-0 -z-10 transition-all duration-1000",
       isBlurred ? 'opacity-40 blur-sm' : 'opacity-100'
-    )}>
+    )} style={{ backgroundColor: getBgColor() }}>
       {/* Vignette Overlay for depth */}
-      <div className="absolute inset-0 z-10 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.6)_100%)]" />
+      <div className={cn(
+        "absolute inset-0 z-10 pointer-events-none transition-opacity duration-1000",
+        theme === 'light' ? 'opacity-20' : 'opacity-100'
+      )} style={{ background: `radial-gradient(circle at center, transparent 0%, rgba(0,0,0,${theme === 'amoled' ? 0.8 : 0.6}) 100%)` }} />
       
       <Canvas 
         gl={{ antialias: true, stencil: false, powerPreference: 'high-performance' }}
@@ -156,16 +180,16 @@ export default function Scene3D({ isBlurred }: { isBlurred?: boolean }) {
           maxPolarAngle={Math.PI / 1.8}
         />
         
-        <ambientLight intensity={0.1} />
+        <ambientLight intensity={theme === 'light' ? 0.5 : 0.1} />
         
         <Suspense fallback={null}>
-          <Sun />
+          <Sun theme={theme} />
           
           {PLANET_DATA.map((p) => (
             <Planet key={p.name} data={p} scrollVelocity={scroll.velocity} />
           ))}
 
-          <StarField scrollVelocity={scroll.velocity} />
+          <StarField scrollVelocity={scroll.velocity} theme={theme} />
           <Environment preset="night" />
         </Suspense>
       </Canvas>

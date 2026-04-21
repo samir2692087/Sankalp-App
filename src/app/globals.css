@@ -1,10 +1,10 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    /* Default Dark (Eclipse) */
     --background: 220 30% 2%;
     --foreground: 210 20% 98%;
     --card: 220 30% 4%;
@@ -26,6 +26,42 @@
     --ring: 262 83% 58%;
     --radius: 1.5rem;
   }
+
+  .theme-light {
+    --background: 210 20% 98%;
+    --foreground: 220 30% 2%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 2%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 2%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 199 89% 48%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 210 20% 90%;
+    --muted-foreground: 215 20% 40%;
+    --accent: 262 83% 58%;
+    --accent-foreground: 220 30% 2%;
+    --border: 220 30% 88%;
+    --input: 220 30% 88%;
+  }
+
+  .theme-purple {
+    --background: 270 50% 4%;
+    --card: 270 50% 6%;
+    --primary: 280 100% 70%;
+    --accent: 280 100% 70%;
+    --ring: 280 100% 70%;
+    --border: 270 50% 15%;
+  }
+
+  .theme-amoled {
+    --background: 0 0% 0%;
+    --card: 0 0% 2%;
+    --popover: 0 0% 2%;
+    --border: 0 0% 10%;
+    --muted: 0 0% 5%;
+  }
 }
 
 @layer components {
@@ -35,9 +71,19 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  .theme-light .glass-card {
+    @apply bg-black/[0.03] border-black/[0.08];
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 1px 0 rgba(0,0,0,0.02);
+  }
+
   .glass-card:hover {
     @apply border-white/20 -translate-y-1;
     box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+
+  .theme-light .glass-card:hover {
+    @apply border-black/10;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
   }
 
   .primary-glow {
@@ -56,9 +102,9 @@
 }
 
 @layer base {
-  * { @apply border-white/10; }
+  * { @apply border-border; }
   body {
-    @apply bg-[#020205] text-foreground antialiased min-h-screen overflow-x-hidden;
+    @apply bg-background text-foreground antialiased min-h-screen overflow-x-hidden transition-colors duration-500;
   }
 }
 
@@ -66,6 +112,5 @@
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 canvas {
-  /* Removed pointer-events: none to allow OrbitControls interaction */
   outline: none;
 }
