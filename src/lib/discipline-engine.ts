@@ -17,7 +17,7 @@ export function calculateDisciplineScore(data: UserData): number {
   const relapses = Array.isArray(data.relapses) ? data.relapses : [];
   const checkIns = Array.isArray(data.checkIns) ? data.checkIns : [];
   
-  const currentStreak = typeof data.currentStreak === 'number' ? data.currentStreak : 0;
+  const currentStreak = typeof data.currentStreak === 'number' && !isNaN(data.currentStreak) ? data.currentStreak : 0;
   const streakFactor = Math.min(currentStreak * 2, 50);
   const urgeFactor = Math.min(urges.length * 3, 40);
   const checkInFactor = Math.min(checkIns.length * 0.5, 20);
@@ -123,8 +123,8 @@ export function getWeeklyData(data: UserData) {
 }
 
 export function getAchievements(streak: number, score: number) {
-  const s = typeof streak === 'number' ? streak : 0;
-  const sc = typeof score === 'number' ? score : 0;
+  const s = typeof streak === 'number' && !isNaN(streak) ? streak : 0;
+  const sc = typeof score === 'number' && !isNaN(score) ? score : 0;
   return [
     { id: '1', name: 'Initiate', desc: 'First 24 hours clean', unlocked: s >= 1 },
     { id: '2', name: 'Warrior', desc: '7 Day Streak reached', unlocked: s >= 7 },
@@ -135,7 +135,7 @@ export function getAchievements(streak: number, score: number) {
 }
 
 export function getDailyChallenge(streak: number) {
-  const s = typeof streak === 'number' ? streak : 0;
+  const s = typeof streak === 'number' && !isNaN(streak) ? streak : 0;
   const lowStreak = [
     "Identify one trigger and remove it.",
     "Do 10 pushups when an urge hits.",
