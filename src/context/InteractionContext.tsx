@@ -3,14 +3,14 @@
 
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 
-export type SystemMode = 'calm' | 'active' | 'focus' | 'risk';
+export type StateOfMind = 'calm' | 'active' | 'focus' | 'risk';
 
 interface InteractionState {
   intensity: number; // 0 to 1
-  mode: SystemMode;
+  mode: StateOfMind;
   lastPulse: number;
   triggerPulse: (strength?: number) => void;
-  setMode: (mode: SystemMode) => void;
+  setMode: (mode: StateOfMind) => void;
   recordInteraction: (type: string) => void;
 }
 
@@ -18,7 +18,7 @@ const InteractionContext = createContext<InteractionState | undefined>(undefined
 
 export function InteractionProvider({ children }: { children: React.ReactNode }) {
   const [intensity, setIntensity] = useState(0);
-  const [mode, setMode] = useState<SystemMode>('calm');
+  const [mode, setMode] = useState<StateOfMind>('calm');
   const [lastPulse, setLastPulse] = useState(0);
   const [interactionLog, setInteractionLog] = useState<{ type: string; timestamp: number }[]>([]);
   const decayRef = useRef<number | null>(null);
@@ -34,7 +34,6 @@ export function InteractionProvider({ children }: { children: React.ReactNode })
     triggerPulse(0.2);
   }, [triggerPulse]);
 
-  // Adaptive Mode Controller
   useEffect(() => {
     const recentActions = interactionLog.filter(a => Date.now() - a.timestamp < 30000);
     const urgeCount = recentActions.filter(a => a.type === 'urge').length;
@@ -46,7 +45,6 @@ export function InteractionProvider({ children }: { children: React.ReactNode })
     else if (activityCount < 3) setMode('calm');
   }, [interactionLog, mode]);
 
-  // Natural decay of intensity over time
   useEffect(() => {
     const decay = () => {
       setIntensity(prev => Math.max(0, prev - 0.015));

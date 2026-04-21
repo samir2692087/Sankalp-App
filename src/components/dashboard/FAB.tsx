@@ -30,17 +30,14 @@ interface FABProps {
 }
 
 const springConfig = { type: "spring", stiffness: 180, damping: 18, mass: 1 };
-const fastSpring = { type: "spring", stiffness: 300, damping: 20, mass: 0.5 };
 
 export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // --- PHYSICS ENGINE: SCROLL INERTIA ---
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
   
-  // Transform velocity into physics-based lag and rotation
   const lagY = useSpring(useTransform(scrollVelocity, [-2000, 2000], [-30, 30]), {
     stiffness: 100,
     damping: 30
@@ -52,10 +49,10 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
   });
 
   const navItems = [
-    { label: 'Mastery', icon: Target, tab: 'milestones', color: 'bg-purple-600', shadow: 'shadow-purple-500/40' },
+    { label: 'Resolve', icon: Target, tab: 'milestones', color: 'bg-purple-600', shadow: 'shadow-purple-500/40' },
     { label: 'Pulse', icon: BarChart3, tab: 'weekly', color: 'bg-blue-500', shadow: 'shadow-blue-500/40' },
     { label: 'History', icon: Calendar, tab: 'history', color: 'bg-green-500', shadow: 'shadow-green-500/40' },
-    { label: 'Crisis', icon: Shield, isEmergency: true, color: 'bg-red-500', shadow: 'shadow-red-500/40' },
+    { label: 'Control', icon: Shield, isEmergency: true, color: 'bg-red-500', shadow: 'shadow-red-500/40' },
   ];
 
   const handleAction = (item: any) => {
@@ -98,7 +95,7 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
                     initial={{ opacity: 0, x: 20, y: 10, scale: 0.4 }}
                     animate={{ 
                       opacity: 1, 
-                      x: -idx * 5, // Orbital offset
+                      x: -idx * 5, 
                       y: 0, 
                       scale: 1 
                     }}
@@ -127,8 +124,6 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
                     >
                       <item.icon size={22} className="relative z-10" />
                       <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-white/20 rounded-2xl pointer-events-none" />
-                      
-                      {/* Subliminal Glow Aura */}
                       <div className={cn(
                         "absolute -inset-2 rounded-[2rem] opacity-0 group-hover:opacity-40 transition-opacity blur-xl",
                         item.color
@@ -184,7 +179,6 @@ export default function FAB({ onOpenInsights, onOpenEmergency }: FABProps) {
                 )}
               </AnimatePresence>
 
-              {/* Atmospheric Glow */}
               {!isOpen && (
                 <motion.div 
                   animate={{ 

@@ -4,8 +4,8 @@ import './globals.css';
 import { InteractionProvider } from '@/context/InteractionContext';
 
 export const metadata: Metadata = {
-  title: 'IronWill | Your Path to Discipline',
-  description: 'Track your streak, resist urges, and master your focus with IronWill.',
+  title: 'Sankalp | Your Path to Discipline',
+  description: 'Track your resolve, hold control, and master your focus with Sankalp.',
 };
 
 export default function RootLayout({

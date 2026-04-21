@@ -30,7 +30,7 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
     <div className="w-full flex flex-col gap-6">
       <div className="flex items-center justify-between px-2">
         <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 flex items-center gap-2">
-          <Sparkles size={14} className="text-primary" /> Mastery Roadmap
+          <Sparkles size={14} className="text-primary" /> Resolve Path
         </h3>
         <span className="text-[10px] font-bold text-white/20">
           Day {currentStreak} of 365
@@ -38,7 +38,6 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
       </div>
 
       <div className="relative">
-        {/* Progress Bar Background */}
         <div className="absolute top-1/2 left-0 w-full h-px bg-white/5 -translate-y-1/2" />
         
         <div 
@@ -48,7 +47,6 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
           {JOURNEY_PHASES.map((phase, idx) => {
             const isActive = currentPhase.id === phase.id;
             const isCompleted = currentStreak >= phase.range[1];
-            const isLocked = currentStreak < phase.range[0];
 
             return (
               <motion.div
@@ -105,7 +103,7 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
                   <div className="flex items-start gap-3">
                     <ShieldCheck size={14} className="text-green-500 mt-0.5 shrink-0" />
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-[8px] font-black uppercase text-white/20 tracking-tighter">Guidance</span>
+                      <span className="text-[8px] font-black uppercase text-white/20 tracking-tighter">Focus</span>
                       <p className="text-[10px] font-medium text-white/60">{phase.guidance}</p>
                     </div>
                   </div>
@@ -117,7 +115,7 @@ export default function JourneyTimeline({ currentStreak }: JourneyTimelineProps)
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between"
                   >
-                    <span className="text-[9px] font-black uppercase text-primary tracking-widest animate-pulse">Current Phase</span>
+                    <span className="text-[9px] font-black uppercase text-primary tracking-widest animate-pulse">Current Stage</span>
                     <Target size={14} className="text-primary" />
                   </motion.div>
                 )}

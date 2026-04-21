@@ -7,10 +7,10 @@ import { Shield, CheckCircle2, Cpu, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const BOOT_MESSAGES = [
-  { text: "Preparing focus path...", phase: 0 },
+  { text: "Preparing resolve path...", phase: 0 },
   { text: "Grounding your environment...", phase: 20 },
-  { text: "Stabilizing inner clarity...", phase: 45 },
-  { text: "Finding your rhythm...", phase: 70 },
+  { text: "Stabilizing clarity...", phase: 45 },
+  { text: "Finding your balance...", phase: 70 },
   { text: "Ready for today.", phase: 90 },
   { text: "You're in control.", phase: 100 }
 ];
@@ -127,7 +127,7 @@ export default function LaunchScreen({ onComplete }: { onComplete: () => void })
           transition={{ ...springConfig, delay: 0.5 }}
           className="mt-12 text-center"
         >
-          <h1 className="text-4xl font-black tracking-tighter text-white mb-2">IRONWILL</h1>
+          <h1 className="text-4xl font-black tracking-tighter text-white mb-2">SANKALP</h1>
           <div className="h-6">
             <AnimatePresence mode="wait">
               <motion.p

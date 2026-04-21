@@ -12,7 +12,6 @@ export function calculateStreak(lastRelapseTimestamp: number | null): number {
 }
 
 export function calculateLevel(xp: number): number {
-  // Simple level curve: Level = sqrt(XP / 100) + 1
   return Math.floor(Math.sqrt(xp / 100)) + 1;
 }
 
@@ -41,12 +40,12 @@ export function calculateDisciplineScore(data: UserData): number {
 
 export function getBehavioralInsights(data: UserData) {
   const defaultInsights = {
-    mostCommonTrigger: "Consistent data required",
+    mostCommonTrigger: "Data required",
     highRiskWindow: "N/A",
     winRate: 100,
     resilienceLevel: 'Steady',
     riskLevel: 'STABLE' as const,
-    protectionMessage: "Staying focused. Keep going."
+    protectionMessage: "Stay steady. Keep going."
   };
 
   if (!data) return defaultInsights;
@@ -80,7 +79,6 @@ export function getBehavioralInsights(data: UserData) {
   const totalBattles = urges.length + relapses.length;
   const winRate = totalBattles > 0 ? Math.round((urges.length / totalBattles) * 100) : 100;
 
-  // Risk Prediction Logic
   const now = Date.now();
   const recentUrges = urges.filter(u => u?.timestamp && (now - u.timestamp < 1000 * 60 * 60 * 48)).length;
   const streak = data.currentStreak || 0;
@@ -98,9 +96,9 @@ export function getBehavioralInsights(data: UserData) {
     winRate,
     resilienceLevel: winRate > 85 ? 'Fortress' : winRate > 60 ? 'Steady' : 'Vulnerable',
     riskLevel,
-    protectionMessage: riskLevel === 'CRITICAL' ? "Take a moment to reset. Your control is being tested." :
-                       riskLevel === 'ELEVATED' ? "Stay sharp. Awareness is your primary shield right now." :
-                       "Staying focused. Every minute of control is a victory."
+    protectionMessage: riskLevel === 'CRITICAL' ? "Take a moment to reset. Your resolve is being tested." :
+                       riskLevel === 'ELEVATED' ? "Stay sharp. Awareness is your primary shield." :
+                       "Stay focused. Every minute of control is a victory."
   };
 }
 
@@ -146,10 +144,10 @@ export function getAchievements(streak: number, score: number) {
   const s = typeof streak === 'number' && !isNaN(streak) ? streak : 0;
   const sc = typeof score === 'number' && !isNaN(score) ? score : 0;
   return [
-    { id: '1', name: 'Starting', desc: 'First 24 hours in control', unlocked: s >= 1 },
-    { id: '2', name: 'Steady', desc: '7 Day streak reached', unlocked: s >= 7 },
-    { id: '3', name: 'Clear Mind', desc: '30 Day mastery', unlocked: s >= 30 },
-    { id: '4', name: 'Iron Will', desc: '90 Day path complete', unlocked: s >= 90 },
+    { id: '1', name: 'Starting', desc: 'First 24 hours held', unlocked: s >= 1 },
+    { id: '2', name: 'Steady', desc: '7 Day path reached', unlocked: s >= 7 },
+    { id: '3', name: 'Clear Mind', desc: '30 Day resolve', unlocked: s >= 30 },
+    { id: '4', name: 'Iron Will', desc: '90 Day mastery complete', unlocked: s >= 90 },
     { id: '5', name: 'Grounded', desc: 'Inner Strength > 90', unlocked: sc >= 90 },
   ];
 }

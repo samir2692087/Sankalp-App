@@ -49,7 +49,7 @@ const Scene3D = dynamic(() => import('@/components/background/Scene3D'), {
 
 const springConfig = { type: "spring", stiffness: 100, damping: 20 };
 
-export default function IronWillDashboard() {
+export default function SankalpOverview() {
   const { toast } = useToast();
   const { triggerPulse, setMode, mode, recordInteraction } = useInteraction();
   const [data, setData] = useState<UserData>(INITIAL_DATA);
@@ -121,7 +121,7 @@ export default function IronWillDashboard() {
     };
     updateState(newData);
     handleCloseModal(setShowRelapseModal);
-    toast({ title: "Focus reset", description: "Stay grounded. Return to clarity." });
+    toast({ title: "Stay aware", description: "Return to your resolve." });
   };
 
   const handleUrgeSubmit = (intensity: UrgeIntensity) => {
@@ -135,7 +135,7 @@ export default function IronWillDashboard() {
     };
     updateState(newData);
     handleCloseModal(setShowUrgeModal);
-    toast({ title: "Stayed firm", description: "You are in control. Strength earned." });
+    toast({ title: "Strength held", description: "You are in control. Resolve earned." });
   };
 
   const insights = useMemo(() => getBehavioralInsights(data), [data]);
@@ -230,12 +230,12 @@ export default function IronWillDashboard() {
                     <Sparkles size={18} />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Fortitude Level</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Resolve Level</span>
                     <span className="text-sm font-black text-white">Level {data.level}</span>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1.5">
-                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{data.xp} Strength Points</span>
+                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{data.xp} Resolve Points</span>
                   <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">
                     <motion.div 
                       initial={{ width: 0 }}
@@ -259,7 +259,7 @@ export default function IronWillDashboard() {
                         triggerPulse(0.5);
                         recordInteraction('freeze');
                         updateState({ ...data, streakFreezes: data.streakFreezes - 1 });
-                        toast({ title: "Pause used", description: "Clarity maintained for 24 hours." });
+                        toast({ title: "Pause used", description: "Resolve held for 24 hours." });
                       }
                     }}
                   />
@@ -277,13 +277,13 @@ export default function IronWillDashboard() {
                     <h3 className="font-bold uppercase tracking-widest text-sm">Vulnerability High</h3>
                   </div>
                   <p className="text-xs text-white/60 leading-relaxed font-medium">
-                    Awareness check: Risk of relapse detected. Pause, breathe, and return to your center immediately.
+                    Stay aware: Risk detected. Pause, breathe, and return to your center.
                   </p>
                   <Button 
                     onClick={() => handleOpenModal(setShowEmergencyModal)}
                     className="w-full bg-red-500 hover:bg-red-600 text-white font-bold h-12 rounded-xl"
                   >
-                    Enter Emergency Calm
+                    Control Mode
                   </Button>
                 </motion.div>
               )}
@@ -299,7 +299,7 @@ export default function IronWillDashboard() {
                         className="h-24 w-full rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex flex-col items-center justify-center gap-2 p-0"
                       >
                         <ShieldAlert size={24} className="text-red-500 group-hover:shadow-[0_0_15px_rgba(239,68,68,0.4)]" />
-                        <span className="text-white/80 font-bold text-xs">Emergency Calm</span>
+                        <span className="text-white/80 font-bold text-xs">Control Mode</span>
                       </Button>
                     </motion.div>
                   </Magnetic>
@@ -313,7 +313,7 @@ export default function IronWillDashboard() {
                         className="h-24 w-full rounded-[2.5rem] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] transition-all group flex flex-col items-center justify-center gap-2 p-0"
                       >
                         <BookOpen size={24} className="text-amber-400 group-hover:shadow-[0_0_15px_rgba(251,191,36,0.4)]" />
-                        <span className="text-white/80 font-bold text-xs">Clarity Library</span>
+                        <span className="text-white/80 font-bold text-xs">Clarity Hub</span>
                       </Button>
                     </motion.div>
                   </Magnetic>
@@ -331,7 +331,7 @@ export default function IronWillDashboard() {
                       ...data, 
                       checkIns: [{ date: today, timestamp: Date.now() }, ...(Array.isArray(data.checkIns) ? data.checkIns : [])] 
                     });
-                    toast({ title: "Checked in", description: "Protocol maintained. Strength earned." });
+                    toast({ title: "Checked in", description: "Commitment held. Strength earned." });
                   }
                 }} 
                 onUrge={() => handleOpenModal(setShowUrgeModal)} 
@@ -362,7 +362,7 @@ export default function IronWillDashboard() {
                       transition={springConfig}
                       className="glass-card p-8 rounded-[3rem] bg-card/20 border-white/5 perspective-1000"
                     >
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 opacity-60">Mastery Task</h4>
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3 opacity-60">Mastery Action</h4>
                       <p className="text-lg font-bold leading-relaxed text-foreground/90">{challenge}</p>
                     </motion.div>
                   </Draggable>

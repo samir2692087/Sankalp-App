@@ -45,7 +45,7 @@ export default function ClockBar() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-[8px] font-black uppercase tracking-[0.15em] text-white/20">Active Focus</span>
+          <span className="text-[8px] font-black uppercase tracking-[0.15em] text-white/20">Active Resolve</span>
         </div>
       </div>
     </div>
