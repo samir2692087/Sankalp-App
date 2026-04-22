@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.sankalp_app_pink.twa",
+        "sha256_cert_fingerprints": ["09:2E:DC:72:D4:28:05:ED:92:C0:A7:00:F7:12:4C:6D:29:2B:DD:C7:34:77:58:37:F4:7A:20:5C:90:E6:2A:D3"]
+      }
+    }]
