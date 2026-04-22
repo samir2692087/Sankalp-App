@@ -8,17 +8,17 @@
   "theme_color": "#a855f7",
   "icons": [
     {
-      "src": "/sankalp-icon.png",
+      "src": "/sankalp3.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/sankalp-icon.png",
+      "src": "/sankalp3.png",
       "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "/sankalp2.png",
+      "src": "/sankalp4.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
